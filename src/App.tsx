@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Header } from "@/components/layout/Header";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -26,49 +28,37 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={
+            <Route path="/*" element={
               <ProtectedRoute>
-                <DashboardLayout>
-                  <Index />
-                </DashboardLayout>
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <div className="flex-1 flex flex-col">
+                      <Header />
+                      <main className="flex-1 p-6">
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/requests" element={<Requests />} />
+                          <Route path="/calendar" element={<CalendarPage />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/employees" element={
+                            <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
+                              <Employees />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/reports" element={
+                            <ProtectedRoute requiredRole={['hr_admin']}>
+                              <Reports />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  </div>
+                </SidebarProvider>
               </ProtectedRoute>
             } />
-            <Route path="/requests" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Requests />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/calendar" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <CalendarPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Profile />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/employees" element={
-              <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
-                <DashboardLayout>
-                  <Employees />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/reports" element={
-              <ProtectedRoute requiredRole={['hr_admin']}>
-                <DashboardLayout>
-                  <Reports />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

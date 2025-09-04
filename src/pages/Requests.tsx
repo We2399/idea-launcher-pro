@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, CalendarIcon, Check, X, Clock } from 'lucide-react';
+import { RequestFilters } from '@/components/requests/RequestFilters';
+import { Plus, CalendarIcon, Check, X, Clock, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
@@ -46,6 +47,11 @@ export default function Requests() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [leaveTypeFilter, setLeaveTypeFilter] = useState('all');
   
   // Form state
   const [startDate, setStartDate] = useState<Date>();
@@ -214,6 +220,35 @@ export default function Requests() {
     );
   };
 
+  // Filtered requests based on search and filters
+  const filteredRequests = useMemo(() => {
+    return requests.filter((request) => {
+      // Search filter
+      const searchMatch = searchQuery === '' || 
+        request.reason.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (request.profiles && 
+          `${request.profiles.first_name} ${request.profiles.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (request.profiles?.employee_id && 
+          request.profiles.employee_id.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Status filter
+      const statusMatch = statusFilter === 'all' || request.status === statusFilter;
+
+      // Leave type filter
+      const typeMatch = leaveTypeFilter === 'all' || request.leave_type_id === leaveTypeFilter;
+
+      return searchMatch && statusMatch && typeMatch;
+    });
+  }, [requests, searchQuery, statusFilter, leaveTypeFilter]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setLeaveTypeFilter('all');
+  };
+
+  const hasActiveFilters = searchQuery !== '' || statusFilter !== 'all' || leaveTypeFilter !== 'all';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -332,11 +367,35 @@ export default function Requests() {
         </Card>
       )}
 
+      {/* Advanced Filters */}
+      <RequestFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        leaveTypeFilter={leaveTypeFilter}
+        onLeaveTypeFilterChange={setLeaveTypeFilter}
+        leaveTypes={leaveTypes}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
+
       <Card>
         <CardHeader>
-          <CardTitle>
-            {userRole === 'employee' ? 'My Leave Requests' : 'Team Leave Requests'}
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>
+              {userRole === 'employee' ? 'My Leave Requests' : 'Team Leave Requests'}
+              <Badge variant="outline" className="ml-2">
+                {filteredRequests.length} {filteredRequests.length === 1 ? 'request' : 'requests'}
+              </Badge>
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <Download className="h-3 w-3" />
+                Export
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -353,7 +412,7 @@ export default function Requests() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requests.map((request) => (
+              {filteredRequests.map((request) => (
                 <TableRow key={request.id}>
                   {userRole !== 'employee' && (
                     <TableCell>
@@ -396,7 +455,16 @@ export default function Requests() {
               ))}
             </TableBody>
           </Table>
-          {requests.length === 0 && (
+          {filteredRequests.length === 0 && requests.length > 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No requests match your current filters</p>
+              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
+                Clear Filters
+              </Button>
+            </div>
+          )}
+          {requests.length === 0 && !loading && (
             <div className="text-center py-8 text-muted-foreground">
               No leave requests found
             </div>

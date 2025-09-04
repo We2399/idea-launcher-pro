@@ -1,13 +1,14 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, FileText, Users, BarChart3, User, Clock } from 'lucide-react';
+import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckCircle } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 const Index = () => {
   const { user, userRole } = useAuth();
+  const stats = useDashboardStats();
 
   if (!user) {
     return (
@@ -82,80 +83,122 @@ const Index = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Welcome Back!</h1>
-          <p className="text-muted-foreground">
-            Manage your leave requests and stay updated with your team's schedule
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dashboardCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Link key={card.title} to={card.href}>
-                <Card className={`h-full transition-all duration-200 hover:shadow-lg bg-gradient-to-br ${card.color} hover:scale-105`}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-background/50">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <CardTitle className="text-lg">{card.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm">
-                      {card.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="text-2xl font-bold">--</div>
-                  <div className="text-sm text-muted-foreground">Pending Requests</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="text-2xl font-bold">--</div>
-                  <div className="text-sm text-muted-foreground">Days Remaining</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="text-2xl font-bold">--</div>
-                  <div className="text-sm text-muted-foreground">This Year</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+    <div className="space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Welcome Back!</h1>
+        <p className="text-muted-foreground">
+          Manage your leave requests and stay updated with your team's schedule
+        </p>
       </div>
-    </DashboardLayout>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {dashboardCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Link key={card.title} to={card.href}>
+              <Card className="card-professional h-full transition-all duration-300 hover:scale-105 animate-fade-in">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-primary shadow-sm">
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                    <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-sm leading-relaxed">
+                    {card.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Real-time Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="card-professional animate-slide-up">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-orange-500/10 ring-1 ring-orange-500/20">
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {stats.loading ? (
+                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats.pendingRequests
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">Pending Requests</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-green-500/10 ring-1 ring-green-500/20">
+                <Calendar className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {stats.loading ? (
+                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats.remainingDays
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">Days Remaining</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20">
+                <CheckCircle className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {stats.loading ? (
+                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats.usedDays
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">Days Used</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-purple-500/10 ring-1 ring-purple-500/20">
+                <TrendingUp className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {stats.loading ? (
+                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats.totalRequests
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">Total This Year</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
