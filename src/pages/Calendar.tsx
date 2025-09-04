@@ -42,16 +42,7 @@ export default function CalendarPage() {
     try {
       let query = supabase
         .from('leave_requests')
-        .select(`
-          id,
-          start_date,
-          end_date,
-          status,
-          days_requested,
-          user_id,
-          profiles!user_id(first_name, last_name, employee_id),
-          leave_types!leave_type_id(name)
-        `)
+        .select('*')
         .eq('status', 'approved')
         .order('start_date');
 
@@ -63,13 +54,36 @@ export default function CalendarPage() {
         query = query;
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      setRequests(data || []);
-    } catch (error) {
+      const { data: requestsData, error: requestsError } = await query;
+      if (requestsError) throw requestsError;
+
+      // Fetch related data separately
+      if (requestsData && requestsData.length > 0) {
+        const userIds = [...new Set(requestsData.map(req => req.user_id))];
+        const leaveTypeIds = [...new Set(requestsData.map(req => req.leave_type_id))];
+
+        const [profilesResult, leaveTypesResult] = await Promise.all([
+          supabase.from('profiles').select('*').in('user_id', userIds),
+          supabase.from('leave_types').select('*').in('id', leaveTypeIds)
+        ]);
+
+        const profilesMap = new Map(profilesResult.data?.map(p => [p.user_id, p]) || []);
+        const leaveTypesMap = new Map(leaveTypesResult.data?.map(lt => [lt.id, lt]) || []);
+
+        const enrichedData = requestsData.map(request => ({
+          ...request,
+          profiles: profilesMap.get(request.user_id) || null,
+          leave_types: leaveTypesMap.get(request.leave_type_id) || null
+        }));
+
+        setRequests(enrichedData);
+      } else {
+        setRequests([]);
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch calendar data",
+        description: error.message || "Failed to fetch calendar data",
         variant: "destructive"
       });
     } finally {

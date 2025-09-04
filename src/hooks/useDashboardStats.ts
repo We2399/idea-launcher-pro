@@ -58,7 +58,7 @@ export function useDashboardStats(): DashboardStats {
             .select('remaining_days, used_days')
             .eq('user_id', user.id)
             .eq('year', new Date().getFullYear())
-            .single();
+            .maybeSingle();
 
           if (balanceData) {
             remainingDays = balanceData.remaining_days;

@@ -70,32 +70,43 @@ export default function Requests() {
     try {
       let query = supabase
         .from('leave_requests')
-        .select(`
-          id,
-          start_date,
-          end_date,
-          days_requested,
-          reason,
-          status,
-          created_at,
-          leave_type_id,
-          user_id,
-          profiles!user_id(first_name, last_name, employee_id),
-          leave_types!leave_type_id(name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (userRole === 'employee') {
         query = query.eq('user_id', user?.id);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      setRequests(data || []);
-    } catch (error) {
+      const { data: requestsData, error: requestsError } = await query;
+      if (requestsError) throw requestsError;
+
+      // Fetch related data separately
+      if (requestsData && requestsData.length > 0) {
+        const userIds = [...new Set(requestsData.map(req => req.user_id))];
+        const leaveTypeIds = [...new Set(requestsData.map(req => req.leave_type_id))];
+
+        const [profilesResult, leaveTypesResult] = await Promise.all([
+          supabase.from('profiles').select('*').in('user_id', userIds),
+          supabase.from('leave_types').select('*').in('id', leaveTypeIds)
+        ]);
+
+        const profilesMap = new Map(profilesResult.data?.map(p => [p.user_id, p]) || []);
+        const leaveTypesMap = new Map(leaveTypesResult.data?.map(lt => [lt.id, lt]) || []);
+
+        const enrichedData = requestsData.map(request => ({
+          ...request,
+          profiles: profilesMap.get(request.user_id) || null,
+          leave_types: leaveTypesMap.get(request.leave_type_id) || null
+        }));
+
+        setRequests(enrichedData);
+      } else {
+        setRequests([]);
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch leave requests",
+        description: error.message || "Failed to fetch leave requests",
         variant: "destructive"
       });
     } finally {
@@ -112,10 +123,10 @@ export default function Requests() {
       
       if (error) throw error;
       setLeaveTypes(data || []);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch leave types",
+        description: error.message || "Failed to fetch leave types",
         variant: "destructive"
       });
     }
@@ -165,10 +176,10 @@ export default function Requests() {
       setReason('');
       setShowNewRequest(false);
       fetchRequests();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to submit leave request",
+        description: error.message || "Failed to submit leave request",
         variant: "destructive"
       });
     }

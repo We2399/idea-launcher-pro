@@ -76,7 +76,7 @@ export default function Profile() {
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       
@@ -85,10 +85,10 @@ export default function Profile() {
       setLastName(data.last_name);
       setDepartment(data.department);
       setPosition(data.position);
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to fetch profile",
+        title: "Error", 
+        description: error.message || "Failed to fetch profile",
         variant: "destructive"
       });
     } finally {
@@ -98,22 +98,38 @@ export default function Profile() {
 
   const fetchLeaveBalances = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: balanceData, error: balanceError } = await supabase
         .from('leave_balances')
-        .select(`
-          *,
-          leave_types!leave_type_id(name)
-        `)
+        .select('*')
         .eq('user_id', user?.id)
-        .eq('year', new Date().getFullYear())
-        .order('leave_types(name)');
+        .eq('year', new Date().getFullYear());
 
-      if (error) throw error;
-      setLeaveBalances(data || []);
-    } catch (error) {
+      if (balanceError) throw balanceError;
+
+      if (balanceData && balanceData.length > 0) {
+        const leaveTypeIds = [...new Set(balanceData.map(b => b.leave_type_id))];
+        const { data: leaveTypesData, error: leaveTypesError } = await supabase
+          .from('leave_types')
+          .select('*')
+          .in('id', leaveTypeIds);
+
+        if (leaveTypesError) throw leaveTypesError;
+
+        const leaveTypesMap = new Map(leaveTypesData?.map(lt => [lt.id, lt]) || []);
+        
+        const enrichedBalances = balanceData.map(balance => ({
+          ...balance,
+          leave_types: leaveTypesMap.get(balance.leave_type_id) || { name: 'Unknown' }
+        }));
+
+        setLeaveBalances(enrichedBalances);
+      } else {
+        setLeaveBalances([]);
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch leave balances",
+        description: error.message || "Failed to fetch leave balances", 
         variant: "destructive"
       });
     }

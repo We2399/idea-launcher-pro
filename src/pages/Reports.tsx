@@ -47,16 +47,9 @@ export default function Reports() {
       // Fetch basic stats
       const [employeesResult, requestsResult, departmentResult, leaveTypeResult] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact' }),
-        supabase
-          .from('leave_requests')
-          .select('*, profiles!user_id(first_name, last_name, department), leave_types!leave_type_id(name)')
-          .gte('created_at', startDate.toISOString()),
+        supabase.from('leave_requests').select('*').gte('created_at', startDate.toISOString()),
         supabase.from('profiles').select('department', { count: 'exact' }).not('department', 'is', null),
-        supabase
-          .from('leave_requests')
-          .select('days_requested, leave_types!leave_type_id(name)')
-          .eq('status', 'approved')
-          .gte('created_at', startDate.toISOString())
+        supabase.from('leave_requests').select('days_requested, leave_type_id').eq('status', 'approved').gte('created_at', startDate.toISOString())
       ]);
 
       if (employeesResult.error) throw employeesResult.error;
@@ -67,6 +60,36 @@ export default function Reports() {
       const requests = requestsResult.data || [];
       const leaveTypeData = leaveTypeResult.data || [];
 
+      // Fetch related data
+      const userIds = [...new Set(requests.map(req => req.user_id))];
+      const leaveTypeIds = [...new Set([...requests.map(req => req.leave_type_id), ...leaveTypeData.map(req => req.leave_type_id)])];
+
+      const [profilesResult, leaveTypesResult] = await Promise.all([
+        userIds.length > 0 ? supabase.from('profiles').select('*').in('user_id', userIds) : { data: [] },
+        leaveTypeIds.length > 0 ? supabase.from('leave_types').select('*').in('id', leaveTypeIds) : { data: [] }
+      ]);
+
+      const profilesMap = new Map<string, any>();
+      if (profilesResult.data) {
+        profilesResult.data.forEach(p => profilesMap.set(p.user_id, p));
+      }
+      
+      const leaveTypesMap = new Map<string, any>();
+      if (leaveTypesResult.data) {
+        leaveTypesResult.data.forEach(lt => leaveTypesMap.set(lt.id, lt));
+      }
+
+      // Enrich requests with related data  
+      const enrichedRequests = requests.map((request: any) => ({
+        ...request,
+        profiles: profilesMap.get(request.user_id) || null
+      }));
+
+      const enrichedLeaveTypeData = leaveTypeData.map((request: any) => ({
+        ...request,
+        leave_types: leaveTypesMap.get(request.leave_type_id) || null
+      }));
+
       // Process data
       const totalEmployees = employeesResult.count || 0;
       const totalRequests = requests.length;
@@ -76,7 +99,7 @@ export default function Reports() {
 
       // Department stats
       const deptCounts: { [key: string]: number } = {};
-      requests.forEach(req => {
+      enrichedRequests.forEach((req: any) => {
         const dept = req.profiles?.department || 'Unknown';
         deptCounts[dept] = (deptCounts[dept] || 0) + 1;
       });
@@ -87,7 +110,7 @@ export default function Reports() {
 
       // Leave type stats
       const leaveTypeCounts: { [key: string]: { count: number; days: number } } = {};
-      leaveTypeData.forEach(req => {
+      enrichedLeaveTypeData.forEach((req: any) => {
         const type = req.leave_types?.name || 'Unknown';
         if (!leaveTypeCounts[type]) {
           leaveTypeCounts[type] = { count: 0, days: 0 };
@@ -109,7 +132,7 @@ export default function Reports() {
         monthlyData[monthKey] = { requests: 0, days: 0 };
       }
 
-      requests.forEach(req => {
+      enrichedRequests.forEach((req: any) => {
         const reqMonth = format(new Date(req.created_at), 'MMM yyyy');
         if (monthlyData[reqMonth]) {
           monthlyData[reqMonth].requests += 1;
@@ -127,7 +150,7 @@ export default function Reports() {
 
       // Top usage by employee
       const employeeUsage: { [key: string]: { days: number; requests: number } } = {};
-      requests.filter(r => r.status === 'approved').forEach(req => {
+      enrichedRequests.filter((r: any) => r.status === 'approved').forEach((req: any) => {
         const empName = req.profiles ? `${req.profiles.first_name} ${req.profiles.last_name}` : 'Unknown';
         if (!employeeUsage[empName]) {
           employeeUsage[empName] = { days: 0, requests: 0 };
@@ -152,10 +175,10 @@ export default function Reports() {
         monthlyTrends,
         topUsage
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch report data",
+        description: error.message || "Failed to fetch report data",
         variant: "destructive"
       });
     } finally {

@@ -59,43 +59,66 @@ export default function Employees() {
 
   const fetchEmployees = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: employeesData, error: employeesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          user_id,
-          employee_id,
-          first_name,
-          last_name,
-          email,
-          department,
-          position,
-          manager_id,
-          created_at,
-          user_roles!user_id(role),
-          manager:profiles!manager_id(first_name, last_name),
-          leave_balances(
-            total_days,
-            used_days,
-            remaining_days,
-            leave_types!leave_type_id(name)
-          )
-        `)
+        .select('*')
         .order('first_name');
 
-        // Handle potential query errors gracefully
-        const processedData = data?.map(emp => ({
+      if (employeesError) throw employeesError;
+
+      if (employeesData && employeesData.length > 0) {
+        const userIds = employeesData.map(emp => emp.user_id);
+
+        // Fetch related data
+        const [rolesResult, balancesResult] = await Promise.all([
+          supabase.from('user_roles').select('*').in('user_id', userIds),
+          supabase.from('leave_balances').select('*').in('user_id', userIds)
+        ]);
+
+        const rolesMap = new Map();
+        rolesResult.data?.forEach(role => {
+          if (!rolesMap.has(role.user_id)) {
+            rolesMap.set(role.user_id, []);
+          }
+          rolesMap.get(role.user_id).push(role);
+        });
+
+        const balancesMap = new Map();
+        if (balancesResult.data && balancesResult.data.length > 0) {
+          const leaveTypeIds = [...new Set(balancesResult.data.map(b => b.leave_type_id))];
+          const { data: leaveTypesData } = await supabase
+            .from('leave_types')
+            .select('*')
+            .in('id', leaveTypeIds);
+
+          const leaveTypesMap = new Map(leaveTypesData?.map(lt => [lt.id, lt]) || []);
+
+          balancesResult.data.forEach(balance => {
+            if (!balancesMap.has(balance.user_id)) {
+              balancesMap.set(balance.user_id, []);
+            }
+            balancesMap.get(balance.user_id).push({
+              ...balance,
+              leave_types: leaveTypesMap.get(balance.leave_type_id) || { name: 'Unknown' }
+            });
+          });
+        }
+
+        const processedData = employeesData.map(emp => ({
           ...emp,
-          user_roles: Array.isArray(emp.user_roles) ? emp.user_roles : null,
-          manager: emp.manager && typeof emp.manager === 'object' ? emp.manager : null,
-          leave_balances: Array.isArray(emp.leave_balances) ? emp.leave_balances : []
-        })) || [];
-        
+          user_roles: rolesMap.get(emp.user_id) || [],
+          manager: null,
+          leave_balances: balancesMap.get(emp.user_id) || []
+        }));
+
         setEmployees(processedData);
-    } catch (error) {
+      } else {
+        setEmployees([]);
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to fetch employees",
+        description: error.message || "Failed to fetch employees",
         variant: "destructive"
       });
     } finally {
@@ -274,12 +297,9 @@ export default function Employees() {
                         {role.replace('_', ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {employee.manager ? 
-                        `${employee.manager.first_name} ${employee.manager.last_name}` : 
-                        'No Manager'
-                      }
-                    </TableCell>
+                     <TableCell>
+                       No Manager
+                     </TableCell>
                     <TableCell>
                       <span className="font-medium">{getTotalLeaveBalance(employee)}</span> days
                     </TableCell>
