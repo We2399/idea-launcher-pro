@@ -49,12 +49,12 @@ export default function Reports() {
         supabase.from('profiles').select('*', { count: 'exact' }),
         supabase
           .from('leave_requests')
-          .select('*, profiles!inner(first_name, last_name, department), leave_types!inner(name)')
+          .select('*, profiles!user_id(first_name, last_name, department), leave_types!leave_type_id(name)')
           .gte('created_at', startDate.toISOString()),
         supabase.from('profiles').select('department', { count: 'exact' }).not('department', 'is', null),
         supabase
           .from('leave_requests')
-          .select('days_requested, leave_types!inner(name)')
+          .select('days_requested, leave_types!leave_type_id(name)')
           .eq('status', 'approved')
           .gte('created_at', startDate.toISOString())
       ]);

@@ -102,7 +102,7 @@ export default function Profile() {
         .from('leave_balances')
         .select(`
           *,
-          leave_types(name)
+          leave_types!leave_type_id(name)
         `)
         .eq('user_id', user?.id)
         .eq('year', new Date().getFullYear())

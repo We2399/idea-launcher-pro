@@ -24,7 +24,7 @@ interface Employee {
   created_at: string;
   user_roles?: {
     role: string;
-  }[];
+  }[] | null;
   manager?: {
     first_name: string;
     last_name: string;
@@ -72,19 +72,26 @@ export default function Employees() {
           position,
           manager_id,
           created_at,
-          user_roles!inner(role),
-          manager:profiles!profiles_manager_id_fkey(first_name, last_name),
+          user_roles!user_id(role),
+          manager:profiles!manager_id(first_name, last_name),
           leave_balances(
             total_days,
             used_days,
             remaining_days,
-            leave_types!inner(name)
+            leave_types!leave_type_id(name)
           )
         `)
         .order('first_name');
 
-      if (error) throw error;
-      setEmployees(data || []);
+        // Handle potential query errors gracefully
+        const processedData = data?.map(emp => ({
+          ...emp,
+          user_roles: Array.isArray(emp.user_roles) ? emp.user_roles : null,
+          manager: emp.manager && typeof emp.manager === 'object' ? emp.manager : null,
+          leave_balances: Array.isArray(emp.leave_balances) ? emp.leave_balances : []
+        })) || [];
+        
+        setEmployees(processedData);
     } catch (error) {
       toast({
         title: "Error",

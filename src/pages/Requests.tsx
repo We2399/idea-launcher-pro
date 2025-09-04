@@ -74,8 +74,8 @@ export default function Requests() {
           created_at,
           leave_type_id,
           user_id,
-          profiles!inner(first_name, last_name, employee_id),
-          leave_types!inner(name)
+          profiles!user_id(first_name, last_name, employee_id),
+          leave_types!leave_type_id(name)
         `)
         .order('created_at', { ascending: false });
 

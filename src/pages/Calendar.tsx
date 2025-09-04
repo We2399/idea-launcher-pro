@@ -49,8 +49,8 @@ export default function CalendarPage() {
           status,
           days_requested,
           user_id,
-          profiles!inner(first_name, last_name, employee_id),
-          leave_types!inner(name)
+          profiles!user_id(first_name, last_name, employee_id),
+          leave_types!leave_type_id(name)
         `)
         .eq('status', 'approved')
         .order('start_date');
