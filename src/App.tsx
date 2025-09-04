@@ -5,9 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Requests from "./pages/Requests";
+import CalendarPage from "./pages/Calendar";
+import Profile from "./pages/Profile";
+import Employees from "./pages/Employees";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -19,49 +25,49 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/requests" 
-              element={
-                <ProtectedRoute>
-                  <div>Requests Page - Coming Soon</div>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/calendar" 
-              element={
-                <ProtectedRoute>
-                  <div>Calendar Page - Coming Soon</div>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employees" 
-              element={
-                <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
-                  <div>Employees Page - Coming Soon</div>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/reports" 
-              element={
-                <ProtectedRoute requiredRole={['hr_admin']}>
-                  <div>Reports Page - Coming Soon</div>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <div>Profile Page - Coming Soon</div>
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Index />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/requests" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Requests />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CalendarPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees" element={
+              <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
+                <DashboardLayout>
+                  <Employees />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute requiredRole={['hr_admin']}>
+                <DashboardLayout>
+                  <Reports />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
