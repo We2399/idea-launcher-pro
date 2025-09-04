@@ -1,12 +1,15 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User, Shield, Crown } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 export function Header() {
   const { user, userRole, signOut } = useAuth();
+  const { t } = useLanguage();
 
   const getRoleColor = (role: string | null) => {
     switch (role) {
@@ -34,6 +37,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
+        <LanguageSwitcher />
         {user && (
           <>
             <div className="flex items-center gap-2">

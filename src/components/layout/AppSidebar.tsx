@@ -7,9 +7,12 @@ import {
   BarChart3,
   User,
   Home,
-  Settings
+  Settings,
+  CheckSquare,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Sidebar,
   SidebarContent,
@@ -23,25 +26,28 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const baseItems = [
-  { title: 'Dashboard', url: '/', icon: Home },
-  { title: 'Leave Requests', url: '/requests', icon: FileText },
-  { title: 'Calendar', url: '/calendar', icon: Calendar },
-  { title: 'Profile', url: '/profile', icon: User },
+const getBaseItems = (t: (key: string) => string) => [
+  { title: t('dashboard'), url: '/', icon: Home },
+  { title: t('leaveRequests'), url: '/requests', icon: FileText },
+  { title: t('calendar'), url: '/calendar', icon: Calendar },
+  { title: t('tasks'), url: '/tasks', icon: CheckSquare },
+  { title: t('cashControl'), url: '/cash-control', icon: DollarSign },
+  { title: t('profile'), url: '/profile', icon: User },
 ];
 
-const managerItems = [
-  { title: 'Team Management', url: '/employees', icon: Users },
+const getManagerItems = (t: (key: string) => string) => [
+  { title: t('employees'), url: '/employees', icon: Users },
 ];
 
-const hrItems = [
-  { title: 'Reports', url: '/reports', icon: BarChart3 },
+const getHrItems = (t: (key: string) => string) => [
+  { title: t('reports'), url: '/reports', icon: BarChart3 },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const { userRole } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -50,14 +56,14 @@ export function AppSidebar() {
     isActive ? "bg-sidebar-accent text-sidebar-primary-foreground font-medium" : "hover:bg-sidebar-accent/50";
 
   // Build navigation items based on role
-  let navigationItems = [...baseItems];
+  let navigationItems = [...getBaseItems(t)];
   
   if (userRole === 'manager' || userRole === 'hr_admin') {
-    navigationItems = [...navigationItems, ...managerItems];
+    navigationItems = [...navigationItems, ...getManagerItems(t)];
   }
   
   if (userRole === 'hr_admin') {
-    navigationItems = [...navigationItems, ...hrItems];
+    navigationItems = [...navigationItems, ...getHrItems(t)];
   }
 
   const collapsed = state === 'collapsed';

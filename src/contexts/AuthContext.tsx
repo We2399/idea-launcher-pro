@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, metadata?: any) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -73,6 +73,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: metadata
       }
     });
+
+    // If signup is successful and user is created, update their role
+    if (data.user && !error && metadata?.role) {
+      try {
+        await supabase
+          .from('user_roles')
+          .update({ role: metadata.role })
+          .eq('user_id', data.user.id);
+      } catch (roleError) {
+        console.error('Error updating user role:', roleError);
+      }
+    }
     
     if (error) {
       toast({

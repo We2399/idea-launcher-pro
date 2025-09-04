@@ -18,7 +18,8 @@ const Auth = () => {
     lastName: '',
     employeeId: '',
     department: '',
-    position: ''
+    position: '',
+    role: 'employee'
   });
 
   // Redirect if already authenticated
@@ -51,7 +52,8 @@ const Auth = () => {
       last_name: formData.lastName,
       employee_id: formData.employeeId,
       department: formData.department,
-      position: formData.position
+      position: formData.position,
+      role: formData.role
     };
     
     await signUp(formData.email, formData.password, metadata);
@@ -168,6 +170,20 @@ const Auth = () => {
                     onChange={(e) => updateFormData('position', e.target.value)}
                     required
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Select onValueChange={(value) => updateFormData('role', value)} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="hr_admin">HR Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="space-y-2">
