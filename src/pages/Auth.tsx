@@ -134,13 +134,12 @@ const Auth = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="employee-id">Employee ID</Label>
+                  <Label htmlFor="employee-id">Employee ID (Optional)</Label>
                   <Input
                     id="employee-id"
-                    placeholder="EMP001"
+                    placeholder="EMP001 (will be auto-generated if not provided)"
                     value={formData.employeeId}
                     onChange={(e) => updateFormData('employeeId', e.target.value)}
-                    required
                   />
                 </div>
                 
@@ -151,12 +150,14 @@ const Auth = () => {
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="Domestic Helper">Domestic Helper</SelectItem>
                       <SelectItem value="Engineering">Engineering</SelectItem>
                       <SelectItem value="HR">Human Resources</SelectItem>
                       <SelectItem value="Marketing">Marketing</SelectItem>
                       <SelectItem value="Sales">Sales</SelectItem>
                       <SelectItem value="Finance">Finance</SelectItem>
                       <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

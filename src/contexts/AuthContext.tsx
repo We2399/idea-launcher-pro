@@ -74,17 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // If signup is successful and user is created, update their role
-    if (data.user && !error && metadata?.role) {
-      try {
-        await supabase
-          .from('user_roles')
-          .update({ role: metadata.role })
-          .eq('user_id', data.user.id);
-      } catch (roleError) {
-        console.error('Error updating user role:', roleError);
-      }
-    }
+    // Role is now handled by the database trigger
     
     if (error) {
       toast({

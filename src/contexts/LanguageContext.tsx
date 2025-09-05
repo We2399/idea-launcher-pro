@@ -74,6 +74,7 @@ const translations = {
     description: 'Description',
     type: 'Type',
     receiptUrl: 'Receipt URL',
+    receipt: 'Receipt',
   },
   'zh-TW': {
     // Navigation
@@ -129,6 +130,7 @@ const translations = {
     description: '描述',
     type: '類型',
     receiptUrl: '收據網址',
+    receipt: '收據',
   },
   'zh-CN': {
     // Navigation
@@ -184,6 +186,7 @@ const translations = {
     description: '描述',
     type: '类型',
     receiptUrl: '收据网址',
+    receipt: '收据',
   },
   id: {
     // Navigation
@@ -239,6 +242,7 @@ const translations = {
     description: 'Deskripsi',
     type: 'Jenis',
     receiptUrl: 'URL Tanda Terima',
+    receipt: 'Tanda Terima',
   },
 };
 

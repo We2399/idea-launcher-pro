@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, DollarSign, Calendar, User, Check, X } from 'lucide-react';
+import { Plus, DollarSign, Calendar, User, Check, X, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CashTransaction {
@@ -62,6 +62,7 @@ const CashControl = () => {
     description: '',
     receipt_url: ''
   });
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   const canApprove = userRole === 'manager' || userRole === 'hr_admin';
 
@@ -114,6 +115,57 @@ const CashControl = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!user) return null;
+
+    try {
+      setUploadingFile(true);
+
+      // Create unique filename with user ID and timestamp
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('receipts')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('receipts')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, receipt_url: publicUrl });
+
+      toast({
+        title: 'Success',
+        description: 'Receipt uploaded successfully',
+      });
+
+      return publicUrl;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to upload receipt',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await handleFileUpload(file);
     }
   };
 
@@ -339,14 +391,55 @@ const CashControl = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="receipt_url">{t('receiptUrl')}</Label>
-                <Input
-                  id="receipt_url"
-                  type="url"
-                  placeholder="https://example.com/receipt.pdf"
-                  value={formData.receipt_url}
-                  onChange={(e) => setFormData({ ...formData, receipt_url: e.target.value })}
-                />
+                <Label htmlFor="receipt">{t('receipt')}</Label>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="receipt-file"
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('receipt-file')?.click()}
+                        disabled={uploadingFile}
+                        className="w-full justify-start"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {uploadingFile ? 'Uploading...' : 'Upload Receipt'}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.getElementById('receipt-file') as HTMLInputElement;
+                        if (input) {
+                          input.capture = 'environment';
+                          input.click();
+                        }
+                      }}
+                      disabled={uploadingFile}
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {formData.receipt_url && (
+                    <div className="text-sm text-muted-foreground">
+                      ✓ Receipt uploaded successfully
+                    </div>
+                  )}
+                  <Input
+                    type="url"
+                    placeholder="Or enter receipt URL manually"
+                    value={formData.receipt_url}
+                    onChange={(e) => setFormData({ ...formData, receipt_url: e.target.value })}
+                  />
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
