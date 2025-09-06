@@ -33,7 +33,7 @@ export function Header() {
     <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        <h1 className="text-xl font-semibold text-foreground">Leave Management System</h1>
+        <h1 className="text-xl font-semibold text-foreground">SME EmpRecord Hub</h1>
       </div>
 
       <div className="flex items-center gap-4">
