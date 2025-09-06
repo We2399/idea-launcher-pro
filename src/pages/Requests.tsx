@@ -260,6 +260,34 @@ export default function Requests() {
 
   const hasActiveFilters = searchQuery !== '' || statusFilter !== 'all' || leaveTypeFilter !== 'all';
 
+  const handleExport = () => {
+    const csvContent = [
+      ['Employee', 'Leave Type', 'Start Date', 'End Date', 'Days', 'Reason', 'Status'].join(','),
+      ...filteredRequests.map(request => [
+        `"${request.profiles ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})` : 'Unknown Employee'}"`,
+        `"${request.leave_types?.name || 'Unknown'}"`,
+        `"${format(new Date(request.start_date), 'MMM dd, yyyy')}"`,
+        `"${format(new Date(request.end_date), 'MMM dd, yyyy')}"`,
+        request.days_requested,
+        `"${request.reason}"`,
+        `"${request.status}"`
+      ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-requests-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Success",
+      description: "Leave requests exported successfully"
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -401,7 +429,7 @@ export default function Requests() {
               </Badge>
             </CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={handleExport}>
                 <Download className="h-3 w-3" />
                 Export
               </Button>

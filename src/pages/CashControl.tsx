@@ -56,7 +56,7 @@ const CashControl = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [formData, setFormData] = useState({
     amount: '',
-    currency: 'USD',
+    currency: 'HKD',
     type: 'request' as 'request' | 'expense' | 'reimbursement',
     category: 'general',
     description: '',
@@ -196,7 +196,7 @@ const CashControl = () => {
       setShowCreateDialog(false);
       setFormData({
         amount: '',
-        currency: 'USD',
+        currency: 'HKD',
         type: 'request',
         category: 'general',
         description: '',
@@ -311,7 +311,7 @@ const CashControl = () => {
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              New Request
+              NEW REQUEST/REPORT
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -338,14 +338,16 @@ const CashControl = () => {
                   <Label htmlFor="currency">{t('currency')}</Label>
                   <Select onValueChange={(value) => setFormData({ ...formData, currency: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="USD" />
+                      <SelectValue placeholder="HKD" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="CNY">CNY</SelectItem>
-                      <SelectItem value="IDR">IDR</SelectItem>
+                      <SelectItem value="HKD">HKD - Hong Kong Dollar</SelectItem>
+                      <SelectItem value="USD">USD - US Dollar</SelectItem>
+                      <SelectItem value="EUR">EUR - Euro</SelectItem>
+                      <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                      <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+                      <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -377,6 +379,8 @@ const CashControl = () => {
                       <SelectItem value="supplies">Office Supplies</SelectItem>
                       <SelectItem value="equipment">Equipment</SelectItem>
                       <SelectItem value="training">Training</SelectItem>
+                      <SelectItem value="groceries">Groceries</SelectItem>
+                      <SelectItem value="others">Others</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

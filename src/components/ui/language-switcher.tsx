@@ -10,8 +10,8 @@ import {
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 const languages = [
-  { code: 'en' as Language, name: 'English', flag: '🇺🇸' },
-  { code: 'zh-TW' as Language, name: '繁體中文', flag: '🇹🇼' },
+  { code: 'en' as Language, name: 'English', flag: '🇬🇧' },
+  { code: 'zh-TW' as Language, name: '繁體中文', flag: '🇭🇰' },
   { code: 'zh-CN' as Language, name: '简体中文', flag: '🇨🇳' },
   { code: 'id' as Language, name: 'Bahasa Indonesia', flag: '🇮🇩' },
 ];

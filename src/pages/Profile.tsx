@@ -46,7 +46,8 @@ const departments = [
   'Customer Support',
   'Product',
   'Legal',
-  'General'
+  'Domestic Helper',
+  'Others'
 ];
 
 export default function Profile() {
@@ -346,7 +347,12 @@ export default function Profile() {
         {/* Leave Balances */}
         <Card>
           <CardHeader>
-            <CardTitle>Leave Balances ({new Date().getFullYear()})</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Leave Balances ({new Date().getFullYear()})</CardTitle>
+              <Button variant="outline" size="sm">
+                Report
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -359,6 +365,9 @@ export default function Profile() {
                         {balance.remaining_days} / {balance.total_days}
                       </Badge>
                     </div>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      Initial allocation: {balance.total_days} days/year
+                    </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
                         className="bg-primary h-2 rounded-full transition-all"
@@ -369,7 +378,7 @@ export default function Profile() {
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>Used: {balance.used_days} days</span>
-                      <span>Remaining: {balance.remaining_days} days</span>
+                      <span>Available: {balance.remaining_days} days</span>
                     </div>
                   </div>
                 ))
