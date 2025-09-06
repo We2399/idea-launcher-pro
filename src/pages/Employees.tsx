@@ -169,6 +169,15 @@ export default function Employees() {
     }
   };
 
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'hr_admin': return 'Administrator';
+      case 'manager': return 'Senior Management';
+      case 'employee': return 'Employee';
+      default: return role;
+    }
+  };
+
   const getUniqueDepartments = () => {
     const departments = [...new Set(employees.map(emp => emp.department))];
     return departments.sort();
@@ -243,12 +252,12 @@ export default function Employees() {
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="employee">Employee</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="hr_admin">HR Admin</SelectItem>
-              </SelectContent>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="employee">Employee</SelectItem>
+                  <SelectItem value="manager">Senior Management</SelectItem>
+                  <SelectItem value="hr_admin">Administrator</SelectItem>
+                </SelectContent>
             </Select>
           </div>
         </CardContent>
@@ -294,7 +303,7 @@ export default function Employees() {
                     <TableCell>
                       <Badge variant={getRoleColor(role)} className="flex items-center gap-1 w-fit">
                         <RoleIcon className="h-3 w-3" />
-                        {role.replace('_', ' ')}
+                        {getRoleDisplayName(role)}
                       </Badge>
                     </TableCell>
                      <TableCell>
@@ -344,7 +353,7 @@ export default function Employees() {
                                 <div>
                                   <label className="text-sm font-medium text-muted-foreground">Role</label>
                                   <Badge variant={getRoleColor(selectedEmployee.user_roles?.[0]?.role || 'employee')}>
-                                    {selectedEmployee.user_roles?.[0]?.role || 'employee'}
+                                    {getRoleDisplayName(selectedEmployee.user_roles?.[0]?.role || 'employee')}
                                   </Badge>
                                 </div>
                               </div>

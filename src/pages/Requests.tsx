@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RequestFilters } from '@/components/requests/RequestFilters';
-import { Plus, CalendarIcon, Check, X, Clock, Download, Filter } from 'lucide-react';
+import { Plus, CalendarIcon, Check, X, Clock, Download, Filter, Shield, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
@@ -185,14 +185,52 @@ export default function Requests() {
     }
   };
 
-  const handleApproveReject = async (requestId: string, status: 'approved' | 'rejected') => {
+  const handleSeniorApproval = async (requestId: string, status: 'approved' | 'rejected') => {
+    try {
+      const updateData = userRole === 'manager' ? {
+        senior_management_approved_by: user?.id,
+        senior_management_approved_at: new Date().toISOString(),
+        status: status === 'approved' ? 'senior_approved' : 'rejected'
+      } : {
+        status,
+        approved_by: user?.id,
+        approved_at: new Date().toISOString(),
+        administrator_approved_by: user?.id,
+        administrator_approved_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('leave_requests')
+        .update(updateData)
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Request ${status} ${userRole === 'manager' ? 'by Senior Management' : 'by Administrator'}`
+      });
+      
+      fetchRequests();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${status} request`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleFinalApproval = async (requestId: string, status: 'approved' | 'rejected') => {
     try {
       const { error } = await supabase
         .from('leave_requests')
         .update({ 
           status,
           approved_by: user?.id,
-          approved_at: new Date().toISOString()
+          approved_at: new Date().toISOString(),
+          administrator_approved_by: user?.id,
+          administrator_approved_at: new Date().toISOString()
         })
         .eq('id', requestId);
 
@@ -200,7 +238,7 @@ export default function Requests() {
 
       toast({
         title: "Success",
-        description: `Request ${status} successfully`
+        description: `Request ${status} by Administrator`
       });
       
       fetchRequests();
@@ -216,6 +254,7 @@ export default function Requests() {
   const getStatusBadge = (status: string) => {
     const variants = {
       pending: { variant: 'outline' as const, icon: Clock, color: 'text-muted-foreground' },
+      senior_approved: { variant: 'secondary' as const, icon: Shield, color: 'text-secondary-foreground' },
       approved: { variant: 'default' as const, icon: Check, color: 'text-primary' },
       rejected: { variant: 'destructive' as const, icon: X, color: 'text-destructive-foreground' }
     };
@@ -223,10 +262,17 @@ export default function Requests() {
     const config = variants[status as keyof typeof variants] || variants.pending;
     const Icon = config.icon;
     
+    const statusLabels = {
+      pending: 'Pending',
+      senior_approved: 'Senior Approved',
+      approved: 'Approved',
+      rejected: 'Rejected'
+    };
+    
     return (
       <Badge variant={config.variant} className="flex items-center gap-1">
         <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {statusLabels[status as keyof typeof statusLabels] || status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
   };
@@ -467,27 +513,78 @@ export default function Requests() {
                   <TableCell>{request.days_requested}</TableCell>
                   <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
-                  {(userRole === 'manager' || userRole === 'hr_admin') && request.status === 'pending' && (
+                  {(userRole === 'manager' || userRole === 'hr_admin') && (
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproveReject(request.id, 'approved')}
-                          className="flex items-center gap-1"
-                        >
-                          <Check className="h-3 w-3" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleApproveReject(request.id, 'rejected')}
-                          className="flex items-center gap-1"
-                        >
-                          <X className="h-3 w-3" />
-                          Reject
-                        </Button>
-                      </div>
+                      {/* Senior Management Approval (for pending requests) */}
+                      {userRole === 'manager' && request.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSeniorApproval(request.id, 'approved')}
+                            className="flex items-center gap-1"
+                          >
+                            <Shield className="h-3 w-3" />
+                            Senior Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleSeniorApproval(request.id, 'rejected')}
+                            className="flex items-center gap-1"
+                          >
+                            <X className="h-3 w-3" />
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {/* Administrator Final Approval */}
+                      {userRole === 'hr_admin' && (
+                        <div className="flex gap-2">
+                          {request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleSeniorApproval(request.id, 'approved')}
+                                className="flex items-center gap-1"
+                              >
+                                <Crown className="h-3 w-3" />
+                                Admin Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleSeniorApproval(request.id, 'rejected')}
+                                className="flex items-center gap-1"
+                              >
+                                <X className="h-3 w-3" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {request.status === 'senior_approved' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleFinalApproval(request.id, 'approved')}
+                                className="flex items-center gap-1"
+                              >
+                                <Check className="h-3 w-3" />
+                                Final Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleFinalApproval(request.id, 'rejected')}
+                                className="flex items-center gap-1"
+                              >
+                                <X className="h-3 w-3" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>

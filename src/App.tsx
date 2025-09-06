@@ -19,6 +19,7 @@ import Employees from './pages/Employees';
 import Reports from './pages/Reports';
 import Tasks from './pages/Tasks';
 import CashControl from './pages/CashControl';
+import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -55,6 +56,11 @@ const App = () => {
                               <Route path="/reports" element={
                                 <ProtectedRoute requiredRole={['hr_admin']}>
                                   <Reports />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/settings" element={
+                                <ProtectedRoute requiredRole={['hr_admin']}>
+                                  <Settings />
                                 </ProtectedRoute>
                               } />
                               <Route path="*" element={<NotFound />} />

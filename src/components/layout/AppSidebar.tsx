@@ -39,7 +39,7 @@ const getManagerItems = (t: (key: string) => string) => [
   { title: t('employees'), url: '/employees', icon: Users },
 ];
 
-const getHrItems = (t: (key: string) => string) => [
+const getAdminItems = (t: (key: string) => string) => [
   { title: t('reports'), url: '/reports', icon: BarChart3 },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
@@ -63,7 +63,7 @@ export function AppSidebar() {
   }
   
   if (userRole === 'hr_admin') {
-    navigationItems = [...navigationItems, ...getHrItems(t)];
+    navigationItems = [...navigationItems, ...getAdminItems(t)];
   }
 
   const collapsed = state === 'collapsed';

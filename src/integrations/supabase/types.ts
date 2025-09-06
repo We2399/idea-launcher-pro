@@ -104,6 +104,54 @@ export type Database = {
         }
         Relationships: []
       }
+      leave_allocations: {
+        Row: {
+          administrator_approved_at: string | null
+          administrator_approved_by: string | null
+          allocated_by: string
+          allocated_days: number
+          created_at: string
+          id: string
+          leave_type_id: string
+          senior_management_approved_at: string | null
+          senior_management_approved_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          administrator_approved_at?: string | null
+          administrator_approved_by?: string | null
+          allocated_by: string
+          allocated_days?: number
+          created_at?: string
+          id?: string
+          leave_type_id: string
+          senior_management_approved_at?: string | null
+          senior_management_approved_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          administrator_approved_at?: string | null
+          administrator_approved_by?: string | null
+          allocated_by?: string
+          allocated_days?: number
+          created_at?: string
+          id?: string
+          leave_type_id?: string
+          senior_management_approved_at?: string | null
+          senior_management_approved_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       leave_balances: {
         Row: {
           created_at: string
@@ -164,45 +212,60 @@ export type Database = {
       }
       leave_requests: {
         Row: {
+          administrator_approved_at: string | null
+          administrator_approved_by: string | null
           approved_at: string | null
           approved_by: string | null
           created_at: string
           days_requested: number
+          delegation_active: boolean | null
           end_date: string
           id: string
           leave_type_id: string
           reason: string | null
           rejection_reason: string | null
+          senior_management_approved_at: string | null
+          senior_management_approved_by: string | null
           start_date: string
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          administrator_approved_at?: string | null
+          administrator_approved_by?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
           days_requested: number
+          delegation_active?: boolean | null
           end_date: string
           id?: string
           leave_type_id: string
           reason?: string | null
           rejection_reason?: string | null
+          senior_management_approved_at?: string | null
+          senior_management_approved_by?: string | null
           start_date: string
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          administrator_approved_at?: string | null
+          administrator_approved_by?: string | null
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
           days_requested?: number
+          delegation_active?: boolean | null
           end_date?: string
           id?: string
           leave_type_id?: string
           reason?: string | null
           rejection_reason?: string | null
+          senior_management_approved_at?: string | null
+          senior_management_approved_by?: string | null
           start_date?: string
           status?: string
           updated_at?: string
@@ -323,6 +386,33 @@ export type Database = {
           },
         ]
       }
+      system_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_by: string
@@ -395,11 +485,23 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      has_delegation_rights: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_administrator: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       is_hr_admin: {
         Args: { user_id: string }
         Returns: boolean
       }
       is_manager: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_senior_management: {
         Args: { user_id: string }
         Returns: boolean
       }
