@@ -55,6 +55,7 @@ export type Database = {
       }
       cash_transactions: {
         Row: {
+          affects_balance: boolean | null
           amount: number
           approved_at: string | null
           approved_by: string | null
@@ -71,6 +72,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          affects_balance?: boolean | null
           amount: number
           approved_at?: string | null
           approved_by?: string | null
@@ -87,6 +89,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          affects_balance?: boolean | null
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
@@ -329,8 +332,54 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_change_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          current_value: string | null
+          field_name: string
+          id: string
+          new_value: string
+          rejection_reason: string | null
+          requested_by: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          current_value?: string | null
+          field_name: string
+          id?: string
+          new_value: string
+          rejection_reason?: string | null
+          requested_by: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          current_value?: string | null
+          field_name?: string
+          id?: string
+          new_value?: string
+          rejection_reason?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          cash_balance: number | null
           created_at: string
           department: string
           email: string
@@ -344,6 +393,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cash_balance?: number | null
           created_at?: string
           department: string
           email: string
@@ -357,6 +407,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cash_balance?: number | null
           created_at?: string
           department?: string
           email?: string

@@ -415,11 +415,23 @@ export default function Requests() {
                   <SelectValue placeholder="Select leave type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {leaveTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name} (Max: {type.max_days_per_year} days/year)
-                    </SelectItem>
-                  ))}
+                  {/* Reordered leave types: Sick Leave first (default), then Vacation, Maternity, Paternity, Others */}
+                  {leaveTypes
+                    .sort((a, b) => {
+                      const order = ['Sick Leave', 'Vacation', 'Maternity', 'Paternity', 'Others'];
+                      const aIndex = order.indexOf(a.name);
+                      const bIndex = order.indexOf(b.name);
+                      
+                      if (aIndex === -1 && bIndex === -1) return a.name.localeCompare(b.name);
+                      if (aIndex === -1) return 1;
+                      if (bIndex === -1) return -1;
+                      return aIndex - bIndex;
+                    })
+                    .map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name} (Max: {type.max_days_per_year} days/year)
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

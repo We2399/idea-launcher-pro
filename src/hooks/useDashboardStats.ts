@@ -57,12 +57,11 @@ export function useDashboardStats(): DashboardStats {
             .from('leave_balances')
             .select('remaining_days, used_days')
             .eq('user_id', user.id)
-            .eq('year', new Date().getFullYear())
-            .maybeSingle();
+            .eq('year', new Date().getFullYear());
 
-          if (balanceData) {
-            remainingDays = balanceData.remaining_days;
-            usedDays = balanceData.used_days;
+          if (balanceData && balanceData.length > 0) {
+            remainingDays = balanceData.reduce((sum, balance) => sum + balance.remaining_days, 0);
+            usedDays = balanceData.reduce((sum, balance) => sum + balance.used_days, 0);
           }
         } else {
           // For managers/HR, show team totals

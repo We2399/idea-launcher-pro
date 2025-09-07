@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 const Index = () => {
   const { user, userRole } = useAuth();
+  const { t } = useLanguage();
   const stats = useDashboardStats();
 
   if (!user) {
@@ -39,21 +41,21 @@ const Index = () => {
 
   const dashboardCards = [
     {
-      title: 'Leave Requests',
+      title: t('leaveRequests'),
       description: 'Submit and manage your leave requests',
       icon: FileText,
       href: '/requests',
       color: 'from-blue-500/10 to-blue-600/10 border-blue-500/20'
     },
     {
-      title: 'Calendar',
+      title: t('calendar'),
       description: 'View leave calendar and upcoming time off',
       icon: Calendar,
       href: '/calendar',
       color: 'from-green-500/10 to-green-600/10 border-green-500/20'
     },
     {
-      title: 'Profile',
+      title: t('profile'),
       description: 'Update your personal information',
       icon: User,
       href: '/profile',
@@ -64,7 +66,7 @@ const Index = () => {
   // Add manager/HR specific cards
   if (userRole === 'manager' || userRole === 'hr_admin') {
     dashboardCards.push({
-      title: 'Team Management',
+      title: t('employees'),
       description: 'Manage your team\'s leave requests',
       icon: Users,
       href: '/employees',
@@ -74,7 +76,7 @@ const Index = () => {
 
   if (userRole === 'hr_admin') {
     dashboardCards.push({
-      title: 'Reports',
+      title: t('reports'),
       description: 'View comprehensive leave reports',
       icon: BarChart3,
       href: '/reports',
@@ -132,7 +134,7 @@ const Index = () => {
                     stats.pendingRequests
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground font-medium">Pending Requests</div>
+                <div className="text-sm text-muted-foreground font-medium">{t('pendingRequests')}</div>
               </div>
             </div>
           </CardContent>
@@ -152,7 +154,7 @@ const Index = () => {
                     stats.remainingDays
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground font-medium">Days Remaining</div>
+                <div className="text-sm text-muted-foreground font-medium">{t('daysRemaining')}</div>
               </div>
             </div>
           </CardContent>
@@ -172,7 +174,7 @@ const Index = () => {
                     stats.usedDays
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground font-medium">Days Used</div>
+                <div className="text-sm text-muted-foreground font-medium">{t('daysUsed')}</div>
               </div>
             </div>
           </CardContent>

@@ -30,6 +30,16 @@ const translations = {
     reports: 'Reports',
     tasks: 'Tasks',
     cashControl: 'Cash Control',
+    settings: 'Settings',
+    staffProfile: 'Staff Profile',
+    
+    // Dashboard
+    pendingRequests: 'Pending Requests',
+    totalRequests: 'Total Requests',
+    remainingDays: 'Remaining Days',
+    usedDays: 'Used Days',
+    daysRemaining: 'Days Remaining',
+    daysUsed: 'Days Used',
     
     // Auth
     signIn: 'Sign In',
@@ -43,8 +53,15 @@ const translations = {
     position: 'Position',
     role: 'Role',
     employee: 'Employee',
-    manager: 'Manager',
-    hrAdmin: 'HR Admin',
+    manager: 'Senior Management',
+    hrAdmin: 'Administrator',
+    
+    // Leave Types
+    sickLeave: 'Sick Leave',
+    vacation: 'Vacation',
+    maternity: 'Maternity',
+    paternity: 'Paternity',
+    others: 'Others',
     
     // Common
     loading: 'Loading...',
@@ -58,6 +75,10 @@ const translations = {
     pending: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
+    newRequest: 'New Request',
+    newReport: 'New Report',
+    cashRequest: 'Cash Request',
+    cashBalance: 'Cash Balance',
     
     // Tasks
     taskTitle: 'Task Title',
@@ -75,6 +96,20 @@ const translations = {
     type: 'Type',
     receiptUrl: 'Receipt URL',
     receipt: 'Receipt',
+    cashControlTitle: 'Cash Control',
+    totalRequested: 'Total Requested',
+    requestApproval: 'Request Approval',
+    
+    // Profile
+    leaveBalances: 'Leave Balances',
+    personalDetails: 'Personal Details',
+    profileChanges: 'Profile Changes',
+    requestChange: 'Request Change',
+    
+    // Calendar
+    leaveCalendar: 'Leave Calendar',
+    upcomingLeave: 'Upcoming Leave',
+    colorLegend: 'Color Legend'
   },
   'zh-TW': {
     // Navigation
@@ -86,6 +121,16 @@ const translations = {
     reports: '報告',
     tasks: '任務',
     cashControl: '現金管理',
+    settings: '設定',
+    staffProfile: '員工資料',
+    
+    // Dashboard
+    pendingRequests: '待審核申請',
+    totalRequests: '總申請數',
+    remainingDays: '剩餘天數',
+    usedDays: '已使用天數',
+    daysRemaining: '剩餘天數',
+    daysUsed: '已使用天數',
     
     // Auth
     signIn: '登入',
@@ -99,8 +144,15 @@ const translations = {
     position: '職位',
     role: '角色',
     employee: '員工',
-    manager: '經理',
-    hrAdmin: '人事管理員',
+    manager: '高級管理層',
+    hrAdmin: '管理員',
+    
+    // Leave Types
+    sickLeave: '病假',
+    vacation: '休假',
+    maternity: '產假',
+    paternity: '陪產假',
+    others: '其他',
     
     // Common
     loading: '載入中...',
@@ -114,6 +166,10 @@ const translations = {
     pending: '待審核',
     approved: '已批准',
     rejected: '已拒絕',
+    newRequest: '新申請',
+    newReport: '新報告',
+    cashRequest: '現金申請',
+    cashBalance: '現金餘額',
     
     // Tasks
     taskTitle: '任務標題',
@@ -131,6 +187,20 @@ const translations = {
     type: '類型',
     receiptUrl: '收據網址',
     receipt: '收據',
+    cashControlTitle: '現金管理',
+    totalRequested: '總申請金額',
+    requestApproval: '申請批准',
+    
+    // Profile
+    leaveBalances: '假期餘額',
+    personalDetails: '個人詳情',
+    profileChanges: '資料變更',
+    requestChange: '申請變更',
+    
+    // Calendar
+    leaveCalendar: '假期日曆',
+    upcomingLeave: '即將到來的假期',
+    colorLegend: '顏色圖例'
   },
   'zh-CN': {
     // Navigation
@@ -142,6 +212,16 @@ const translations = {
     reports: '报告',
     tasks: '任务',
     cashControl: '现金管理',
+    settings: '设置',
+    staffProfile: '员工资料',
+    
+    // Dashboard
+    pendingRequests: '待审核申请',
+    totalRequests: '总申请数',
+    remainingDays: '剩余天数',
+    usedDays: '已使用天数',
+    daysRemaining: '剩余天数',
+    daysUsed: '已使用天数',
     
     // Auth
     signIn: '登录',
@@ -155,8 +235,15 @@ const translations = {
     position: '职位',
     role: '角色',
     employee: '员工',
-    manager: '经理',
-    hrAdmin: '人事管理员',
+    manager: '高级管理层',
+    hrAdmin: '管理员',
+    
+    // Leave Types
+    sickLeave: '病假',
+    vacation: '休假',
+    maternity: '产假',
+    paternity: '陪产假',
+    others: '其他',
     
     // Common
     loading: '加载中...',
@@ -170,6 +257,10 @@ const translations = {
     pending: '待审核',
     approved: '已批准',
     rejected: '已拒绝',
+    newRequest: '新申请',
+    newReport: '新报告',
+    cashRequest: '现金申请',
+    cashBalance: '现金余额',
     
     // Tasks
     taskTitle: '任务标题',
@@ -187,6 +278,20 @@ const translations = {
     type: '类型',
     receiptUrl: '收据网址',
     receipt: '收据',
+    cashControlTitle: '现金管理',
+    totalRequested: '总申请金额',
+    requestApproval: '申请批准',
+    
+    // Profile
+    leaveBalances: '假期余额',
+    personalDetails: '个人详情',
+    profileChanges: '资料变更',
+    requestChange: '申请变更',
+    
+    // Calendar
+    leaveCalendar: '假期日历',
+    upcomingLeave: '即将到来的假期',
+    colorLegend: '颜色图例'
   },
   id: {
     // Navigation
@@ -198,6 +303,16 @@ const translations = {
     reports: 'Laporan',
     tasks: 'Tugas',
     cashControl: 'Kontrol Kas',
+    settings: 'Pengaturan',
+    staffProfile: 'Profil Staf',
+    
+    // Dashboard
+    pendingRequests: 'Permintaan Tertunda',
+    totalRequests: 'Total Permintaan',
+    remainingDays: 'Hari Tersisa',
+    usedDays: 'Hari Terpakai',
+    daysRemaining: 'Hari Tersisa',
+    daysUsed: 'Hari Terpakai',
     
     // Auth
     signIn: 'Masuk',
@@ -211,8 +326,15 @@ const translations = {
     position: 'Posisi',
     role: 'Peran',
     employee: 'Karyawan',
-    manager: 'Manajer',
-    hrAdmin: 'Admin HR',
+    manager: 'Manajemen Senior',
+    hrAdmin: 'Administrator',
+    
+    // Leave Types
+    sickLeave: 'Cuti Sakit',
+    vacation: 'Liburan',
+    maternity: 'Cuti Melahirkan',
+    paternity: 'Cuti Ayah',
+    others: 'Lainnya',
     
     // Common
     loading: 'Memuat...',
@@ -226,6 +348,10 @@ const translations = {
     pending: 'Menunggu',
     approved: 'Disetujui',
     rejected: 'Ditolak',
+    newRequest: 'Permintaan Baru',
+    newReport: 'Laporan Baru',
+    cashRequest: 'Permintaan Kas',
+    cashBalance: 'Saldo Kas',
     
     // Tasks
     taskTitle: 'Judul Tugas',
@@ -243,6 +369,20 @@ const translations = {
     type: 'Jenis',
     receiptUrl: 'URL Tanda Terima',
     receipt: 'Tanda Terima',
+    cashControlTitle: 'Kontrol Kas',
+    totalRequested: 'Total Diminta',
+    requestApproval: 'Persetujuan Permintaan',
+    
+    // Profile
+    leaveBalances: 'Saldo Cuti',
+    personalDetails: 'Detail Pribadi',
+    profileChanges: 'Perubahan Profil',
+    requestChange: 'Minta Perubahan',
+    
+    // Calendar
+    leaveCalendar: 'Kalender Cuti',
+    upcomingLeave: 'Cuti Mendatang',
+    colorLegend: 'Legenda Warna'
   },
 };
 
