@@ -21,6 +21,10 @@ import Tasks from './pages/Tasks';
 import CashControl from './pages/CashControl';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
+// New enhanced components
+import CalendarWithColors from './components/calendar/CalendarWithColors';
+import ProfileWithApproval from './components/profile/ProfileWithApproval';
+import CashControlSplit from './pages/CashControlSplit';
 
 const queryClient = new QueryClient();
 
@@ -44,10 +48,10 @@ const App = () => {
                             <Routes>
                               <Route path="/" element={<Index />} />
                               <Route path="/requests" element={<Requests />} />
-                              <Route path="/calendar" element={<Calendar />} />
+                              <Route path="/calendar" element={<CalendarWithColors />} />
                               <Route path="/tasks" element={<Tasks />} />
-                              <Route path="/cash-control" element={<CashControl />} />
-                              <Route path="/profile" element={<Profile />} />
+                              <Route path="/cash-control" element={<CashControlSplit />} />
+                              <Route path="/profile" element={<ProfileWithApproval />} />
                               <Route path="/employees" element={
                                 <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
                                   <Employees />

@@ -410,7 +410,11 @@ export default function Requests() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Leave Type</label>
-              <Select value={selectedLeaveType} onValueChange={setSelectedLeaveType}>
+              <Select 
+                value={selectedLeaveType} 
+                onValueChange={setSelectedLeaveType}
+                defaultValue={leaveTypes.find(type => type.name === 'Sick Leave')?.id || ''}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select leave type" />
                 </SelectTrigger>

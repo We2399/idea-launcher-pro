@@ -233,7 +233,7 @@ export default function CalendarWithColors() {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {Object.entries(leaveTypeColors).map(([leaveType, colors]) => (
                   <div key={leaveType} className="space-y-1">
-                    <div className="font-medium">{t(leaveType.toLowerCase().replace(/\s+/g, ''))}</div>
+                    <div className="font-medium">{leaveType === 'Sick Leave' ? t('sickLeave') : leaveType === 'Vacation' ? t('vacation') : leaveType === 'Maternity' ? t('maternity') : leaveType === 'Paternity' ? t('paternity') : t('others')}</div>
                     <div className="flex gap-2">
                       <div className="flex items-center gap-1">
                         <div 

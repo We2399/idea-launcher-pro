@@ -62,6 +62,18 @@ export function useDashboardStats(): DashboardStats {
           if (balanceData && balanceData.length > 0) {
             remainingDays = balanceData.reduce((sum, balance) => sum + balance.remaining_days, 0);
             usedDays = balanceData.reduce((sum, balance) => sum + balance.used_days, 0);
+          } else {
+            // Fallback: calculate from approved leave requests
+            const { data: approvedRequests } = await supabase
+              .from('leave_requests')
+              .select('days_requested')
+              .eq('user_id', user.id)
+              .eq('status', 'approved')
+              .gte('created_at', `${new Date().getFullYear()}-01-01`);
+
+            if (approvedRequests) {
+              usedDays = approvedRequests.reduce((sum, req) => sum + req.days_requested, 0);
+            }
           }
         } else {
           // For managers/HR, show team totals
