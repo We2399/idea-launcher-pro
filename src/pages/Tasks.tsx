@@ -246,14 +246,14 @@ const Tasks = () => {
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                Create Task
+                {t('createTask')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New Task</DialogTitle>
+                <DialogTitle>{t('createTask')}</DialogTitle>
                 <DialogDescription>
-                  Assign a new task to a team member
+                  {t('taskAssignment')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateTask} className="space-y-4">

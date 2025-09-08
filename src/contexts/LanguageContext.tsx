@@ -109,7 +109,89 @@ const translations = {
     // Calendar
     leaveCalendar: 'Leave Calendar',
     upcomingLeave: 'Upcoming Leave',
-    colorLegend: 'Color Legend'
+    colorLegend: 'Color Legend',
+    myLeave: 'My Leave',
+    teamLeave: 'Team Leave',
+    allLeave: 'All Leave',
+    
+    // Extended Profile Fields
+    idNumber: 'ID Number',
+    passportNumber: 'Passport Number',
+    visaNumber: 'Visa Number',
+    dateOfBirth: 'Date of Birth',
+    homeAddress: 'Home Address',
+    maritalStatus: 'Marital Status',
+    emergencyContact: 'Emergency Contact',
+    emergencyPhone: 'Emergency Phone',
+    nationality: 'Nationality',
+    documents: 'Documents',
+    uploadDocument: 'Upload Document',
+    
+    // Leave Request Management
+    editRequest: 'Edit Request',
+    deleteRequest: 'Delete Request',
+    confirmDelete: 'Confirm Delete',
+    areYouSure: 'Are you sure?',
+    cannotBeUndone: 'This action cannot be undone',
+    myLeaveRequests: 'My Leave Requests',
+    teamLeaveRequests: 'Team Leave Requests',
+    startDate: 'Start Date',
+    endDate: 'End Date',
+    leaveType: 'Leave Type',
+    reason: 'Reason',
+    daysRequested: 'Days Requested',
+    requestStatus: 'Request Status',
+    
+    // Cash Control Extended
+    personalView: 'Personal View',
+    managementView: 'Management View',
+    selectEmployee: 'Select Employee',
+    approveRequest: 'Approve Request',
+    rejectRequest: 'Reject Request',
+    rejectionReason: 'Rejection Reason',
+    cashTransactions: 'Cash Transactions',
+    expenseReport: 'Expense Report',
+    reimbursement: 'Reimbursement',
+    
+    // Tasks Extended
+    createTask: 'Create Task',
+    taskAssignment: 'Task Assignment',
+    assignedBy: 'Assigned By',
+    assignedTo: 'Assigned To',
+    startTask: 'Start Task',
+    completeTask: 'Complete Task',
+    taskCompleted: 'Task Completed',
+    
+    // General Actions
+    approve: 'Approve',
+    reject: 'Reject',
+    viewDetails: 'View Details',
+    downloadFile: 'Download File',
+    uploadFile: 'Upload File',
+    selectFile: 'Select File',
+    fileUploaded: 'File Uploaded',
+    
+    // Status Messages
+    requestSubmitted: 'Request submitted successfully',
+    requestUpdated: 'Request updated successfully',
+    requestDeleted: 'Request deleted successfully',
+    changesSaved: 'Changes saved successfully',
+    operationFailed: 'Operation failed',
+    accessDenied: 'Access denied',
+    
+    // Form Validation
+    requiredField: 'This field is required',
+    invalidDate: 'Invalid date',
+    invalidAmount: 'Invalid amount',
+    selectOption: 'Please select an option',
+    
+    // File Upload
+    dragDropFiles: 'Drag and drop files here, or click to select',
+    supportedFormats: 'Supported formats',
+    maxFileSize: 'Maximum file size',
+    uploading: 'Uploading...',
+    uploadComplete: 'Upload complete',
+    uploadFailed: 'Upload failed'
   },
   'zh-TW': {
     // Navigation
@@ -200,7 +282,89 @@ const translations = {
     // Calendar
     leaveCalendar: '假期日曆',
     upcomingLeave: '即將到來的假期',
-    colorLegend: '顏色圖例'
+    colorLegend: '顏色圖例',
+    myLeave: '我的假期',
+    teamLeave: '團隊假期',
+    allLeave: '所有假期',
+    
+    // Extended Profile Fields
+    idNumber: '身份證號碼',
+    passportNumber: '護照號碼',
+    visaNumber: '簽證號碼',
+    dateOfBirth: '出生日期',
+    homeAddress: '家庭住址',
+    maritalStatus: '婚姻狀況',
+    emergencyContact: '緊急聯絡人',
+    emergencyPhone: '緊急聯絡電話',
+    nationality: '國籍',
+    documents: '文件',
+    uploadDocument: '上傳文件',
+    
+    // Leave Request Management
+    editRequest: '編輯申請',
+    deleteRequest: '刪除申請',
+    confirmDelete: '確認刪除',
+    areYouSure: '您確定嗎？',
+    cannotBeUndone: '此操作無法撤銷',
+    myLeaveRequests: '我的請假申請',
+    teamLeaveRequests: '團隊請假申請',
+    startDate: '開始日期',
+    endDate: '結束日期',
+    leaveType: '假期類型',
+    reason: '原因',
+    daysRequested: '申請天數',
+    requestStatus: '申請狀態',
+    
+    // Cash Control Extended
+    personalView: '個人視圖',
+    managementView: '管理視圖',
+    selectEmployee: '選擇員工',
+    approveRequest: '批准申請',
+    rejectRequest: '拒絕申請',
+    rejectionReason: '拒絕原因',
+    cashTransactions: '現金交易',
+    expenseReport: '費用報告',
+    reimbursement: '報銷',
+    
+    // Tasks Extended
+    createTask: '建立任務',
+    taskAssignment: '任務分配',
+    assignedBy: '分配者',
+    assignedTo: '分配給',
+    startTask: '開始任務',
+    completeTask: '完成任務',
+    taskCompleted: '任務已完成',
+    
+    // General Actions
+    approve: '批准',
+    reject: '拒絕',
+    viewDetails: '查看詳情',
+    downloadFile: '下載文件',
+    uploadFile: '上傳文件',
+    selectFile: '選擇文件',
+    fileUploaded: '文件已上傳',
+    
+    // Status Messages
+    requestSubmitted: '申請提交成功',
+    requestUpdated: '申請更新成功',
+    requestDeleted: '申請刪除成功',
+    changesSaved: '更改保存成功',
+    operationFailed: '操作失敗',
+    accessDenied: '存取被拒',
+    
+    // Form Validation
+    requiredField: '此字段為必填項',
+    invalidDate: '無效日期',
+    invalidAmount: '無效金額',
+    selectOption: '請選擇選項',
+    
+    // File Upload
+    dragDropFiles: '拖放文件到此處，或點擊選擇',
+    supportedFormats: '支持的格式',
+    maxFileSize: '最大文件大小',
+    uploading: '上傳中...',
+    uploadComplete: '上傳完成',
+    uploadFailed: '上傳失敗'
   },
   'zh-CN': {
     // Navigation
@@ -291,7 +455,89 @@ const translations = {
     // Calendar
     leaveCalendar: '假期日历',
     upcomingLeave: '即将到来的假期',
-    colorLegend: '颜色图例'
+    colorLegend: '颜色图例',
+    myLeave: '我的假期',
+    teamLeave: '团队假期',
+    allLeave: '所有假期',
+    
+    // Extended Profile Fields
+    idNumber: '身份证号码',
+    passportNumber: '护照号码',
+    visaNumber: '签证号码',
+    dateOfBirth: '出生日期',
+    homeAddress: '家庭住址',
+    maritalStatus: '婚姻状况',
+    emergencyContact: '紧急联系人',
+    emergencyPhone: '紧急联系电话',
+    nationality: '国籍',
+    documents: '文件',
+    uploadDocument: '上传文件',
+    
+    // Leave Request Management
+    editRequest: '编辑申请',
+    deleteRequest: '删除申请',
+    confirmDelete: '确认删除',
+    areYouSure: '您确定吗？',
+    cannotBeUndone: '此操作无法撤销',
+    myLeaveRequests: '我的请假申请',
+    teamLeaveRequests: '团队请假申请',
+    startDate: '开始日期',
+    endDate: '结束日期',
+    leaveType: '假期类型',
+    reason: '原因',
+    daysRequested: '申请天数',
+    requestStatus: '申请状态',
+    
+    // Cash Control Extended
+    personalView: '个人视图',
+    managementView: '管理视图',
+    selectEmployee: '选择员工',
+    approveRequest: '批准申请',
+    rejectRequest: '拒绝申请',
+    rejectionReason: '拒绝原因',
+    cashTransactions: '现金交易',
+    expenseReport: '费用报告',
+    reimbursement: '报销',
+    
+    // Tasks Extended
+    createTask: '创建任务',
+    taskAssignment: '任务分配',
+    assignedBy: '分配者',
+    assignedTo: '分配给',
+    startTask: '开始任务',
+    completeTask: '完成任务',
+    taskCompleted: '任务已完成',
+    
+    // General Actions
+    approve: '批准',
+    reject: '拒绝',
+    viewDetails: '查看详情',
+    downloadFile: '下载文件',
+    uploadFile: '上传文件',
+    selectFile: '选择文件',
+    fileUploaded: '文件已上传',
+    
+    // Status Messages
+    requestSubmitted: '申请提交成功',
+    requestUpdated: '申请更新成功',
+    requestDeleted: '申请删除成功',
+    changesSaved: '更改保存成功',
+    operationFailed: '操作失败',
+    accessDenied: '访问被拒',
+    
+    // Form Validation
+    requiredField: '此字段为必填项',
+    invalidDate: '无效日期',
+    invalidAmount: '无效金额',
+    selectOption: '请选择选项',
+    
+    // File Upload
+    dragDropFiles: '拖放文件到此处，或点击选择',
+    supportedFormats: '支持的格式',
+    maxFileSize: '最大文件大小',
+    uploading: '上传中...',
+    uploadComplete: '上传完成',
+    uploadFailed: '上传失败'
   },
   id: {
     // Navigation
@@ -382,7 +628,89 @@ const translations = {
     // Calendar
     leaveCalendar: 'Kalender Cuti',
     upcomingLeave: 'Cuti Mendatang',
-    colorLegend: 'Legenda Warna'
+    colorLegend: 'Legenda Warna',
+    myLeave: 'Cuti Saya',
+    teamLeave: 'Cuti Tim',
+    allLeave: 'Semua Cuti',
+    
+    // Extended Profile Fields
+    idNumber: 'Nomor KTP',
+    passportNumber: 'Nomor Paspor',
+    visaNumber: 'Nomor Visa',
+    dateOfBirth: 'Tanggal Lahir',
+    homeAddress: 'Alamat Rumah',
+    maritalStatus: 'Status Pernikahan',
+    emergencyContact: 'Kontak Darurat',
+    emergencyPhone: 'Telepon Darurat',
+    nationality: 'Kewarganegaraan',
+    documents: 'Dokumen',
+    uploadDocument: 'Unggah Dokumen',
+    
+    // Leave Request Management
+    editRequest: 'Edit Permohonan',
+    deleteRequest: 'Hapus Permohonan',
+    confirmDelete: 'Konfirmasi Hapus',
+    areYouSure: 'Apakah Anda yakin?',
+    cannotBeUndone: 'Tindakan ini tidak bisa dibatalkan',
+    myLeaveRequests: 'Permohonan Cuti Saya',
+    teamLeaveRequests: 'Permohonan Cuti Tim',
+    startDate: 'Tanggal Mulai',
+    endDate: 'Tanggal Selesai',
+    leaveType: 'Jenis Cuti',
+    reason: 'Alasan',
+    daysRequested: 'Hari Diminta',
+    requestStatus: 'Status Permohonan',
+    
+    // Cash Control Extended
+    personalView: 'Tampilan Pribadi',
+    managementView: 'Tampilan Manajemen',
+    selectEmployee: 'Pilih Karyawan',
+    approveRequest: 'Setujui Permohonan',
+    rejectRequest: 'Tolak Permohonan',
+    rejectionReason: 'Alasan Penolakan',
+    cashTransactions: 'Transaksi Kas',
+    expenseReport: 'Laporan Pengeluaran',
+    reimbursement: 'Penggantian',
+    
+    // Tasks Extended
+    createTask: 'Buat Tugas',
+    taskAssignment: 'Penugasan Tugas',
+    assignedBy: 'Ditugaskan Oleh',
+    assignedTo: 'Ditugaskan Kepada',
+    startTask: 'Mulai Tugas',
+    completeTask: 'Selesaikan Tugas',
+    taskCompleted: 'Tugas Selesai',
+    
+    // General Actions
+    approve: 'Setujui',
+    reject: 'Tolak',
+    viewDetails: 'Lihat Detail',
+    downloadFile: 'Unduh File',
+    uploadFile: 'Unggah File',
+    selectFile: 'Pilih File',
+    fileUploaded: 'File Terunggah',
+    
+    // Status Messages
+    requestSubmitted: 'Permohonan berhasil dikirim',
+    requestUpdated: 'Permohonan berhasil diperbarui',
+    requestDeleted: 'Permohonan berhasil dihapus',
+    changesSaved: 'Perubahan berhasil disimpan',
+    operationFailed: 'Operasi gagal',
+    accessDenied: 'Akses ditolak',
+    
+    // Form Validation
+    requiredField: 'Field ini wajib diisi',
+    invalidDate: 'Tanggal tidak valid',
+    invalidAmount: 'Jumlah tidak valid',
+    selectOption: 'Pilih opsi',
+    
+    // File Upload
+    dragDropFiles: 'Seret dan lepas file di sini, atau klik untuk memilih',
+    supportedFormats: 'Format yang didukung',
+    maxFileSize: 'Ukuran file maksimum',
+    uploading: 'Mengunggah...',
+    uploadComplete: 'Unggah selesai',
+    uploadFailed: 'Unggah gagal'
   },
 };
 

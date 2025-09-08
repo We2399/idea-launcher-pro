@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { RequestFilters } from '@/components/requests/RequestFilters';
-import { Plus, CalendarIcon, Check, X, Clock, Download, Filter, Shield, Crown } from 'lucide-react';
+import { Plus, CalendarIcon, Check, X, Clock, Download, Filter, Shield, Crown, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
@@ -43,9 +46,12 @@ interface LeaveType {
 
 export default function Requests() {
   const { user, userRole } = useAuth();
+  const { t } = useLanguage();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Filter state
@@ -140,8 +146,8 @@ export default function Requests() {
   const handleSubmitRequest = async () => {
     if (!startDate || !endDate || !selectedLeaveType || !reason.trim()) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: t('error'),
+        description: t('requiredField'),
         variant: "destructive"
       });
       return;
@@ -165,8 +171,8 @@ export default function Requests() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Leave request submitted successfully"
+        title: t('success'),
+        description: t('requestSubmitted')
       });
 
       // Reset form
@@ -178,11 +184,93 @@ export default function Requests() {
       fetchRequests();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to submit leave request",
+        title: t('error'),
+        description: error.message || t('operationFailed'),
         variant: "destructive"
       });
     }
+  };
+
+  const handleEditRequest = async () => {
+    if (!startDate || !endDate || !selectedLeaveType || !reason.trim() || !editingRequest) {
+      toast({
+        title: t('error'),
+        description: t('requiredField'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const daysRequested = calculateDays(startDate, endDate);
+      
+      const { error } = await supabase
+        .from('leave_requests')
+        .update({
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+          days_requested: daysRequested,
+          leave_type_id: selectedLeaveType,
+          reason: reason,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingRequest.id);
+
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: t('requestUpdated')
+      });
+
+      // Reset form
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setSelectedLeaveType('');
+      setReason('');
+      setShowEditDialog(false);
+      setEditingRequest(null);
+      fetchRequests();
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || t('operationFailed'),
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('leave_requests')
+        .delete()
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: t('requestDeleted')
+      });
+
+      fetchRequests();
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || t('operationFailed'),
+        variant: "destructive"
+      });
+    }
+  };
+
+  const openEditDialog = (request: LeaveRequest) => {
+    setEditingRequest(request);
+    setStartDate(new Date(request.start_date));
+    setEndDate(new Date(request.end_date));
+    setSelectedLeaveType(request.leave_type_id);
+    setReason(request.reason);
+    setShowEditDialog(true);
   };
 
   const handleSeniorApproval = async (requestId: string, status: 'approved' | 'rejected') => {
@@ -207,15 +295,15 @@ export default function Requests() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Request ${status} ${userRole === 'manager' ? 'by Senior Management' : 'by Administrator'}`
+        title: t('success'),
+        description: `${t('requestStatus')} ${status} ${userRole === 'manager' ? 'by Senior Management' : 'by Administrator'}`
       });
       
       fetchRequests();
     } catch (error) {
       toast({
-        title: "Error",
-        description: `Failed to ${status} request`,
+        title: t('error'),
+        description: t('operationFailed'),
         variant: "destructive"
       });
     }
@@ -237,15 +325,15 @@ export default function Requests() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Request ${status} by Administrator`
+        title: t('success'),
+        description: `${t('requestStatus')} ${status} by Administrator`
       });
       
       fetchRequests();
     } catch (error) {
       toast({
-        title: "Error",
-        description: `Failed to ${status} request`,
+        title: t('error'),
+        description: t('operationFailed'),
         variant: "destructive"
       });
     }
@@ -263,10 +351,10 @@ export default function Requests() {
     const Icon = config.icon;
     
     const statusLabels = {
-      pending: 'Pending',
+      pending: t('pending'),
       senior_approved: 'Senior Approved',
-      approved: 'Approved',
-      rejected: 'Rejected'
+      approved: t('approved'),
+      rejected: t('rejected')
     };
     
     return (
@@ -329,8 +417,8 @@ export default function Requests() {
     window.URL.revokeObjectURL(url);
     
     toast({
-      title: "Success",
-      description: "Leave requests exported successfully"
+      title: t('success'),
+      description: t('operationFailed')
     });
   };
 
@@ -346,15 +434,15 @@ export default function Requests() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Leave Requests</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('leaveRequests')}</h1>
           <p className="text-muted-foreground">
-            {userRole === 'employee' ? 'Manage your leave requests' : 'Review and approve team leave requests'}
+            {userRole === 'employee' ? t('myLeaveRequests') : t('teamLeaveRequests')}
           </p>
         </div>
         {userRole === 'employee' && (
           <Button onClick={() => setShowNewRequest(true)} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            New Request
+            {t('newRequest')}
           </Button>
         )}
       </div>
@@ -362,13 +450,13 @@ export default function Requests() {
       {showNewRequest && (
         <Card>
           <CardHeader>
-            <CardTitle>New Leave Request</CardTitle>
+            <CardTitle>{t('newRequest')}</CardTitle>
             <CardDescription>Submit a new leave request for approval</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Start Date</label>
+                <label className="text-sm font-medium">{t('startDate')}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -388,7 +476,7 @@ export default function Requests() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">End Date</label>
+                <label className="text-sm font-medium">{t('endDate')}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -409,7 +497,7 @@ export default function Requests() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Leave Type</label>
+              <label className="text-sm font-medium">{t('leaveType')}</label>
               <Select 
                 value={selectedLeaveType} 
                 onValueChange={setSelectedLeaveType}
@@ -441,7 +529,7 @@ export default function Requests() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Reason</label>
+              <label className="text-sm font-medium">{t('reason')}</label>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -453,20 +541,116 @@ export default function Requests() {
             {startDate && endDate && (
               <div className="p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  Total days requested: <strong>{calculateDays(startDate, endDate)}</strong>
+                  {t('daysRequested')}: <strong>{calculateDays(startDate, endDate)}</strong>
                 </p>
               </div>
             )}
 
             <div className="flex gap-2">
-              <Button onClick={handleSubmitRequest}>Submit Request</Button>
+              <Button onClick={handleSubmitRequest}>{t('submit')}</Button>
               <Button variant="outline" onClick={() => setShowNewRequest(false)}>
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Request Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('editRequest')}</DialogTitle>
+            <DialogDescription>
+              Edit your leave request details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('startDate')}</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{t('endDate')}</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('leaveType')}</label>
+              <Select value={selectedLeaveType} onValueChange={setSelectedLeaveType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select leave type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leaveTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name} (Max: {type.max_days_per_year} days/year)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('reason')}</label>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Please provide a reason for your leave request"
+                rows={3}
+              />
+            </div>
+
+            {startDate && endDate && (
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  {t('daysRequested')}: <strong>{calculateDays(startDate, endDate)}</strong>
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button onClick={handleEditRequest}>{t('update')}</Button>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                {t('cancel')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Advanced Filters */}
       <RequestFilters
@@ -485,7 +669,7 @@ export default function Requests() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
-              {userRole === 'employee' ? 'My Leave Requests' : 'Team Leave Requests'}
+              {userRole === 'employee' ? t('myLeaveRequests') : t('teamLeaveRequests')}
               <Badge variant="outline" className="ml-2">
                 {filteredRequests.length} {filteredRequests.length === 1 ? 'request' : 'requests'}
               </Badge>
