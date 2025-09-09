@@ -8,6 +8,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { CreateLeaveDialog } from './CreateLeaveDialog';
+import { Button } from '@/components/ui/button';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface LeaveRequest {
   id: string;
@@ -56,6 +60,8 @@ export default function CalendarWithColors() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
   const [loading, setLoading] = useState(true);
+  const [showNewRequest, setShowNewRequest] = useState(false);
+  const [newRequestDate, setNewRequestDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (user) {
@@ -165,6 +171,35 @@ export default function CalendarWithColors() {
     return styles;
   };
 
+  const handleDateDoubleClick = (date: Date) => {
+    setNewRequestDate(date);
+    setShowNewRequest(true);
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('leave_requests')
+        .delete()
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: t('leaveDeleted')
+      });
+
+      fetchRequests();
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to delete leave request',
+        variant: "destructive"
+      });
+    }
+  };
+
   const getViewModeOptions = () => {
     const options = [{ value: 'my', label: 'My Leave' }];
     
@@ -195,21 +230,28 @@ export default function CalendarWithColors() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('leaveCalendar')}</h1>
-          <p className="text-muted-foreground">View leave requests with color-coded status</p>
+          <p className="text-muted-foreground">View leave requests with color-coded status. Double-click dates to create requests.</p>
         </div>
         
-        <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {getViewModeOptions().map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setShowNewRequest(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            {t('createLeaveRequest')}
+          </Button>
+          
+          <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {getViewModeOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -221,7 +263,10 @@ export default function CalendarWithColors() {
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date);
+                // For double-click to create, we'll add a button instead
+              }}
               modifiers={getDayModifiers()}
               modifiersStyles={getDayModifiersStyles()}
               className="rounded-md border"
@@ -266,6 +311,17 @@ export default function CalendarWithColors() {
           <CardContent>
             {selectedDate ? (
               <div className="space-y-4">
+                {/* Create Leave Button for Selected Date */}
+                <Button
+                  onClick={() => handleDateDoubleClick(selectedDate)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('createLeaveRequest')} - {format(selectedDate, 'MMM dd')}
+                </Button>
+                
                 {getSelectedDateRequests().length > 0 ? (
                   getSelectedDateRequests().map((request) => (
                     <div 
@@ -302,6 +358,38 @@ export default function CalendarWithColors() {
                       {viewMode !== 'my' && request.profiles && (
                         <div className="text-xs text-muted-foreground">
                           ID: {request.profiles.employee_id}
+                        </div>
+                      )}
+                      
+                      {/* Edit/Delete actions for user's own pending requests */}
+                      {viewMode === 'my' && request.status === 'pending' && request.user_id === user?.id && (
+                        <div className="flex gap-1 mt-2">
+                          <Button size="sm" variant="outline" className="h-6 text-xs">
+                            <Edit className="h-3 w-3 mr-1" />
+                            {t('edit')}
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive" className="h-6 text-xs">
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                {t('delete')}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete your leave request.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteRequest(request.id)}>
+                                  {t('delete')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       )}
                     </div>
@@ -373,6 +461,18 @@ export default function CalendarWithColors() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Create Leave Request Dialog */}
+      <CreateLeaveDialog 
+        open={showNewRequest}
+        onOpenChange={setShowNewRequest}
+        selectedDate={newRequestDate}
+        onSuccess={() => {
+          fetchRequests();
+          setShowNewRequest(false);
+          setNewRequestDate(undefined);
+        }}
+      />
     </div>
   );
 }

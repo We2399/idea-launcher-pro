@@ -685,16 +685,16 @@ export default function Requests() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                {userRole !== 'employee' && <TableHead>Employee</TableHead>}
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead>Days</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Status</TableHead>
-                {(userRole === 'manager' || userRole === 'hr_admin') && <TableHead>Actions</TableHead>}
-              </TableRow>
+               <TableRow>
+                 {userRole !== 'employee' && <TableHead>Employee</TableHead>}
+                 <TableHead>Leave Type</TableHead>
+                 <TableHead>Start Date</TableHead>
+                 <TableHead>End Date</TableHead>
+                 <TableHead>Days</TableHead>
+                 <TableHead>Reason</TableHead>
+                 <TableHead>Status</TableHead>
+                 <TableHead>Actions</TableHead>
+               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredRequests.map((request) => (
@@ -712,11 +712,53 @@ export default function Requests() {
                   <TableCell>{format(new Date(request.end_date), 'MMM dd, yyyy')}</TableCell>
                   <TableCell>{request.days_requested}</TableCell>
                   <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
-                  {(userRole === 'manager' || userRole === 'hr_admin') && (
-                    <TableCell>
-                      {/* Senior Management Approval (for pending requests) */}
-                      {userRole === 'manager' && request.status === 'pending' && (
+                   <TableCell>{getStatusBadge(request.status)}</TableCell>
+                   <TableCell>
+                     {/* Employee actions for their own pending requests */}
+                     {userRole === 'employee' && request.status === 'pending' && (
+                       <div className="flex gap-2">
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => openEditDialog(request)}
+                           className="flex items-center gap-1"
+                         >
+                           <Edit className="h-3 w-3" />
+                           {t('edit')}
+                         </Button>
+                         <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                             <Button
+                               size="sm"
+                               variant="destructive"
+                               className="flex items-center gap-1"
+                             >
+                               <Trash2 className="h-3 w-3" />
+                               {t('delete')}
+                             </Button>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent>
+                             <AlertDialogHeader>
+                               <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
+                               <AlertDialogDescription>
+                                 This action cannot be undone. This will permanently delete your leave request.
+                               </AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <AlertDialogFooter>
+                               <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                               <AlertDialogAction onClick={() => handleDeleteRequest(request.id)}>
+                                 {t('delete')}
+                               </AlertDialogAction>
+                             </AlertDialogFooter>
+                           </AlertDialogContent>
+                         </AlertDialog>
+                       </div>
+                     )}
+                     {/* Manager/HR Admin actions */}
+                     {(userRole === 'manager' || userRole === 'hr_admin') && (
+                       <>
+                         {/* Senior Management Approval (for pending requests) */}
+                         {userRole === 'manager' && request.status === 'pending' && (
                         <div className="flex gap-2">
                           <Button
                             size="sm"
@@ -782,11 +824,12 @@ export default function Requests() {
                                 Reject
                               </Button>
                             </>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                  )}
+                           )}
+                         </div>
+                       )}
+                       </>
+                     )}
+                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>

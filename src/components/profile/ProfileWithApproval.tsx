@@ -452,19 +452,19 @@ export default function ProfileWithApproval() {
                         <SelectValue placeholder="Select field" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="first_name">{t('firstName') || 'First Name'}</SelectItem>
-                        <SelectItem value="last_name">{t('lastName') || 'Last Name'}</SelectItem>
-                        <SelectItem value="department">{t('department')}</SelectItem>
-                        <SelectItem value="position">{t('position')}</SelectItem>
-                        <SelectItem value="id_number">{t('idNumber')}</SelectItem>
-                        <SelectItem value="passport_number">{t('passportNumber')}</SelectItem>
-                        <SelectItem value="visa_number">{t('visaNumber')}</SelectItem>
-                        <SelectItem value="date_of_birth">{t('dateOfBirth')}</SelectItem>
-                        <SelectItem value="home_address">{t('homeAddress')}</SelectItem>
-                        <SelectItem value="marital_status">{t('maritalStatus')}</SelectItem>
-                        <SelectItem value="emergency_contact_name">{t('emergencyContactName')}</SelectItem>
-                        <SelectItem value="emergency_contact_phone">{t('emergencyContactPhone')}</SelectItem>
-                        <SelectItem value="phone_number">{t('phoneNumber')}</SelectItem>
+                         <SelectItem value="first_name">{t('firstName') || 'First Name'}</SelectItem>
+                         <SelectItem value="last_name">{t('lastName') || 'Last Name'}</SelectItem>
+                         <SelectItem value="department">{t('department')}</SelectItem>
+                         <SelectItem value="position">{t('position')}</SelectItem>
+                         <SelectItem value="id_number">{t('idNumber')}</SelectItem>
+                         <SelectItem value="passport_number">{t('passportNumber')}</SelectItem>
+                         <SelectItem value="visa_number">{t('visaNumber')}</SelectItem>
+                         <SelectItem value="date_of_birth">{t('dateOfBirth')}</SelectItem>
+                         <SelectItem value="home_address">{t('homeAddress')}</SelectItem>
+                         <SelectItem value="marital_status">{t('maritalStatus')}</SelectItem>
+                         <SelectItem value="emergency_contact_name">{t('emergencyContactName')}</SelectItem>
+                         <SelectItem value="emergency_contact_phone">{t('emergencyContactPhone')}</SelectItem>
+                         <SelectItem value="phone_number">{t('phoneNumber')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -528,7 +528,7 @@ export default function ProfileWithApproval() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Existing fields */}
+              {/* Core Profile Fields */}
               <div className="space-y-2">
                 <Label>{t('firstName')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded">
@@ -545,10 +545,42 @@ export default function ProfileWithApproval() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>{t('email')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{currentProfile.email}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('employeeId')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span>{currentProfile.employee_id}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('department')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Building className="h-4 w-4 text-muted-foreground" />
+                  <span>{currentProfile.department}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('position')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  <span>{currentProfile.position}</span>
+                </div>
+              </div>
+
               {/* Extended Profile Fields */}
               {currentProfile.id_number && (
                 <div className="space-y-2">
-                  <Label>{t('profileIdNumber')}</Label>
+                  <Label>{t('idNumber')}</Label>
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span>{currentProfile.id_number}</span>
@@ -556,9 +588,29 @@ export default function ProfileWithApproval() {
                 </div>
               )}
 
+              {currentProfile.passport_number && (
+                <div className="space-y-2">
+                  <Label>{t('passportNumber')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.passport_number}</span>
+                  </div>
+                </div>
+              )}
+
+              {currentProfile.visa_number && (
+                <div className="space-y-2">
+                  <Label>{t('visaNumber')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.visa_number}</span>
+                  </div>
+                </div>
+              )}
+
               {currentProfile.phone_number && (
                 <div className="space-y-2">
-                  <Label>{t('profilePhoneNumber')}</Label>
+                  <Label>{t('phoneNumber')}</Label>
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span>{currentProfile.phone_number}</span>
@@ -566,9 +618,49 @@ export default function ProfileWithApproval() {
                 </div>
               )}
 
+              {currentProfile.date_of_birth && (
+                <div className="space-y-2">
+                  <Label>{t('dateOfBirth')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{new Date(currentProfile.date_of_birth).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              )}
+
+              {currentProfile.marital_status && (
+                <div className="space-y-2">
+                  <Label>{t('maritalStatus')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.marital_status}</span>
+                  </div>
+                </div>
+              )}
+
+              {currentProfile.emergency_contact_name && (
+                <div className="space-y-2">
+                  <Label>{t('emergencyContactName')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.emergency_contact_name}</span>
+                  </div>
+                </div>
+              )}
+
+              {currentProfile.emergency_contact_phone && (
+                <div className="space-y-2">
+                  <Label>{t('emergencyContactPhone')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.emergency_contact_phone}</span>
+                  </div>
+                </div>
+              )}
+
               {currentProfile.home_address && (
                 <div className="space-y-2 md:col-span-2">
-                  <Label>{t('profileHomeAddress')}</Label>
+                  <Label>{t('homeAddress')}</Label>
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{currentProfile.home_address}</span>
