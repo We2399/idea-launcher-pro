@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
+import { CreateLeaveDialog } from '@/components/calendar/CreateLeaveDialog';
 
 interface LeaveRequest {
   id: string;
@@ -27,10 +31,12 @@ interface LeaveRequest {
 
 export default function CalendarPage() {
   const { user, userRole } = useAuth();
+  const { t } = useLanguage();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -140,22 +146,29 @@ export default function CalendarPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Leave Calendar</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('calendar')}</h1>
           <p className="text-muted-foreground">View approved leave requests in calendar format</p>
         </div>
         
-        <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {getViewModeOptions().map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Leave Request
+          </Button>
+
+          <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {getViewModeOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -167,7 +180,18 @@ export default function CalendarPage() {
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date);
+                // Double-click or Ctrl+click to create leave request
+                if (date && (date !== selectedDate)) {
+                  const now = Date.now();
+                  const lastClick = (window as any).lastCalendarClick || 0;
+                  if (now - lastClick < 300) { // Double click
+                    setShowCreateDialog(true);
+                  }
+                  (window as any).lastCalendarClick = now;
+                }
+              }}
               modifiers={getDayModifiers()}
               modifiersStyles={{
                 hasLeave: { 
@@ -182,6 +206,9 @@ export default function CalendarPage() {
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-primary rounded"></div>
                 <span>Days with approved leave</span>
+              </div>
+              <div className="text-xs">
+                💡 Double-click a date to create a leave request
               </div>
             </div>
           </CardContent>
@@ -281,6 +308,13 @@ export default function CalendarPage() {
           </div>
         </CardContent>
       </Card>
+
+      <CreateLeaveDialog 
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        selectedDate={selectedDate}
+        onSuccess={fetchRequests}
+      />
     </div>
   );
 }

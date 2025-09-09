@@ -54,6 +54,7 @@ const CashControl = () => {
   const [transactions, setTransactions] = useState<CashTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
   const [formData, setFormData] = useState({
     amount: '',
     currency: 'HKD',
@@ -70,16 +71,35 @@ const CashControl = () => {
     if (user) {
       fetchTransactions();
     }
-  }, [user, userRole]);
+  }, [user, userRole, viewMode]);
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       
-      const { data: transactionsData, error: transactionsError } = await supabase
+      let query = supabase
         .from('cash_transactions')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Apply view mode filtering
+      if (viewMode === 'my') {
+        query = query.eq('employee_id', user?.id);
+      } else if (viewMode === 'team' && userRole === 'manager') {
+        // Get team members
+        const { data: teamMembers } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('manager_id', user?.id);
+        
+        if (teamMembers) {
+          const teamIds = teamMembers.map(m => m.user_id);
+          query = query.in('employee_id', teamIds);
+        }
+      }
+      // 'all' mode doesn't need additional filtering for hr_admin
+
+      const { data: transactionsData, error: transactionsError } = await query;
 
       if (transactionsError) throw transactionsError;
 
@@ -273,6 +293,23 @@ const CashControl = () => {
     }
   };
 
+  const getViewModeOptions = () => {
+    const options = [{ value: 'my', label: 'My Requests' }];
+    
+    if (userRole === 'manager') {
+      options.push({ value: 'team', label: 'Team Requests' });
+    }
+    
+    if (userRole === 'hr_admin') {
+      options.push(
+        { value: 'team', label: 'Team Requests' },
+        { value: 'all', label: 'All Requests' }
+      );
+    }
+    
+    return options;
+  };
+
   const getStatusColor = (status: CashTransaction['status']) => {
     switch (status) {
       case 'pending': return 'default';
@@ -307,14 +344,27 @@ const CashControl = () => {
           <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
           <p className="text-muted-foreground">Manage cash requests and expenses</p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              NEW REQUEST/REPORT
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <div className="flex items-center gap-4">
+          <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {getViewModeOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                NEW REQUEST/REPORT
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Cash Request</DialogTitle>
               <DialogDescription>
@@ -454,6 +504,7 @@ const CashControl = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Summary Cards */}

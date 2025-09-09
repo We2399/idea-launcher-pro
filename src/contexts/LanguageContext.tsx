@@ -178,7 +178,6 @@ const translations = {
     requestDeleted: 'Request deleted successfully',
     changesSaved: 'Changes saved successfully',
     uploadSuccess: 'Upload successful',
-    uploadFailed: 'Upload failed',
     
     // Errors
     invalidInput: 'Invalid input',
@@ -425,24 +424,24 @@ const translations = {
     invalidAmount: '金額無效',
     selectOption: '請選擇選項',
     
-    // File Upload
+    // File Upload (Traditional Chinese)
     dragDropFiles: '拖放檔案到此處，或點擊選擇',
     supportedFormats: '支援格式',
     maxFileSize: '最大檔案大小',
     uploading: '上傳中...',
     uploadComplete: '上傳完成',
-    uploadFailed: '上傳失敗',
+    uploadFailedTC: '上傳失敗',
     
-    // Extended Profile Fields
-    idNumber: '身份證號碼',
-    passportNumber: '護照號碼',
-    visaNumber: '簽證號碼',
-    dateOfBirth: '出生日期',
-    homeAddress: '住址',
-    maritalStatus: '婚姻狀況',
-    emergencyContactName: '緊急聯絡人姓名',
-    emergencyContactPhone: '緊急聯絡人電話',
-    phoneNumber: '電話號碼',
+    // Extended Profile Fields (Traditional Chinese)
+    profileIdNumber: '身份證號碼',
+    profilePassportNumber: '護照號碼',
+    profileVisaNumber: '簽證號碼',
+    profileDateOfBirth: '出生日期',
+    profileHomeAddress: '住址',
+    profileMaritalStatus: '婚姻狀況',
+    profileEmergencyContactName: '緊急聯絡人姓名',
+    profileEmergencyContactPhone: '緊急聯絡人電話',
+    profilePhoneNumber: '電話號碼',
     single: '單身',
     married: '已婚',
     divorced: '離婚',
@@ -644,7 +643,6 @@ const translations = {
     requestDeleted: '申请已成功删除',
     changesSaved: '更改已成功保存',
     uploadSuccess: '上传成功',
-    uploadFailed: '上传失败',
     
     // Errors
     invalidInput: '输入无效',
@@ -658,7 +656,7 @@ const translations = {
     invalidAmount: '金额无效',
     selectOption: '请选择选项',
     
-    // File Upload
+    // File Upload (Simplified Chinese)
     dragDropFiles: '拖放文件到此处，或点击选择',
     supportedFormats: '支持格式',
     maxFileSize: '最大文件大小',
@@ -666,13 +664,13 @@ const translations = {
     uploadComplete: '上传完成',
     uploadFailed: '上传失败',
     
-    // Extended Profile Fields
-    idNumber: '身份证号码',
-    passportNumber: '护照号码',
-    visaNumber: '签证号码',
-    dateOfBirth: '出生日期',
-    homeAddress: '住址',
-    maritalStatus: '婚姻状况',
+    // Extended Profile Fields (Simplified Chinese)
+    profileIdNumber: '身份证号码',
+    profilePassportNumber: '护照号码',
+    profileVisaNumber: '签证号码',
+    profileDateOfBirth: '出生日期',
+    profileHomeAddress: '住址',
+    profileMaritalStatus: '婚姻状况',
     emergencyContactName: '紧急联系人姓名',  
     emergencyContactPhone: '紧急联系人电话',
     phoneNumber: '电话号码',
@@ -877,7 +875,6 @@ const translations = {
     requestDeleted: 'Permohonan berhasil dihapus',
     changesSaved: 'Perubahan berhasil disimpan',
     uploadSuccess: 'Unggah berhasil',
-    uploadFailed: 'Unggah gagal',
     
     // Errors
     invalidInput: 'Input tidak valid',
@@ -891,7 +888,7 @@ const translations = {
     invalidAmount: 'Jumlah tidak valid',
     selectOption: 'Pilih opsi',
     
-    // File Upload
+    // File Upload (Indonesian)
     dragDropFiles: 'Seret dan lepas file di sini, atau klik untuk memilih',
     supportedFormats: 'Format yang didukung',
     maxFileSize: 'Ukuran file maksimum',
@@ -899,15 +896,15 @@ const translations = {
     uploadComplete: 'Unggah selesai',
     uploadFailed: 'Unggah gagal',
     
-    // Extended Profile Fields - New unique keys only (Indonesian)
-    idNumber: 'Nomor ID',
-    passportNumber: 'Nomor Paspor',
-    visaNumber: 'Nomor Visa', 
-    dateOfBirth: 'Tanggal Lahir',
-    homeAddress: 'Alamat Rumah',
-    maritalStatus: 'Status Perkawinan',
-    emergencyContactName: 'Nama Kontak Darurat',
-    emergencyContactPhone: 'Telepon Kontak Darurat',
+    // Extended Profile Fields (Indonesian)
+    profileIdNumber: 'Nomor ID',
+    profilePassportNumber: 'Nomor Paspor',
+    profileVisaNumber: 'Nomor Visa', 
+    profileDateOfBirth: 'Tanggal Lahir',
+    profileHomeAddress: 'Alamat Rumah',
+    profileMaritalStatus: 'Status Perkawinan',
+    profileEmergencyContactName: 'Nama Kontak Darurat',
+    profileEmergencyContactPhone: 'Telepon Kontak Darurat',
     phoneNumber: 'Nomor Telepon',
     single: 'Lajang',
     married: 'Menikah',
