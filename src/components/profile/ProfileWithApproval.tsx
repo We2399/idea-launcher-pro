@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import DocumentManager from './DocumentManager';
 
 interface Profile {
   id: string;
@@ -25,6 +27,16 @@ interface Profile {
   manager_id?: string;
   created_at: string;
   updated_at: string;
+  // Extended fields
+  id_number?: string;
+  passport_number?: string;
+  visa_number?: string;
+  date_of_birth?: string;
+  home_address?: string;
+  marital_status?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  phone_number?: string;
 }
 
 interface LeaveBalance {
@@ -440,10 +452,19 @@ export default function ProfileWithApproval() {
                         <SelectValue placeholder="Select field" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="first_name">First Name</SelectItem>
-                        <SelectItem value="last_name">Last Name</SelectItem>
-                        <SelectItem value="department">Department</SelectItem>
-                        <SelectItem value="position">Position</SelectItem>
+                        <SelectItem value="first_name">{t('firstName') || 'First Name'}</SelectItem>
+                        <SelectItem value="last_name">{t('lastName') || 'Last Name'}</SelectItem>
+                        <SelectItem value="department">{t('department')}</SelectItem>
+                        <SelectItem value="position">{t('position')}</SelectItem>
+                        <SelectItem value="id_number">{t('idNumber')}</SelectItem>
+                        <SelectItem value="passport_number">{t('passportNumber')}</SelectItem>
+                        <SelectItem value="visa_number">{t('visaNumber')}</SelectItem>
+                        <SelectItem value="date_of_birth">{t('dateOfBirth')}</SelectItem>
+                        <SelectItem value="home_address">{t('homeAddress')}</SelectItem>
+                        <SelectItem value="marital_status">{t('maritalStatus')}</SelectItem>
+                        <SelectItem value="emergency_contact_name">{t('emergencyContactName')}</SelectItem>
+                        <SelectItem value="emergency_contact_phone">{t('emergencyContactPhone')}</SelectItem>
+                        <SelectItem value="phone_number">{t('phoneNumber')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -462,6 +483,31 @@ export default function ProfileWithApproval() {
                           ))}
                         </SelectContent>
                       </Select>
+                    ) : selectedField === 'marital_status' ? (
+                      <Select value={newValue} onValueChange={setNewValue}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select marital status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single">{t('single')}</SelectItem>
+                          <SelectItem value="married">{t('married')}</SelectItem>
+                          <SelectItem value="divorced">{t('divorced')}</SelectItem>
+                          <SelectItem value="widowed">{t('widowed')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : selectedField === 'date_of_birth' ? (
+                      <Input
+                        type="date"
+                        value={newValue}
+                        onChange={(e) => setNewValue(e.target.value)}
+                      />
+                    ) : selectedField === 'home_address' ? (
+                      <Textarea
+                        value={newValue}
+                        onChange={(e) => setNewValue(e.target.value)}
+                        placeholder="Enter address"
+                        rows={3}
+                      />
                     ) : (
                       <Input
                         value={newValue}
@@ -482,8 +528,9 @@ export default function ProfileWithApproval() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Existing fields */}
               <div className="space-y-2">
-                <Label>First Name</Label>
+                <Label>{t('firstName')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span>{currentProfile.first_name}</span>
@@ -491,55 +538,49 @@ export default function ProfileWithApproval() {
               </div>
 
               <div className="space-y-2">
-                <Label>Last Name</Label>
+                <Label>{t('lastName')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span>{currentProfile.last_name}</span>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.email}</span>
+              {/* Extended Profile Fields */}
+              {currentProfile.id_number && (
+                <div className="space-y-2">
+                  <Label>{t('profileIdNumber')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.id_number}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <Label>Employee ID</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.employee_id}</span>
+              {currentProfile.phone_number && (
+                <div className="space-y-2">
+                  <Label>{t('profilePhoneNumber')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.phone_number}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <Label>Department</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.department}</span>
+              {currentProfile.home_address && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label>{t('profileHomeAddress')}</Label>
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.home_address}</span>
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Position</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.position}</span>
-                </div>
-              </div>
+              )}
             </div>
 
             <Separator className="my-4" />
 
-            <div className="space-y-2">
-              <Label>Account Created</Label>
-              <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{new Date(currentProfile.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
+            {/* Document Manager */}
+            <DocumentManager userId={currentProfile.user_id} canManage={!isManager || selectedStaffId === user?.id} />
           </CardContent>
         </Card>
 

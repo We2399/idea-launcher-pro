@@ -377,48 +377,114 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_documents: {
+        Row: {
+          created_at: string
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          updated_at: string
+          uploaded_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           cash_balance: number | null
           created_at: string
+          date_of_birth: string | null
           department: string
           email: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           employee_id: string
           first_name: string
+          home_address: string | null
           id: string
+          id_number: string | null
           last_name: string
           manager_id: string | null
+          marital_status: string | null
+          passport_number: string | null
+          phone_number: string | null
           position: string
           updated_at: string
           user_id: string
+          visa_number: string | null
         }
         Insert: {
           cash_balance?: number | null
           created_at?: string
+          date_of_birth?: string | null
           department: string
           email: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           employee_id: string
           first_name: string
+          home_address?: string | null
           id?: string
+          id_number?: string | null
           last_name: string
           manager_id?: string | null
+          marital_status?: string | null
+          passport_number?: string | null
+          phone_number?: string | null
           position: string
           updated_at?: string
           user_id: string
+          visa_number?: string | null
         }
         Update: {
           cash_balance?: number | null
           created_at?: string
+          date_of_birth?: string | null
           department?: string
           email?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           employee_id?: string
           first_name?: string
+          home_address?: string | null
           id?: string
+          id_number?: string | null
           last_name?: string
           manager_id?: string | null
+          marital_status?: string | null
+          passport_number?: string | null
+          phone_number?: string | null
           position?: string
           updated_at?: string
           user_id?: string
+          visa_number?: string | null
         }
         Relationships: [
           {
