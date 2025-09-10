@@ -577,102 +577,108 @@ export default function ProfileWithApproval() {
                 </div>
               </div>
 
-              {/* Extended Profile Fields */}
-              {currentProfile.id_number && (
-                <div className="space-y-2">
-                  <Label>{t('idNumber')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.id_number}</span>
-                  </div>
+              {/* Extended Profile Fields - Always Show with Placeholders */}
+              <div className="space-y-2">
+                <Label>{t('idNumber')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.id_number ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.id_number || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.passport_number && (
-                <div className="space-y-2">
-                  <Label>{t('passportNumber')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.passport_number}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('passportNumber')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.passport_number ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.passport_number || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.visa_number && (
-                <div className="space-y-2">
-                  <Label>{t('visaNumber')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.visa_number}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('visaNumber')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.visa_number ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.visa_number || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.phone_number && (
-                <div className="space-y-2">
-                  <Label>{t('phoneNumber')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.phone_number}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('phoneNumber')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.phone_number ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.phone_number || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.date_of_birth && (
-                <div className="space-y-2">
-                  <Label>{t('dateOfBirth')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{new Date(currentProfile.date_of_birth).toLocaleDateString()}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('dateOfBirth')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.marital_status && (
-                <div className="space-y-2">
-                  <Label>{t('maritalStatus')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <Heart className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.marital_status}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('maritalStatus')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Heart className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.marital_status ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.marital_status || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.emergency_contact_name && (
-                <div className="space-y-2">
-                  <Label>{t('emergencyContactName')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.emergency_contact_name}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('emergencyContactName')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.emergency_contact_name ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.emergency_contact_name || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.emergency_contact_phone && (
-                <div className="space-y-2">
-                  <Label>{t('emergencyContactPhone')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.emergency_contact_phone}</span>
-                  </div>
+              <div className="space-y-2">
+                <Label>{t('emergencyContactPhone')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.emergency_contact_phone ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.emergency_contact_phone || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
 
-              {currentProfile.home_address && (
-                <div className="space-y-2 md:col-span-2">
-                  <Label>{t('homeAddress')}</Label>
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.home_address}</span>
-                  </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>{t('homeAddress')}</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className={!currentProfile.home_address ? "text-muted-foreground italic" : ""}>
+                    {currentProfile.home_address || "Not provided"}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
 
             <Separator className="my-4" />
 
             {/* Document Manager */}
-            <DocumentManager userId={currentProfile.user_id} canManage={!isManager || selectedStaffId === user?.id} />
+            <DocumentManager 
+              userId={currentProfile.user_id} 
+              canManage={
+                userRole === 'hr_admin' || 
+                (!isManager || selectedStaffId === user?.id)
+              } 
+            />
           </CardContent>
         </Card>
 

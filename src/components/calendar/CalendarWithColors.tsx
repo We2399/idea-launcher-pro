@@ -33,23 +33,28 @@ interface LeaveRequest {
 const leaveTypeColors = {
   'Sick Leave': {
     pending: 'hsl(30, 40%, 80%)', // Light brown
-    approved: 'hsl(30, 40%, 40%)'  // Dark brown
+    approved: 'hsl(30, 40%, 40%)', // Dark brown
+    senior_approved: 'hsl(30, 50%, 25%)'  // Darker brown
   },
   'Vacation': {
     pending: 'hsl(200, 60%, 80%)', // Light blue
-    approved: 'hsl(200, 60%, 40%)'  // Dark blue
+    approved: 'hsl(200, 60%, 40%)', // Dark blue
+    senior_approved: 'hsl(200, 70%, 25%)'  // Darker blue
   },
   'Maternity': {
     pending: 'hsl(340, 60%, 85%)', // Light pink
-    approved: 'hsl(340, 60%, 45%)'  // Dark pink
+    approved: 'hsl(340, 60%, 45%)', // Dark pink
+    senior_approved: 'hsl(340, 70%, 30%)'  // Darker pink
   },
   'Paternity': {
     pending: 'hsl(270, 50%, 80%)', // Light purple
-    approved: 'hsl(270, 50%, 40%)'  // Dark purple
+    approved: 'hsl(270, 50%, 40%)', // Dark purple
+    senior_approved: 'hsl(270, 60%, 30%)'  // Darker purple
   },
   'Others': {
     pending: 'hsl(0, 0%, 75%)',    // Light grey
-    approved: 'hsl(0, 0%, 35%)'     // Dark grey
+    approved: 'hsl(0, 0%, 35%)',   // Dark grey
+    senior_approved: 'hsl(0, 0%, 20%)'  // Darker grey
   }
 };
 
@@ -74,14 +79,25 @@ export default function CalendarWithColors() {
       let query = supabase
         .from('leave_requests')
         .select('*')
-        .in('status', ['pending', 'approved'])
+        .in('status', ['pending', 'approved', 'senior_approved'])
         .order('start_date');
 
       if (viewMode === 'my') {
         query = query.eq('user_id', user?.id);
-      } else if (viewMode === 'team' && userRole === 'manager') {
-        // For managers, show their team's requests
-        query = query;
+      } else if (viewMode === 'team' && (userRole === 'manager' || userRole === 'hr_admin')) {
+        // For managers/HR, show their team's requests by joining with profiles
+        const { data: teamProfiles } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('manager_id', user?.id);
+        
+        if (teamProfiles && teamProfiles.length > 0) {
+          const teamUserIds = teamProfiles.map(p => p.user_id);
+          query = query.in('user_id', teamUserIds);
+        } else {
+          // No team members found, return empty result
+          query = query.eq('user_id', 'no-match');
+        }
       }
 
       const { data: requestsData, error: requestsError } = await query;
@@ -139,7 +155,7 @@ export default function CalendarWithColors() {
     
     // Create modifiers for each leave type and status
     Object.keys(leaveTypeColors).forEach(leaveType => {
-      ['pending', 'approved'].forEach(status => {
+      ['pending', 'approved', 'senior_approved'].forEach(status => {
         const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
         modifiers[key] = (date: Date) => {
           const dayRequests = getRequestsForDate(date);
@@ -157,11 +173,11 @@ export default function CalendarWithColors() {
     const styles: any = {};
     
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
-      ['pending', 'approved'].forEach(status => {
+      ['pending', 'approved', 'senior_approved'].forEach(status => {
         const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
         styles[key] = {
-          backgroundColor: colors[status as 'pending' | 'approved'],
-          color: status === 'approved' ? 'white' : 'black',
+          backgroundColor: colors[status as 'pending' | 'approved' | 'senior_approved'],
+          color: (status === 'approved' || status === 'senior_approved') ? 'white' : 'black',
           borderRadius: '4px',
           fontWeight: 'bold'
         };
@@ -311,16 +327,6 @@ export default function CalendarWithColors() {
           <CardContent>
             {selectedDate ? (
               <div className="space-y-4">
-                {/* Create Leave Button for Selected Date */}
-                <Button
-                  onClick={() => handleDateDoubleClick(selectedDate)}
-                  variant="outline"
-                  size="sm"
-                  className="w-full flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  {t('createLeaveRequest')} - {format(selectedDate, 'MMM dd')}
-                </Button>
                 
                 {getSelectedDateRequests().length > 0 ? (
                   getSelectedDateRequests().map((request) => (
@@ -329,7 +335,7 @@ export default function CalendarWithColors() {
                       className="p-3 border border-border rounded-lg space-y-2"
                       style={{
                         borderLeftWidth: '4px',
-                        borderLeftColor: leaveTypeColors[request.leave_types?.name as keyof typeof leaveTypeColors]?.[request.status as 'pending' | 'approved'] || 'hsl(var(--border))'
+                        borderLeftColor: leaveTypeColors[request.leave_types?.name as keyof typeof leaveTypeColors]?.[request.status as 'pending' | 'approved' | 'senior_approved'] || 'hsl(var(--border))'
                       }}
                     >
                       <div className="flex items-center justify-between">
@@ -342,10 +348,14 @@ export default function CalendarWithColors() {
                           }
                         </span>
                         <Badge 
-                          variant={request.status === 'approved' ? 'default' : 'outline'} 
+                          variant={
+                            request.status === 'approved' || request.status === 'senior_approved' 
+                              ? 'default' 
+                              : 'outline'
+                          } 
                           className="text-xs"
                         >
-                          {request.status}
+                          {request.status === 'senior_approved' ? 'Senior Approved' : request.status}
                         </Badge>
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -424,7 +434,7 @@ export default function CalendarWithColors() {
                   className="flex items-center justify-between p-3 border border-border rounded-lg"
                   style={{
                     borderLeftWidth: '4px',
-                    borderLeftColor: leaveTypeColors[request.leave_types?.name as keyof typeof leaveTypeColors]?.[request.status as 'pending' | 'approved'] || 'hsl(var(--border))'
+                    borderLeftColor: leaveTypeColors[request.leave_types?.name as keyof typeof leaveTypeColors]?.[request.status as 'pending' | 'approved' | 'senior_approved'] || 'hsl(var(--border))'
                   }}
                 >
                   <div className="space-y-1">
@@ -442,10 +452,14 @@ export default function CalendarWithColors() {
                   </div>
                   <div className="text-right">
                     <Badge 
-                      variant={request.status === 'approved' ? 'default' : 'outline'} 
+                      variant={
+                        request.status === 'approved' || request.status === 'senior_approved' 
+                          ? 'default' 
+                          : 'outline'
+                      } 
                       className="text-xs mb-1"
                     >
-                      {request.status}
+                      {request.status === 'senior_approved' ? 'Senior Approved' : request.status}
                     </Badge>
                     <div className="text-xs text-muted-foreground">
                       {request.days_requested} day{request.days_requested !== 1 ? 's' : ''}

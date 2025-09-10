@@ -49,15 +49,25 @@ export default function CalendarPage() {
       let query = supabase
         .from('leave_requests')
         .select('*')
-        .eq('status', 'approved')
+        .in('status', ['approved', 'senior_approved'])
         .order('start_date');
 
       if (viewMode === 'my') {
         query = query.eq('user_id', user?.id);
-      } else if (viewMode === 'team' && userRole === 'manager') {
-        // For managers, show their team's requests
-        // Note: This would need proper team relationship setup
-        query = query;
+      } else if (viewMode === 'team' && (userRole === 'manager' || userRole === 'hr_admin')) {
+        // For managers/HR, show their team's requests by joining with profiles
+        const { data: teamProfiles } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('manager_id', user?.id);
+        
+        if (teamProfiles && teamProfiles.length > 0) {
+          const teamUserIds = teamProfiles.map(p => p.user_id);
+          query = query.in('user_id', teamUserIds);
+        } else {
+          // No team members found, return empty result
+          query = query.eq('user_id', 'no-match');
+        }
       }
 
       const { data: requestsData, error: requestsError } = await query;
