@@ -17,10 +17,27 @@ const Auth = () => {
     firstName: '',
     lastName: '',
     employeeId: '',
-    department: '',
+    department: 'General',
     position: '',
     role: 'employee'
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.password.trim()) newErrors.password = 'Password is required';
+    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (!formData.department.trim()) newErrors.department = 'Department is required';
+    if (!formData.position.trim()) newErrors.position = 'Position is required';
+    if (!formData.role.trim()) newErrors.role = 'Role is required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Redirect if already authenticated
   if (!loading && user) {
@@ -45,18 +62,29 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
+    setErrors({});
     
     const metadata = {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      employee_id: formData.employeeId,
+      first_name: formData.firstName.trim(),
+      last_name: formData.lastName.trim(),
+      employee_id: formData.employeeId.trim() || `EMP${Date.now()}`,
       department: formData.department,
-      position: formData.position,
+      position: formData.position.trim(),
       role: formData.role
     };
     
-    await signUp(formData.email, formData.password, metadata);
+    const result = await signUp(formData.email, formData.password, metadata);
+    
+    if (result?.error) {
+      setErrors({ submit: result.error.message });
+    }
+    
     setIsLoading(false);
   };
 
@@ -145,11 +173,12 @@ const Auth = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="department">Department</Label>
-                  <Select onValueChange={(value) => updateFormData('department', value)} required>
+                  <Select value={formData.department} onValueChange={(value) => updateFormData('department', value)} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="General">General</SelectItem>
                       <SelectItem value="Domestic Helper">Domestic Helper</SelectItem>
                       <SelectItem value="Engineering">Engineering</SelectItem>
                       <SelectItem value="HR">Human Resources</SelectItem>
@@ -160,6 +189,7 @@ const Auth = () => {
                       <SelectItem value="Others">Others</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.department && <p className="text-sm text-destructive">{errors.department}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -175,7 +205,7 @@ const Auth = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
-                  <Select onValueChange={(value) => updateFormData('role', value)} required>
+                  <Select value={formData.role} onValueChange={(value) => updateFormData('role', value)} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
@@ -185,6 +215,7 @@ const Auth = () => {
                       <SelectItem value="hr_admin">HR Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -210,7 +241,14 @@ const Auth = () => {
                     required
                     minLength={6}
                   />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
+                
+                {errors.submit && (
+                  <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+                    {errors.submit}
+                  </div>
+                )}
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Creating Account...' : 'Create Account'}
