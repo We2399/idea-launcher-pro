@@ -85,6 +85,9 @@ export default function ProfileWithApproval() {
   const [showChangeDialog, setShowChangeDialog] = useState(false);
   const [selectedField, setSelectedField] = useState('');
   const [newValue, setNewValue] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [editValues, setEditValues] = useState<Partial<Profile>>({});
+  const [saving, setSaving] = useState(false);
 
   // For managers - staff profile selection
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
@@ -94,6 +97,16 @@ export default function ProfileWithApproval() {
   const isManager = userRole === 'manager' || userRole === 'hr_admin';
   const currentProfile = isManager && selectedStaffProfile ? selectedStaffProfile : profile;
   const viewingUserId = isManager && selectedStaffId ? selectedStaffId : user?.id;
+
+  // Define which fields can be edited directly vs require approval
+  const directEditFields = [
+    'phone_number', 'home_address', 'marital_status', 'emergency_contact_name', 
+    'emergency_contact_phone', 'id_number', 'passport_number', 'visa_number', 'date_of_birth'
+  ];
+  
+  const approvalRequiredFields = [
+    'first_name', 'last_name', 'department', 'position'
+  ];
 
   useEffect(() => {
     if (user) {
@@ -225,6 +238,55 @@ export default function ProfileWithApproval() {
         variant: "destructive"
       });
     }
+  };
+
+  const handleDirectSave = async () => {
+    if (!currentProfile || Object.keys(editValues).length === 0) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...editValues,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentProfile.user_id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully"
+      });
+
+      setEditMode(false);
+      setEditValues({});
+      
+      // Refresh the profile data
+      if (isManager && selectedStaffId) {
+        fetchSelectedStaffProfile(selectedStaffId);
+      } else {
+        fetchProfile();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditMode(false);
+    setEditValues({});
+  };
+
+  const updateEditValue = (field: string, value: string) => {
+    setEditValues(prev => ({ ...prev, [field]: value }));
   };
 
   const handleRequestChange = async () => {
@@ -430,101 +492,99 @@ export default function ProfileWithApproval() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('personalDetails')}</CardTitle>
-            <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  {t('requestChange')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Request Profile Change</DialogTitle>
-                  <DialogDescription>
-                    Submit a request to change your profile information. Changes require approval.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Field to Change</Label>
-                    <Select value={selectedField} onValueChange={setSelectedField}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select field" />
-                      </SelectTrigger>
-                      <SelectContent>
-                         <SelectItem value="first_name">{t('firstName') || 'First Name'}</SelectItem>
-                         <SelectItem value="last_name">{t('lastName') || 'Last Name'}</SelectItem>
-                         <SelectItem value="department">{t('department')}</SelectItem>
-                         <SelectItem value="position">{t('position')}</SelectItem>
-                         <SelectItem value="id_number">{t('idNumber')}</SelectItem>
-                         <SelectItem value="passport_number">{t('passportNumber')}</SelectItem>
-                         <SelectItem value="visa_number">{t('visaNumber')}</SelectItem>
-                         <SelectItem value="date_of_birth">{t('dateOfBirth')}</SelectItem>
-                         <SelectItem value="home_address">{t('homeAddress')}</SelectItem>
-                         <SelectItem value="marital_status">{t('maritalStatus')}</SelectItem>
-                         <SelectItem value="emergency_contact_name">{t('emergencyContactName')}</SelectItem>
-                         <SelectItem value="emergency_contact_phone">{t('emergencyContactPhone')}</SelectItem>
-                         <SelectItem value="phone_number">{t('phoneNumber')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>New Value</Label>
-                    {selectedField === 'department' ? (
-                      <Select value={newValue} onValueChange={setNewValue}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {departments.map((dept) => (
-                            <SelectItem key={dept} value={dept}>
-                              {dept}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : selectedField === 'marital_status' ? (
-                      <Select value={newValue} onValueChange={setNewValue}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select marital status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="single">{t('single')}</SelectItem>
-                          <SelectItem value="married">{t('married')}</SelectItem>
-                          <SelectItem value="divorced">{t('divorced')}</SelectItem>
-                          <SelectItem value="widowed">{t('widowed')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : selectedField === 'date_of_birth' ? (
-                      <Input
-                        type="date"
-                        value={newValue}
-                        onChange={(e) => setNewValue(e.target.value)}
-                      />
-                    ) : selectedField === 'home_address' ? (
-                      <Textarea
-                        value={newValue}
-                        onChange={(e) => setNewValue(e.target.value)}
-                        placeholder="Enter address"
-                        rows={3}
-                      />
-                    ) : (
-                      <Input
-                        value={newValue}
-                        onChange={(e) => setNewValue(e.target.value)}
-                        placeholder="Enter new value"
-                      />
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleRequestChange}>Submit Request</Button>
-                    <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
-                      Cancel
-                    </Button>
-                  </div>
+            <div className="flex gap-2">
+              {!editMode ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => {
+                      setEditMode(true);
+                      setEditValues({});
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit Profile
+                  </Button>
+                  <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Edit className="h-4 w-4" />
+                        {t('requestChange')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Request Profile Change</DialogTitle>
+                        <DialogDescription>
+                          Submit a request to change sensitive profile information that requires approval.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Field to Change</Label>
+                          <Select value={selectedField} onValueChange={setSelectedField}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {approvalRequiredFields.map((field) => (
+                                <SelectItem key={field} value={field}>
+                                  {field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>New Value</Label>
+                          {selectedField === 'department' ? (
+                            <Select value={newValue} onValueChange={setNewValue}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {departments.map((dept) => (
+                                  <SelectItem key={dept} value={dept}>
+                                    {dept}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              value={newValue}
+                              onChange={(e) => setNewValue(e.target.value)}
+                              placeholder="Enter new value"
+                            />
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={handleRequestChange}>Submit Request</Button>
+                          <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleDirectSave} 
+                    disabled={saving || Object.keys(editValues).length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button variant="outline" onClick={handleEditCancel}>
+                    Cancel
+                  </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -577,95 +637,185 @@ export default function ProfileWithApproval() {
                 </div>
               </div>
 
-              {/* Extended Profile Fields - Always Show with Placeholders */}
-              <div className="space-y-2">
-                <Label>{t('idNumber')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.id_number ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.id_number || "Not provided"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t('passportNumber')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.passport_number ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.passport_number || "Not provided"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t('visaNumber')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.visa_number ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.visa_number || "Not provided"}
-                  </span>
-                </div>
-              </div>
-
+              {/* Extended Profile Fields - Editable/Display Mode */}
               <div className="space-y-2">
                 <Label>{t('phoneNumber')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.phone_number ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.phone_number || "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Input
+                    value={editValues.phone_number ?? currentProfile.phone_number ?? ''}
+                    onChange={(e) => updateEditValue('phone_number', e.target.value)}
+                    placeholder="Enter phone number"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.phone_number ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.phone_number || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('dateOfBirth')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Input
+                    type="date"
+                    value={editValues.date_of_birth ?? currentProfile.date_of_birth ?? ''}
+                    onChange={(e) => updateEditValue('date_of_birth', e.target.value)}
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : "Not provided"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('idNumber')}</Label>
+                {editMode ? (
+                  <Input
+                    value={editValues.id_number ?? currentProfile.id_number ?? ''}
+                    onChange={(e) => updateEditValue('id_number', e.target.value)}
+                    placeholder="Enter ID number"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.id_number ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.id_number || "Not provided"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('passportNumber')}</Label>
+                {editMode ? (
+                  <Input
+                    value={editValues.passport_number ?? currentProfile.passport_number ?? ''}
+                    onChange={(e) => updateEditValue('passport_number', e.target.value)}
+                    placeholder="Enter passport number"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.passport_number ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.passport_number || "Not provided"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t('visaNumber')}</Label>
+                {editMode ? (
+                  <Input
+                    value={editValues.visa_number ?? currentProfile.visa_number ?? ''}
+                    onChange={(e) => updateEditValue('visa_number', e.target.value)}
+                    placeholder="Enter visa number"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.visa_number ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.visa_number || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('maritalStatus')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Heart className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.marital_status ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.marital_status || "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Select 
+                    value={editValues.marital_status ?? currentProfile.marital_status ?? ''} 
+                    onValueChange={(value) => updateEditValue('marital_status', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select marital status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">{t('single') || 'Single'}</SelectItem>
+                      <SelectItem value="married">{t('married') || 'Married'}</SelectItem>
+                      <SelectItem value="divorced">{t('divorced') || 'Divorced'}</SelectItem>
+                      <SelectItem value="widowed">{t('widowed') || 'Widowed'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Heart className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.marital_status ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.marital_status || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactName')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.emergency_contact_name ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.emergency_contact_name || "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Input
+                    value={editValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? ''}
+                    onChange={(e) => updateEditValue('emergency_contact_name', e.target.value)}
+                    placeholder="Enter emergency contact name"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.emergency_contact_name ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.emergency_contact_name || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactPhone')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.emergency_contact_phone ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.emergency_contact_phone || "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Input
+                    value={editValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? ''}
+                    onChange={(e) => updateEditValue('emergency_contact_phone', e.target.value)}
+                    placeholder="Enter emergency contact phone"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.emergency_contact_phone ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.emergency_contact_phone || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <Label>{t('homeAddress')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className={!currentProfile.home_address ? "text-muted-foreground italic" : ""}>
-                    {currentProfile.home_address || "Not provided"}
-                  </span>
-                </div>
+                {editMode ? (
+                  <Textarea
+                    value={editValues.home_address ?? currentProfile.home_address ?? ''}
+                    onChange={(e) => updateEditValue('home_address', e.target.value)}
+                    placeholder="Enter home address"
+                    rows={3}
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className={!currentProfile.home_address ? "text-muted-foreground italic" : ""}>
+                      {currentProfile.home_address || "Not provided"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
