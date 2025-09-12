@@ -4,13 +4,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckCircle } from 'lucide-react';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp } from 'lucide-react';
+import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
+import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
+import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
 
 const Index = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
-  const stats = useDashboardStats();
+  const stats = useEnhancedDashboardStats();
 
   if (!user) {
     return (
@@ -143,48 +145,8 @@ const Index = () => {
         <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.1s' }}>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-green-500/10 ring-1 ring-green-500/20">
-                <Calendar className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-foreground">
-                  {stats.loading ? (
-                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
-                  ) : (
-                    stats.remainingDays
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">{t('daysRemaining')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-foreground">
-                  {stats.loading ? (
-                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
-                  ) : (
-                    stats.usedDays
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">{t('daysUsed')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-purple-500/10 ring-1 ring-purple-500/20">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+              <div className="p-3 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                <TrendingUp className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
                 <div className="text-2xl font-bold text-foreground">
@@ -199,7 +161,38 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+        
+        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
+                <Calendar className="h-6 w-6 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-2xl font-bold text-foreground">
+                  {stats.loading ? (
+                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats.leaveBalances.reduce((sum, balance) => sum + balance.remainingDays, 0)
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground font-medium">Days Remaining</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <ProfileRequestsCard 
+          stats={stats.profileChangeRequests} 
+          loading={stats.loading}
+        />
       </div>
+      
+      {/* Detailed Leave Breakdown */}
+      <LeaveTypeBreakdown 
+        leaveBalances={stats.leaveBalances} 
+        loading={stats.loading}
+      />
     </div>
   );
 };
