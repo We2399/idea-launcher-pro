@@ -316,6 +316,19 @@ export default function Requests() {
 
   const handleSeniorApproval = async (requestId: string, status: 'approved' | 'rejected') => {
     try {
+      // If approving, check for overlaps first
+      if (status === 'approved') {
+        const request = requests.find(r => r.id === requestId);
+        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
+          toast({
+            title: t('error'),
+            description: 'Cannot approve: this request overlaps with another approved leave request.',
+            variant: 'destructive'
+          });
+          return;
+        }
+      }
+
       const updateData = userRole === 'manager' ? {
         senior_management_approved_by: user?.id,
         senior_management_approved_at: new Date().toISOString(),
@@ -352,6 +365,19 @@ export default function Requests() {
 
   const handleFinalApproval = async (requestId: string, status: 'approved' | 'rejected') => {
     try {
+      // If approving, check for overlaps first
+      if (status === 'approved') {
+        const request = requests.find(r => r.id === requestId);
+        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
+          toast({
+            title: t('error'),
+            description: 'Cannot approve: this request overlaps with another approved leave request.',
+            variant: 'destructive'
+          });
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from('leave_requests')
         .update({ 

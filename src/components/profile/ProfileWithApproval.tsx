@@ -105,7 +105,9 @@ export default function ProfileWithApproval() {
   ];
   
   const approvalRequiredFields = [
-    'first_name', 'last_name', 'department', 'position'
+    'first_name', 'last_name', 'department', 'position', 'employee_id', 'email',
+    'phone_number', 'home_address', 'marital_status', 'emergency_contact_name', 
+    'emergency_contact_phone', 'id_number', 'passport_number', 'visa_number', 'date_of_birth'
   ];
 
   useEffect(() => {
@@ -223,11 +225,17 @@ export default function ProfileWithApproval() {
 
   const fetchChangeRequests = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profile_change_requests')
         .select('*')
-        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
+
+      // If not manager/HR admin, only fetch own requests
+      if (!isManager) {
+        query = query.eq('user_id', user?.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setChangeRequests(data || []);
@@ -530,7 +538,7 @@ export default function ProfileWithApproval() {
                             <SelectContent>
                               {approvalRequiredFields.map((field) => (
                                 <SelectItem key={field} value={field}>
-                                  {field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </SelectItem>
                               ))}
                             </SelectContent>

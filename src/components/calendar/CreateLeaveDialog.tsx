@@ -80,6 +80,24 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
     return diffDays;
   };
 
+  // Check for overlapping leave requests
+  const hasOverlap = async (startDate: string, endDate: string) => {
+    if (!user) return false;
+    
+    const { data, error } = await supabase
+      .from('leave_requests')
+      .select('id,start_date,end_date,status')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'approved', 'senior_approved']);
+    
+    if (error) throw error;
+    
+    return (data || []).some((r) => {
+      // Overlap if not (newEnd < existingStart or newStart > existingEnd)
+      return !(endDate < r.start_date || startDate > r.end_date);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -91,6 +109,16 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
         toast({
           title: 'Error',
           description: 'End date cannot be before start date',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Check for overlapping requests
+      if (await hasOverlap(formData.start_date, formData.end_date)) {
+        toast({
+          title: 'Error',
+          description: 'Your selected dates overlap with an existing leave request.',
           variant: 'destructive',
         });
         return;
