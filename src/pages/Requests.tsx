@@ -143,6 +143,27 @@ export default function Requests() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
+  // Format a Date as a local date string without timezone issues
+  const formatDateLocal = (date: Date) => format(date, 'yyyy-MM-dd');
+
+  // Check if the requested range overlaps with any existing pending/approved requests
+  const hasOverlap = async (start: Date, end: Date, excludeId?: string) => {
+    if (!user) return false;
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
+    const { data, error } = await supabase
+      .from('leave_requests')
+      .select('id,start_date,end_date,status')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'approved', 'senior_approved']);
+    if (error) throw error;
+    return (data || []).some((r) => {
+      if (excludeId && r.id === excludeId) return false;
+      // Overlap if not (newEnd < existingStart or newStart > existingEnd)
+      return !(endStr < r.start_date || startStr > r.end_date);
+    });
+  };
+
   const handleSubmitRequest = async () => {
     if (!startDate || !endDate || !selectedLeaveType || !reason.trim()) {
       toast({
@@ -154,14 +175,24 @@ export default function Requests() {
     }
 
     try {
+      // Prevent overlapping requests
+      if (await hasOverlap(startDate, endDate)) {
+        toast({
+          title: t('error'),
+          description: 'Your selected dates overlap with an existing leave request.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       const daysRequested = calculateDays(startDate, endDate);
       
       const { error } = await supabase
         .from('leave_requests')
         .insert({
           user_id: user?.id,
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
+          start_date: formatDateLocal(startDate),
+          end_date: formatDateLocal(endDate),
           days_requested: daysRequested,
           leave_type_id: selectedLeaveType,
           reason: reason,
@@ -202,13 +233,23 @@ export default function Requests() {
     }
 
     try {
+      // Prevent overlapping requests (exclude the current request)
+      if (await hasOverlap(startDate, endDate, editingRequest.id)) {
+        toast({
+          title: t('error'),
+          description: 'Your selected dates overlap with an existing leave request.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       const daysRequested = calculateDays(startDate, endDate);
       
       const { error } = await supabase
         .from('leave_requests')
         .update({
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
+          start_date: formatDateLocal(startDate),
+          end_date: formatDateLocal(endDate),
           days_requested: daysRequested,
           leave_type_id: selectedLeaveType,
           reason: reason,
