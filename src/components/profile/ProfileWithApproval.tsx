@@ -27,6 +27,8 @@ interface Profile {
   manager_id?: string;
   created_at: string;
   updated_at: string;
+  profile_completed: boolean;
+  initial_setup_completed_at?: string;
   // Extended fields
   id_number?: string;
   passport_number?: string;
@@ -85,8 +87,8 @@ export default function ProfileWithApproval() {
   const [showChangeDialog, setShowChangeDialog] = useState(false);
   const [selectedField, setSelectedField] = useState('');
   const [newValue, setNewValue] = useState('');
-  const [editMode, setEditMode] = useState(false);
-  const [editValues, setEditValues] = useState<Partial<Profile>>({});
+  const [setupMode, setSetupMode] = useState(false);
+  const [setupValues, setSetupValues] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
 
   // For managers - staff profile selection
@@ -98,17 +100,15 @@ export default function ProfileWithApproval() {
   const currentProfile = isManager && selectedStaffProfile ? selectedStaffProfile : profile;
   const viewingUserId = isManager && selectedStaffId ? selectedStaffId : user?.id;
 
-  // Define which fields can be edited directly vs require approval
-  const directEditFields = [
+  // Define all profile fields for initial setup and change requests
+  const allProfileFields = [
+    'first_name', 'last_name', 'employee_id', 'email', 'department', 'position',
     'phone_number', 'home_address', 'marital_status', 'emergency_contact_name', 
     'emergency_contact_phone', 'id_number', 'passport_number', 'visa_number', 'date_of_birth'
   ];
-  
-  const approvalRequiredFields = [
-    'first_name', 'last_name', 'department', 'position', 'employee_id', 'email',
-    'phone_number', 'home_address', 'marital_status', 'emergency_contact_name', 
-    'emergency_contact_phone', 'id_number', 'passport_number', 'visa_number', 'date_of_birth'
-  ];
+
+  const isProfileIncomplete = currentProfile && !currentProfile.profile_completed;
+  const canEditDirectly = isManager || isProfileIncomplete;
 
   useEffect(() => {
     if (user) {
@@ -248,15 +248,35 @@ export default function ProfileWithApproval() {
     }
   };
 
-  const handleDirectSave = async () => {
-    if (!currentProfile || Object.keys(editValues).length === 0) return;
+  const handleCompleteSetup = async () => {
+    if (!currentProfile) return;
+    
+    // Validate that all required fields are filled
+    const requiredFields = ['first_name', 'last_name', 'phone_number', 'home_address', 
+      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'];
+    
+    const missingFields = requiredFields.filter(field => {
+      const value = setupValues[field as keyof Profile] || currentProfile[field as keyof Profile];
+      return !value || value === '';
+    });
+
+    if (missingFields.length > 0) {
+      toast({
+        title: "Error",
+        description: `Please fill in all required fields: ${missingFields.join(', ')}. Use "NIL" if not applicable.`,
+        variant: "destructive"
+      });
+      return;
+    }
     
     setSaving(true);
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          ...editValues,
+          ...setupValues,
+          profile_completed: true,
+          initial_setup_completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('user_id', currentProfile.user_id);
@@ -265,11 +285,11 @@ export default function ProfileWithApproval() {
 
       toast({
         title: "Success",
-        description: "Profile updated successfully"
+        description: "Profile setup completed successfully"
       });
 
-      setEditMode(false);
-      setEditValues({});
+      setSetupMode(false);
+      setSetupValues({});
       
       // Refresh the profile data
       if (isManager && selectedStaffId) {
@@ -280,7 +300,7 @@ export default function ProfileWithApproval() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update profile",
+        description: error.message || "Failed to complete profile setup",
         variant: "destructive"
       });
     } finally {
@@ -288,13 +308,13 @@ export default function ProfileWithApproval() {
     }
   };
 
-  const handleEditCancel = () => {
-    setEditMode(false);
-    setEditValues({});
+  const handleSetupCancel = () => {
+    setSetupMode(false);
+    setSetupValues({});
   };
 
-  const updateEditValue = (field: string, value: string) => {
-    setEditValues(prev => ({ ...prev, [field]: value }));
+  const updateSetupValue = (field: string, value: string) => {
+    setSetupValues(prev => ({ ...prev, [field]: value }));
   };
 
   const handleRequestChange = async () => {
@@ -454,14 +474,39 @@ export default function ProfileWithApproval() {
   const RoleIcon = getRoleIcon(userRole);
 
   return (
-    <div className="space-y-6">
+      <div className="space-y-6">
+      {isProfileIncomplete && (
+        <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <User className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                Complete Your Profile Setup
+              </h3>
+              <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                Please complete your profile setup by filling in all required information. 
+                Once completed, any future changes will require manager approval for security and compliance.
+                Use "NIL" for fields that are not applicable to you.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             {isManager ? t('staffProfile') : t('profile')}
           </h1>
           <p className="text-muted-foreground">
-            {isManager ? 'Manage staff profiles and approve changes' : 'Manage your personal information and view leave balances'}
+            {isManager 
+              ? 'Manage staff profiles and approve changes' 
+              : isProfileIncomplete 
+                ? 'Complete your initial profile setup - all fields are required'
+                : 'View your personal information and submit change requests for approval'
+            }
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -501,158 +546,241 @@ export default function ProfileWithApproval() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('personalDetails')}</CardTitle>
             <div className="flex gap-2">
-              {!editMode ? (
+              {isProfileIncomplete ? (
                 <>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center gap-2"
-                    onClick={() => {
-                      setEditMode(true);
-                      setEditValues({});
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit Profile
-                  </Button>
-                  <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <Edit className="h-4 w-4" />
-                        {t('requestChange')}
+                  {!setupMode ? (
+                    <Button 
+                      variant="default" 
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        setSetupMode(true);
+                        setSetupValues({});
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                      Complete Profile Setup
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleCompleteSetup} 
+                        disabled={saving}
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="h-4 w-4" />
+                        {saving ? 'Saving...' : 'Complete Setup'}
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Request Profile Change</DialogTitle>
-                        <DialogDescription>
-                          Submit a request to change sensitive profile information that requires approval.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Field to Change</Label>
-                          <Select value={selectedField} onValueChange={setSelectedField}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {approvalRequiredFields.map((field) => (
-                                <SelectItem key={field} value={field}>
-                                  {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>New Value</Label>
-                          {selectedField === 'department' ? (
-                            <Select value={newValue} onValueChange={setNewValue}>
+                      <Button variant="outline" onClick={handleSetupCancel}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {!isManager && (
+                    <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="flex items-center gap-2">
+                          <Edit className="h-4 w-4" />
+                          {t('requestChange')}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Request Profile Change</DialogTitle>
+                          <DialogDescription>
+                            Submit a request to change profile information that requires approval.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Field to Change</Label>
+                            <Select value={selectedField} onValueChange={setSelectedField}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select department" />
+                                <SelectValue placeholder="Select field" />
                               </SelectTrigger>
                               <SelectContent>
-                                {departments.map((dept) => (
-                                  <SelectItem key={dept} value={dept}>
-                                    {dept}
+                                {allProfileFields.map((field) => (
+                                  <SelectItem key={field} value={field}>
+                                    {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                          ) : (
-                            <Input
-                              value={newValue}
-                              onChange={(e) => setNewValue(e.target.value)}
-                              placeholder="Enter new value"
-                            />
-                          )}
+                          </div>
+                          <div className="space-y-2">
+                            <Label>New Value</Label>
+                            {selectedField === 'department' ? (
+                              <Select value={newValue} onValueChange={setNewValue}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {departments.map((dept) => (
+                                    <SelectItem key={dept} value={dept}>
+                                      {dept}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : selectedField === 'marital_status' ? (
+                              <Select value={newValue} onValueChange={setNewValue}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select marital status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="single">Single</SelectItem>
+                                  <SelectItem value="married">Married</SelectItem>
+                                  <SelectItem value="divorced">Divorced</SelectItem>
+                                  <SelectItem value="widowed">Widowed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                value={newValue}
+                                onChange={(e) => setNewValue(e.target.value)}
+                                placeholder="Enter new value"
+                              />
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={handleRequestChange}>Submit Request</Button>
+                            <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button onClick={handleRequestChange}>Submit Request</Button>
-                          <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </>
-              ) : (
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleDirectSave} 
-                    disabled={saving || Object.keys(editValues).length === 0}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                  <Button variant="outline" onClick={handleEditCancel}>
-                    Cancel
-                  </Button>
-                </div>
               )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Core Profile Fields */}
+              {/* Core Profile Fields - Setup/Display Mode */}
               <div className="space-y-2">
                 <Label>{t('firstName')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.first_name}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Input
+                    value={setupValues.first_name ?? currentProfile.first_name ?? ''}
+                    onChange={(e) => updateSetupValue('first_name', e.target.value)}
+                    placeholder="Enter first name"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.first_name}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('lastName')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.last_name}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Input
+                    value={setupValues.last_name ?? currentProfile.last_name ?? ''}
+                    onChange={(e) => updateSetupValue('last_name', e.target.value)}
+                    placeholder="Enter last name"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.last_name}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('email')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.email}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Input
+                    value={setupValues.email ?? currentProfile.email ?? ''}
+                    onChange={(e) => updateSetupValue('email', e.target.value)}
+                    placeholder="Enter email address"
+                    type="email"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.email}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('employeeId')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.employee_id}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Input
+                    value={setupValues.employee_id ?? currentProfile.employee_id ?? ''}
+                    onChange={(e) => updateSetupValue('employee_id', e.target.value)}
+                    placeholder="Enter employee ID"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.employee_id}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('department')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.department}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Select 
+                    value={setupValues.department ?? currentProfile.department ?? ''} 
+                    onValueChange={(value) => updateSetupValue('department', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.department}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>{t('position')}</Label>
-                <div className="flex items-center gap-2 p-2 border border-border rounded">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <span>{currentProfile.position}</span>
-                </div>
+                {isProfileIncomplete && setupMode ? (
+                  <Input
+                    value={setupValues.position ?? currentProfile.position ?? ''}
+                    onChange={(e) => updateSetupValue('position', e.target.value)}
+                    placeholder="Enter position/job title"
+                    className="flex items-center gap-2"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentProfile.position}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Extended Profile Fields - Editable/Display Mode */}
+              {/* Extended Profile Fields - Setup/Display Mode */}
               <div className="space-y-2">
                 <Label>{t('phoneNumber')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.phone_number ?? currentProfile.phone_number ?? ''}
-                    onChange={(e) => updateEditValue('phone_number', e.target.value)}
-                    placeholder="Enter phone number"
+                    value={setupValues.phone_number ?? currentProfile.phone_number ?? ''}
+                    onChange={(e) => updateSetupValue('phone_number', e.target.value)}
+                    placeholder="Enter phone number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -667,11 +795,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('dateOfBirth')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
                     type="date"
-                    value={editValues.date_of_birth ?? currentProfile.date_of_birth ?? ''}
-                    onChange={(e) => updateEditValue('date_of_birth', e.target.value)}
+                    value={setupValues.date_of_birth ?? currentProfile.date_of_birth ?? ''}
+                    onChange={(e) => updateSetupValue('date_of_birth', e.target.value)}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -686,11 +814,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('idNumber')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.id_number ?? currentProfile.id_number ?? ''}
-                    onChange={(e) => updateEditValue('id_number', e.target.value)}
-                    placeholder="Enter ID number"
+                    value={setupValues.id_number ?? currentProfile.id_number ?? ''}
+                    onChange={(e) => updateSetupValue('id_number', e.target.value)}
+                    placeholder="Enter ID number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -705,11 +833,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('passportNumber')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.passport_number ?? currentProfile.passport_number ?? ''}
-                    onChange={(e) => updateEditValue('passport_number', e.target.value)}
-                    placeholder="Enter passport number"
+                    value={setupValues.passport_number ?? currentProfile.passport_number ?? ''}
+                    onChange={(e) => updateSetupValue('passport_number', e.target.value)}
+                    placeholder="Enter passport number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -724,11 +852,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('visaNumber')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.visa_number ?? currentProfile.visa_number ?? ''}
-                    onChange={(e) => updateEditValue('visa_number', e.target.value)}
-                    placeholder="Enter visa number"
+                    value={setupValues.visa_number ?? currentProfile.visa_number ?? ''}
+                    onChange={(e) => updateSetupValue('visa_number', e.target.value)}
+                    placeholder="Enter visa number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -743,10 +871,10 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('maritalStatus')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Select 
-                    value={editValues.marital_status ?? currentProfile.marital_status ?? ''} 
-                    onValueChange={(value) => updateEditValue('marital_status', value)}
+                    value={setupValues.marital_status ?? currentProfile.marital_status ?? ''} 
+                    onValueChange={(value) => updateSetupValue('marital_status', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select marital status" />
@@ -756,6 +884,7 @@ export default function ProfileWithApproval() {
                       <SelectItem value="married">{t('married') || 'Married'}</SelectItem>
                       <SelectItem value="divorced">{t('divorced') || 'Divorced'}</SelectItem>
                       <SelectItem value="widowed">{t('widowed') || 'Widowed'}</SelectItem>
+                      <SelectItem value="NIL">NIL</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
@@ -770,11 +899,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactName')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? ''}
-                    onChange={(e) => updateEditValue('emergency_contact_name', e.target.value)}
-                    placeholder="Enter emergency contact name"
+                    value={setupValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? ''}
+                    onChange={(e) => updateSetupValue('emergency_contact_name', e.target.value)}
+                    placeholder="Enter emergency contact name or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -789,11 +918,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactPhone')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Input
-                    value={editValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? ''}
-                    onChange={(e) => updateEditValue('emergency_contact_phone', e.target.value)}
-                    placeholder="Enter emergency contact phone"
+                    value={setupValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? ''}
+                    onChange={(e) => updateSetupValue('emergency_contact_phone', e.target.value)}
+                    placeholder="Enter emergency contact phone or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -808,11 +937,11 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2 md:col-span-2">
                 <Label>{t('homeAddress')}</Label>
-                {editMode ? (
+                {isProfileIncomplete && setupMode ? (
                   <Textarea
-                    value={editValues.home_address ?? currentProfile.home_address ?? ''}
-                    onChange={(e) => updateEditValue('home_address', e.target.value)}
-                    placeholder="Enter home address"
+                    value={setupValues.home_address ?? currentProfile.home_address ?? ''}
+                    onChange={(e) => updateSetupValue('home_address', e.target.value)}
+                    placeholder="Enter home address or NIL if not applicable"
                     rows={3}
                     className="flex items-center gap-2"
                   />

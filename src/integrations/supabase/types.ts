@@ -430,12 +430,14 @@ export type Database = {
           home_address: string | null
           id: string
           id_number: string | null
+          initial_setup_completed_at: string | null
           last_name: string
           manager_id: string | null
           marital_status: string | null
           passport_number: string | null
           phone_number: string | null
           position: string
+          profile_completed: boolean | null
           updated_at: string
           user_id: string
           visa_number: string | null
@@ -453,12 +455,14 @@ export type Database = {
           home_address?: string | null
           id?: string
           id_number?: string | null
+          initial_setup_completed_at?: string | null
           last_name: string
           manager_id?: string | null
           marital_status?: string | null
           passport_number?: string | null
           phone_number?: string | null
           position: string
+          profile_completed?: boolean | null
           updated_at?: string
           user_id: string
           visa_number?: string | null
@@ -476,12 +480,14 @@ export type Database = {
           home_address?: string | null
           id?: string
           id_number?: string | null
+          initial_setup_completed_at?: string | null
           last_name?: string
           manager_id?: string | null
           marital_status?: string | null
           passport_number?: string | null
           phone_number?: string | null
           position?: string
+          profile_completed?: boolean | null
           updated_at?: string
           user_id?: string
           visa_number?: string | null
