@@ -356,22 +356,8 @@ export default function ProfileWithApproval() {
 
   const approveChangeRequest = async (requestId: string) => {
     try {
-      const request = changeRequests.find(r => r.id === requestId);
-      if (!request) return;
-
-      // Update the profile with the new value
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          [request.field_name]: request.new_value,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', request.user_id);
-
-      if (updateError) throw updateError;
-
-      // Mark the request as approved
-      const { error: approveError } = await supabase
+      // Mark the request as approved - the database trigger will automatically apply the change
+      const { error } = await supabase
         .from('profile_change_requests')
         .update({
           status: 'approved',
@@ -380,11 +366,11 @@ export default function ProfileWithApproval() {
         })
         .eq('id', requestId);
 
-      if (approveError) throw approveError;
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Change request approved successfully"
+        description: "Change request approved - profile updated automatically"
       });
 
       fetchChangeRequests();
