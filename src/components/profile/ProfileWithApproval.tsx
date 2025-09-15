@@ -95,8 +95,13 @@ export default function ProfileWithApproval() {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState('');
   const [selectedStaffProfile, setSelectedStaffProfile] = useState<Profile | null>(null);
+  
+  // HR Admin direct editing state
+  const [hrEditMode, setHrEditMode] = useState(false);
+  const [hrEditValues, setHrEditValues] = useState<Partial<Profile>>({});
 
   const isManager = userRole === 'manager' || userRole === 'hr_admin';
+  const isHrAdmin = userRole === 'hr_admin';
   const currentProfile = isManager && selectedStaffProfile ? selectedStaffProfile : profile;
   const viewingUserId = isManager && selectedStaffId ? selectedStaffId : user?.id;
 
@@ -108,7 +113,9 @@ export default function ProfileWithApproval() {
   ];
 
   const isProfileIncomplete = currentProfile && !currentProfile.profile_completed;
-  const canEditDirectly = isManager || isProfileIncomplete;
+  // HR Admins can always directly edit, users can only edit during initial setup
+  const canUserEditDirectly = !isManager && isProfileIncomplete;
+  const canHrAdminEdit = isHrAdmin;
 
   useEffect(() => {
     if (user) {
@@ -315,6 +322,55 @@ export default function ProfileWithApproval() {
 
   const updateSetupValue = (field: string, value: string) => {
     setSetupValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const updateHrEditValue = (field: string, value: string) => {
+    setHrEditValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleHrDirectSave = async () => {
+    if (!currentProfile || !isHrAdmin) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...hrEditValues,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentProfile.user_id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully"
+      });
+
+      setHrEditMode(false);
+      setHrEditValues({});
+      
+      // Refresh the profile data
+      if (isManager && selectedStaffId) {
+        fetchSelectedStaffProfile(selectedStaffId);
+      } else {
+        fetchProfile();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleHrEditCancel = () => {
+    setHrEditMode(false);
+    setHrEditValues({});
   };
 
   const handleRequestChange = async () => {
@@ -532,7 +588,8 @@ export default function ProfileWithApproval() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('personalDetails')}</CardTitle>
             <div className="flex gap-2">
-              {isProfileIncomplete ? (
+              {/* Initial Setup for Incomplete Profiles */}
+              {canUserEditDirectly ? (
                 <>
                   {!setupMode ? (
                     <Button 
@@ -564,7 +621,41 @@ export default function ProfileWithApproval() {
                 </>
               ) : (
                 <>
-                  {!isManager && (
+                  {/* HR Admin Direct Edit for Any Profile */}
+                  {canHrAdminEdit && (
+                    <>
+                      {!hrEditMode ? (
+                        <Button 
+                          variant="secondary" 
+                          className="flex items-center gap-2"
+                          onClick={() => {
+                            setHrEditMode(true);
+                            setHrEditValues({});
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit Profile
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={handleHrDirectSave} 
+                            disabled={saving}
+                            className="flex items-center gap-2"
+                          >
+                            <Save className="h-4 w-4" />
+                            {saving ? 'Saving...' : 'Save Changes'}
+                          </Button>
+                          <Button variant="outline" onClick={handleHrEditCancel}>
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Regular User Change Request */}
+                  {!isManager && !canUserEditDirectly && (
                     <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
                       <DialogTrigger asChild>
                         <Button variant="outline" className="flex items-center gap-2">
@@ -646,13 +737,21 @@ export default function ProfileWithApproval() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Core Profile Fields - Setup/Display Mode */}
+              {/* Core Profile Fields - Setup/Display/HR Edit Mode */}
               <div className="space-y-2">
                 <Label>{t('firstName')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.first_name ?? currentProfile.first_name ?? ''}
-                    onChange={(e) => updateSetupValue('first_name', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.first_name ?? currentProfile.first_name ?? '')
+                        : (hrEditValues.first_name ?? currentProfile.first_name ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('first_name', e.target.value)
+                        : updateHrEditValue('first_name', e.target.value)
+                    }
                     placeholder="Enter first name"
                     className="flex items-center gap-2"
                   />
@@ -666,10 +765,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('lastName')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.last_name ?? currentProfile.last_name ?? ''}
-                    onChange={(e) => updateSetupValue('last_name', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.last_name ?? currentProfile.last_name ?? '')
+                        : (hrEditValues.last_name ?? currentProfile.last_name ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('last_name', e.target.value)
+                        : updateHrEditValue('last_name', e.target.value)
+                    }
                     placeholder="Enter last name"
                     className="flex items-center gap-2"
                   />
@@ -683,10 +790,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('email')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.email ?? currentProfile.email ?? ''}
-                    onChange={(e) => updateSetupValue('email', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.email ?? currentProfile.email ?? '')
+                        : (hrEditValues.email ?? currentProfile.email ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('email', e.target.value)
+                        : updateHrEditValue('email', e.target.value)
+                    }
                     placeholder="Enter email address"
                     type="email"
                     className="flex items-center gap-2"
@@ -701,10 +816,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('employeeId')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.employee_id ?? currentProfile.employee_id ?? ''}
-                    onChange={(e) => updateSetupValue('employee_id', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.employee_id ?? currentProfile.employee_id ?? '')
+                        : (hrEditValues.employee_id ?? currentProfile.employee_id ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('employee_id', e.target.value)
+                        : updateHrEditValue('employee_id', e.target.value)
+                    }
                     placeholder="Enter employee ID"
                     className="flex items-center gap-2"
                   />
@@ -718,10 +841,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('department')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Select 
-                    value={setupValues.department ?? currentProfile.department ?? ''} 
-                    onValueChange={(value) => updateSetupValue('department', value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.department ?? currentProfile.department ?? '')
+                        : (hrEditValues.department ?? currentProfile.department ?? '')
+                    } 
+                    onValueChange={(value) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('department', value)
+                        : updateHrEditValue('department', value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select department" />
@@ -744,10 +875,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('position')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.position ?? currentProfile.position ?? ''}
-                    onChange={(e) => updateSetupValue('position', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.position ?? currentProfile.position ?? '')
+                        : (hrEditValues.position ?? currentProfile.position ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('position', e.target.value)
+                        : updateHrEditValue('position', e.target.value)
+                    }
                     placeholder="Enter position/job title"
                     className="flex items-center gap-2"
                   />
@@ -759,13 +898,21 @@ export default function ProfileWithApproval() {
                 )}
               </div>
 
-              {/* Extended Profile Fields - Setup/Display Mode */}
+              {/* Extended Profile Fields - Setup/Display/HR Edit Mode */}
               <div className="space-y-2">
                 <Label>{t('phoneNumber')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.phone_number ?? currentProfile.phone_number ?? ''}
-                    onChange={(e) => updateSetupValue('phone_number', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.phone_number ?? currentProfile.phone_number ?? '')
+                        : (hrEditValues.phone_number ?? currentProfile.phone_number ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('phone_number', e.target.value)
+                        : updateHrEditValue('phone_number', e.target.value)
+                    }
                     placeholder="Enter phone number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -781,11 +928,19 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('dateOfBirth')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
                     type="date"
-                    value={setupValues.date_of_birth ?? currentProfile.date_of_birth ?? ''}
-                    onChange={(e) => updateSetupValue('date_of_birth', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
+                        : (hrEditValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('date_of_birth', e.target.value)
+                        : updateHrEditValue('date_of_birth', e.target.value)
+                    }
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -800,10 +955,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('idNumber')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.id_number ?? currentProfile.id_number ?? ''}
-                    onChange={(e) => updateSetupValue('id_number', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.id_number ?? currentProfile.id_number ?? '')
+                        : (hrEditValues.id_number ?? currentProfile.id_number ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('id_number', e.target.value)
+                        : updateHrEditValue('id_number', e.target.value)
+                    }
                     placeholder="Enter ID number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -819,10 +982,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('passportNumber')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.passport_number ?? currentProfile.passport_number ?? ''}
-                    onChange={(e) => updateSetupValue('passport_number', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.passport_number ?? currentProfile.passport_number ?? '')
+                        : (hrEditValues.passport_number ?? currentProfile.passport_number ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('passport_number', e.target.value)
+                        : updateHrEditValue('passport_number', e.target.value)
+                    }
                     placeholder="Enter passport number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -838,10 +1009,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('visaNumber')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.visa_number ?? currentProfile.visa_number ?? ''}
-                    onChange={(e) => updateSetupValue('visa_number', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.visa_number ?? currentProfile.visa_number ?? '')
+                        : (hrEditValues.visa_number ?? currentProfile.visa_number ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('visa_number', e.target.value)
+                        : updateHrEditValue('visa_number', e.target.value)
+                    }
                     placeholder="Enter visa number or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -857,10 +1036,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('maritalStatus')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Select 
-                    value={setupValues.marital_status ?? currentProfile.marital_status ?? ''} 
-                    onValueChange={(value) => updateSetupValue('marital_status', value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.marital_status ?? currentProfile.marital_status ?? '')
+                        : (hrEditValues.marital_status ?? currentProfile.marital_status ?? '')
+                    } 
+                    onValueChange={(value) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('marital_status', value)
+                        : updateHrEditValue('marital_status', value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select marital status" />
@@ -885,10 +1072,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactName')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? ''}
-                    onChange={(e) => updateSetupValue('emergency_contact_name', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? '')
+                        : (hrEditValues.emergency_contact_name ?? currentProfile.emergency_contact_name ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('emergency_contact_name', e.target.value)
+                        : updateHrEditValue('emergency_contact_name', e.target.value)
+                    }
                     placeholder="Enter emergency contact name or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -904,10 +1099,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2">
                 <Label>{t('emergencyContactPhone')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
-                    value={setupValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? ''}
-                    onChange={(e) => updateSetupValue('emergency_contact_phone', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? '')
+                        : (hrEditValues.emergency_contact_phone ?? currentProfile.emergency_contact_phone ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('emergency_contact_phone', e.target.value)
+                        : updateHrEditValue('emergency_contact_phone', e.target.value)
+                    }
                     placeholder="Enter emergency contact phone or NIL if not applicable"
                     className="flex items-center gap-2"
                   />
@@ -923,10 +1126,18 @@ export default function ProfileWithApproval() {
 
               <div className="space-y-2 md:col-span-2">
                 <Label>{t('homeAddress')}</Label>
-                {isProfileIncomplete && setupMode ? (
+                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Textarea
-                    value={setupValues.home_address ?? currentProfile.home_address ?? ''}
-                    onChange={(e) => updateSetupValue('home_address', e.target.value)}
+                    value={
+                      canUserEditDirectly && setupMode 
+                        ? (setupValues.home_address ?? currentProfile.home_address ?? '')
+                        : (hrEditValues.home_address ?? currentProfile.home_address ?? '')
+                    }
+                    onChange={(e) => 
+                      canUserEditDirectly && setupMode
+                        ? updateSetupValue('home_address', e.target.value)
+                        : updateHrEditValue('home_address', e.target.value)
+                    }
                     placeholder="Enter home address or NIL if not applicable"
                     rows={3}
                     className="flex items-center gap-2"
