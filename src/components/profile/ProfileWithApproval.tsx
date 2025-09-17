@@ -257,31 +257,37 @@ export default function ProfileWithApproval() {
 
   const handleCompleteSetup = async () => {
     if (!currentProfile) return;
-    
-    // Validate that all required fields are filled
-    const requiredFields = ['first_name', 'last_name', 'phone_number', 'home_address', 
-      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'];
-    
-    const missingFields = requiredFields.filter(field => {
-      const value = setupValues[field as keyof Profile] || currentProfile[field as keyof Profile];
-      return !value || value === '';
+
+    // Required fields for initial setup
+    const requiredFields = [
+      'first_name', 'last_name', 'phone_number', 'home_address',
+      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'
+    ];
+
+    // Auto-fill NIL for any empty required fields (using currentProfile as fallback)
+    const updates: Partial<Profile> = { ...setupValues };
+    const missing: string[] = [];
+    requiredFields.forEach((field) => {
+      const current = (updates as any)[field] ?? (currentProfile as any)[field];
+      if (!current || String(current).trim() === '') {
+        (updates as any)[field] = 'NIL';
+        missing.push(field);
+      }
     });
 
-    if (missingFields.length > 0) {
+    if (missing.length > 0) {
       toast({
-        title: "Error",
-        description: `Please fill in all required fields: ${missingFields.join(', ')}. Use "NIL" if not applicable.`,
-        variant: "destructive"
+        title: 'Note',
+        description: `Empty required fields filled with "NIL": ${missing.join(', ')}`,
       });
-      return;
     }
-    
+
     setSaving(true);
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          ...setupValues,
+          ...updates,
           profile_completed: true,
           initial_setup_completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -291,13 +297,13 @@ export default function ProfileWithApproval() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Profile setup completed successfully"
+        title: 'Success',
+        description: 'Profile setup completed successfully'
       });
 
       setSetupMode(false);
       setSetupValues({});
-      
+
       // Refresh the profile data
       if (isManager && selectedStaffId) {
         fetchSelectedStaffProfile(selectedStaffId);
@@ -306,9 +312,9 @@ export default function ProfileWithApproval() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to complete profile setup",
-        variant: "destructive"
+        title: 'Error',
+        description: error.message || 'Failed to complete profile setup',
+        variant: 'destructive'
       });
     } finally {
       setSaving(false);
@@ -322,6 +328,30 @@ export default function ProfileWithApproval() {
 
   const updateSetupValue = (field: string, value: string) => {
     setSetupValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Helper: fill "NIL" for any empty required fields during setup
+  const fillNilForEmptyRequired = () => {
+    if (!currentProfile) return;
+    const requiredFields = [
+      'first_name', 'last_name', 'phone_number', 'home_address',
+      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'
+    ];
+    const updates: Partial<Profile> = { ...setupValues };
+    const filled: string[] = [];
+    requiredFields.forEach((field) => {
+      const current = (updates as any)[field] ?? (currentProfile as any)[field];
+      if (!current || String(current).trim() === '') {
+        (updates as any)[field] = 'NIL';
+        filled.push(field);
+      }
+    });
+    setSetupValues(updates);
+    if (filled.length > 0) {
+      toast({ title: 'Filled', description: `Set "NIL" for: ${filled.join(', ')}` });
+    } else {
+      toast({ title: 'All set', description: 'No empty required fields detected.' });
+    }
   };
 
   const updateHrEditValue = (field: string, value: string) => {
@@ -605,6 +635,9 @@ export default function ProfileWithApproval() {
                     </Button>
                   ) : (
                     <div className="flex gap-2">
+                      <Button variant="outline" onClick={fillNilForEmptyRequired}>
+                        Fill NIL
+                      </Button>
                       <Button 
                         onClick={handleCompleteSetup} 
                         disabled={saving}
@@ -812,6 +845,14 @@ export default function ProfileWithApproval() {
                     <span>{currentProfile.email}</span>
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Email (Login)</Label>
+                <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{user?.email || '—'}</span>
+                </div>
               </div>
 
               <div className="space-y-2">
