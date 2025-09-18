@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +28,8 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accen
 
 export default function Reports() {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
+  const { translateLeaveType } = useTranslationHelpers();
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('12');
@@ -119,7 +123,7 @@ export default function Reports() {
         leaveTypeCounts[type].days += req.days_requested || 0;
       });
       const leaveTypeStats = Object.entries(leaveTypeCounts).map(([type, data]) => ({
-        type,
+        type: type === 'Unknown' ? t('unknown') : translateLeaveType(type),
         count: data.count,
         days: data.days
       }));
@@ -190,8 +194,8 @@ export default function Reports() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-destructive mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">Only HR administrators can access reports.</p>
+          <h2 className="text-xl font-semibold text-destructive mb-2">{t('accessDenied')}</h2>
+          <p className="text-muted-foreground">{t('onlyHRAdminAccess')}</p>
         </div>
       </div>
     );
@@ -217,19 +221,19 @@ export default function Reports() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Analytics & Reports</h1>
-          <p className="text-muted-foreground">Comprehensive leave management insights</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('analyticsReports')}</h1>
+          <p className="text-muted-foreground">{t('comprehensiveLeaveInsights')}</p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-40">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="3">Last 3 months</SelectItem>
-            <SelectItem value="6">Last 6 months</SelectItem>
-            <SelectItem value="12">Last 12 months</SelectItem>
-            <SelectItem value="24">Last 24 months</SelectItem>
-          </SelectContent>
+            <SelectContent>
+              <SelectItem value="3">{t('last3Months')}</SelectItem>
+              <SelectItem value="6">{t('last6Months')}</SelectItem>
+              <SelectItem value="12">{t('last12Months')}</SelectItem>
+              <SelectItem value="24">{t('last24Months')}</SelectItem>
+            </SelectContent>
         </Select>
       </div>
 
@@ -241,7 +245,7 @@ export default function Reports() {
               <Users className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{reportData.totalEmployees}</p>
-                <p className="text-sm text-muted-foreground">Total Employees</p>
+                <p className="text-sm text-muted-foreground">{t('totalEmployees')}</p>
               </div>
             </div>
           </CardContent>
@@ -253,7 +257,7 @@ export default function Reports() {
               <FileText className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{reportData.totalRequests}</p>
-                <p className="text-sm text-muted-foreground">Total Requests</p>
+                <p className="text-sm text-muted-foreground">{t('totalRequests')}</p>
               </div>
             </div>
           </CardContent>
@@ -265,7 +269,7 @@ export default function Reports() {
               <TrendingUp className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{reportData.approvedRequests}</p>
-                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-sm text-muted-foreground">{t('approved')}</p>
               </div>
             </div>
           </CardContent>
@@ -277,7 +281,7 @@ export default function Reports() {
               <Calendar className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{reportData.pendingRequests}</p>
-                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-sm text-muted-foreground">{t('pending')}</p>
               </div>
             </div>
           </CardContent>
@@ -288,7 +292,7 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Trends</CardTitle>
+            <CardTitle>{t('monthlyTrends')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -297,8 +301,8 @@ export default function Reports() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="requests" stroke="hsl(var(--primary))" name="Requests" />
-                <Line type="monotone" dataKey="days" stroke="hsl(var(--secondary))" name="Days" />
+                <Line type="monotone" dataKey="requests" stroke="hsl(var(--primary))" name={t('requests')} />
+                <Line type="monotone" dataKey="days" stroke="hsl(var(--secondary))" name={t('days')} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -306,7 +310,7 @@ export default function Reports() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Leave Types Distribution</CardTitle>
+            <CardTitle>{t('leaveTypesDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -335,7 +339,7 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Department Usage</CardTitle>
+            <CardTitle>{t('departmentUsage')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -352,15 +356,15 @@ export default function Reports() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Leave Usage</CardTitle>
+            <CardTitle>{t('topLeaveUsage')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Requests</TableHead>
-                  <TableHead>Days Used</TableHead>
+                  <TableHead>{t('employee')}</TableHead>
+                  <TableHead>{t('requests')}</TableHead>
+                  <TableHead>{t('daysUsed')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

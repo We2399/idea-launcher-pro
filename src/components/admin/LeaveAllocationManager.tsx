@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +48,8 @@ interface LeaveType {
 
 export function LeaveAllocationManager() {
   const { user, userRole } = useAuth();
+  const { t } = useLanguage();
+  const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [allocations, setAllocations] = useState<LeaveAllocation[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -208,10 +212,10 @@ export function LeaveAllocationManager() {
     const Icon = config.icon;
     
     const statusLabels = {
-      pending: 'Pending Senior Approval',
-      senior_approved: 'Pending Administrator Approval',
-      approved: 'Approved',
-      rejected: 'Rejected'
+      pending: t('pendingSeniorApproval'),
+      senior_approved: t('pendingAdministratorApproval'),
+      approved: t('approved'),
+      rejected: t('rejected')
     };
     
     return (
@@ -245,27 +249,27 @@ export function LeaveAllocationManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Leave Allocation Management</h1>
-          <p className="text-muted-foreground">Manage employee leave entitlements with dual approval workflow</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('leaveAllocationManagement')}</h1>
+          <p className="text-muted-foreground">{t('leaveAllocationDescription')}</p>
         </div>
         {(userRole === 'manager' || userRole === 'hr_admin') && (
           <Dialog open={showNewAllocation} onOpenChange={setShowNewAllocation}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                New Allocation
+                {t('newAllocation')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Leave Allocation</DialogTitle>
+                <DialogTitle>{t('createLeaveAllocation')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Employee</label>
+                  <label className="text-sm font-medium">{t('employee')}</label>
                   <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select employee" />
+                      <SelectValue placeholder={t('selectEmployee')} />
                     </SelectTrigger>
                     <SelectContent>
                       {employees.map((employee) => (
@@ -278,15 +282,15 @@ export function LeaveAllocationManager() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Leave Type</label>
+                  <label className="text-sm font-medium">{t('leaveType')}</label>
                   <Select value={selectedLeaveType} onValueChange={setSelectedLeaveType}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select leave type" />
+                      <SelectValue placeholder={t('selectLeaveType')} />
                     </SelectTrigger>
                     <SelectContent>
                       {leaveTypes.map((type) => (
                         <SelectItem key={type.id} value={type.id}>
-                          {type.name} (Max: {type.max_days_per_year} days/year)
+                          {translateLeaveType(type.name)} ({t('max')}: {type.max_days_per_year} {t('daysPerYear')})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -294,29 +298,29 @@ export function LeaveAllocationManager() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Allocated Days</label>
+                  <label className="text-sm font-medium">{t('allocatedDays')}</label>
                   <Input
                     type="number"
                     value={allocatedDays}
                     onChange={(e) => setAllocatedDays(e.target.value)}
-                    placeholder="Enter number of days"
+                    placeholder={t('enterNumberOfDays')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Year</label>
+                  <label className="text-sm font-medium">{t('year')}</label>
                   <Input
                     type="number"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    placeholder="Enter year"
+                    placeholder={t('enterYear')}
                   />
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handleCreateAllocation}>Create Allocation</Button>
+                  <Button onClick={handleCreateAllocation}>{t('createAllocation')}</Button>
                   <Button variant="outline" onClick={() => setShowNewAllocation(false)}>
-                    Cancel
+                    {t('cancel')}
                   </Button>
                 </div>
               </div>
@@ -327,18 +331,18 @@ export function LeaveAllocationManager() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Leave Allocations</CardTitle>
+          <CardTitle>{t('leaveAllocations')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Leave Type</TableHead>
-                <TableHead>Allocated Days</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('employee')}</TableHead>
+                <TableHead>{t('leaveType')}</TableHead>
+                <TableHead>{t('allocatedDays')}</TableHead>
+                <TableHead>{t('year')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -347,11 +351,11 @@ export function LeaveAllocationManager() {
                   <TableCell>
                     {allocation.profiles ? 
                       `${allocation.profiles.first_name} ${allocation.profiles.last_name} (${allocation.profiles.employee_id})` : 
-                      'Unknown Employee'
+                      t('unknownEmployee')
                     }
                   </TableCell>
-                  <TableCell>{allocation.leave_types?.name || 'Unknown'}</TableCell>
-                  <TableCell>{allocation.allocated_days} days</TableCell>
+                  <TableCell>{allocation.leave_types?.name ? translateLeaveType(allocation.leave_types.name) : t('unknown')}</TableCell>
+                  <TableCell>{allocation.allocated_days} {t('days')}</TableCell>
                   <TableCell>{allocation.year}</TableCell>
                   <TableCell>{getStatusBadge(allocation.status)}</TableCell>
                   <TableCell>
@@ -430,7 +434,7 @@ export function LeaveAllocationManager() {
           </Table>
           {allocations.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No leave allocations found
+              {t('noLeaveAllocationsFound')}
             </div>
           )}
         </CardContent>

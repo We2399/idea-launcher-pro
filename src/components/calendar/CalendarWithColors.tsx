@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +62,7 @@ const leaveTypeColors = {
 export default function CalendarWithColors() {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
+  const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
@@ -217,16 +219,16 @@ export default function CalendarWithColors() {
   };
 
   const getViewModeOptions = () => {
-    const options = [{ value: 'my', label: 'My Leave' }];
+    const options = [{ value: 'my', label: t('myLeave') }];
     
     if (userRole === 'manager') {
-      options.push({ value: 'team', label: 'Team Leave' });
+      options.push({ value: 'team', label: t('teamLeave') });
     }
     
     if (userRole === 'hr_admin') {
       options.push(
-        { value: 'team', label: 'Team Leave' },
-        { value: 'all', label: 'All Leave' }
+        { value: 'team', label: t('teamLeave') },
+        { value: 'all', label: t('allLeave') }
       );
     }
     
@@ -246,7 +248,7 @@ export default function CalendarWithColors() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('leaveCalendar')}</h1>
-          <p className="text-muted-foreground">View leave requests with color-coded status. Double-click dates to create requests.</p>
+          <p className="text-muted-foreground">{t('leaveCalendarDescription')}</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -273,7 +275,7 @@ export default function CalendarWithColors() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Calendar View</CardTitle>
+            <CardTitle>{t('calendarView')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Calendar
@@ -294,21 +296,21 @@ export default function CalendarWithColors() {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {Object.entries(leaveTypeColors).map(([leaveType, colors]) => (
                   <div key={leaveType} className="space-y-1">
-                    <div className="font-medium">{leaveType === 'Sick Leave' ? t('sickLeave') : leaveType === 'Vacation' ? t('vacation') : leaveType === 'Maternity' ? t('maternity') : leaveType === 'Paternity' ? t('paternity') : t('others')}</div>
+                    <div className="font-medium">{translateLeaveType(leaveType)}</div>
                     <div className="flex gap-2">
                       <div className="flex items-center gap-1">
                         <div 
                           className="w-3 h-3 rounded"
                           style={{ backgroundColor: colors.pending }}
                         ></div>
-                        <span>{t('pending')}</span>
+                        <span>{translateStatus('pending')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <div 
                           className="w-3 h-3 rounded"
                           style={{ backgroundColor: colors.approved }}
                         ></div>
-                        <span>{t('approved')}</span>
+                        <span>{translateStatus('approved')}</span>
                       </div>
                     </div>
                   </div>
@@ -321,7 +323,7 @@ export default function CalendarWithColors() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : 'Select a Date'}
+              {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : t('selectDate')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -341,10 +343,10 @@ export default function CalendarWithColors() {
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm">
                           {viewMode === 'my' 
-                            ? request.leave_types?.name || 'Unknown Type'
+                            ? (request.leave_types?.name ? translateLeaveType(request.leave_types.name) : t('unknownType'))
                             : request.profiles 
                               ? `${request.profiles.first_name} ${request.profiles.last_name}`
-                              : 'Unknown Employee'
+                              : t('unknownEmployee')
                           }
                         </span>
                         <Badge 
@@ -355,15 +357,15 @@ export default function CalendarWithColors() {
                           } 
                           className="text-xs"
                         >
-                          {request.status === 'senior_approved' ? 'Senior Approved' : request.status}
+                          {translateStatus(request.status)}
                         </Badge>
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {format(parseISO(request.start_date), 'MMM dd')} - {format(parseISO(request.end_date), 'MMM dd')}
                         <br />
-                        {request.days_requested} day{request.days_requested !== 1 ? 's' : ''}
+                        {request.days_requested} {request.days_requested !== 1 ? t('days') : t('day')}
                         <br />
-                        {request.leave_types?.name}
+                        {request.leave_types?.name ? translateLeaveType(request.leave_types.name) : t('unknownType')}
                       </div>
                       {viewMode !== 'my' && request.profiles && (
                         <div className="text-xs text-muted-foreground">
@@ -406,13 +408,13 @@ export default function CalendarWithColors() {
                   ))
                 ) : (
                   <div className="text-center py-8 text-muted-foreground text-sm">
-                    No leave requests for this date
+                    {t('noLeaveRequestsForDate')}
                   </div>
                 )}
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground text-sm">
-                Click on a date to see leave details
+                {t('clickDateToSeeDetails')}
               </div>
             )}
           </CardContent>
@@ -440,10 +442,10 @@ export default function CalendarWithColors() {
                   <div className="space-y-1">
                     <div className="font-medium text-sm">
                       {viewMode === 'my'
-                        ? request.leave_types?.name || 'Unknown Type'
+                        ? (request.leave_types?.name ? translateLeaveType(request.leave_types.name) : t('unknownType'))
                         : request.profiles
                           ? `${request.profiles.first_name} ${request.profiles.last_name}`
-                          : 'Unknown Employee'
+                          : t('unknownEmployee')
                       }
                     </div>
                     <div className="text-xs text-muted-foreground">
