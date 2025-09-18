@@ -101,14 +101,11 @@ const translations = {
     unknownEmployee: 'Unknown Employee',
     noLeaveRequestsForDate: 'No leave requests for this date',
     clickDateToSeeDetails: 'Click on a date to see leave details',
-    upcomingLeave: 'Upcoming Leave',
-    confirmDeleteLeave: 'Are you sure you want to delete this leave request?',
-    leaveDeleted: 'Leave request deleted successfully',
     leaveAllocationManagement: 'Leave Allocation Management',
     leaveAllocationDescription: 'Manage employee leave entitlements with dual approval workflow',
     newAllocation: 'New Allocation',
     createLeaveAllocation: 'Create Leave Allocation',
-    selectEmployee: 'Select employee',
+    selectEmployeeOption: 'Select employee',
     allocatedDays: 'Allocated Days',
     enterNumberOfDays: 'Enter number of days',
     enterYear: 'Enter year',
@@ -124,16 +121,12 @@ const translations = {
     last12Months: 'Last 12 months',
     last24Months: 'Last 24 months',
     totalEmployees: 'Total Employees',
-    totalRequests: 'Total Requests',
     onlyHRAdminAccess: 'Only HR administrators can access reports.',
     monthlyTrends: 'Monthly Trends',
     leaveTypesDistribution: 'Leave Types Distribution',
     departmentUsage: 'Department Usage',
     topLeaveUsage: 'Top Leave Usage',
-    daysUsed: 'Days Used',
     searchByEmployeeReason: 'Search by employee name, reason...',
-    allStatus: 'All Status',
-    allTypes: 'All Types',
     daysPerYear: 'days/year',
     
     // Leave Types
@@ -161,18 +154,7 @@ const translations = {
     request: 'Request',
     expense: 'Expense',
     reimbursement: 'Reimbursement',
-    
-    // Statuses
-    pending: 'Pending',
-    approved: 'Approved',
-    rejected: 'Rejected',
     paid: 'Paid',
-    seniorApproved: 'Senior Approved',
-    expense: 'Expense',
-    reimbursement: 'Reimbursement',
-    
-    // Status Values
-    seniorApproved: 'Senior Approved',
     
     // View Modes
     myRequests: 'My Requests',
@@ -184,8 +166,6 @@ const translations = {
     selectCategory: 'Select category',
     selectType: 'Select type',
     selectStatus: 'Select status',
-    allTypes: 'All Types',
-    allStatus: 'All Status',
     searchPlaceholder: 'Search by employee name, reason...',
     receiptUploaded: 'Receipt uploaded successfully',
     orEnterUrl: 'Or enter receipt URL manually',
@@ -336,10 +316,8 @@ const translations = {
     clickToCreateLeave: 'Click on a date to create a leave request',
     editLeaveRequest: 'Edit Leave Request',
     deleteLeaveRequest: 'Delete Leave Request', 
-    confirmDeleteLeave: 'Are you sure you want to delete this leave request?',
     cannotEditApproved: 'Cannot edit approved requests',
     leaveUpdated: 'Leave request updated successfully',
-    leaveDeleted: 'Leave request deleted successfully',
     
     // Cash Control Dual Role - New unique keys only
     personalView: 'Personal View',
