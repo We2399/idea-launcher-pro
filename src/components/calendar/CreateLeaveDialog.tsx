@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslationHelpers } from '@/lib/translations';
 import { Calendar, CalendarDays } from 'lucide-react';
 
 interface CreateLeaveDialogProps {
@@ -30,6 +31,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
   const { user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { translateLeaveType } = useTranslationHelpers();
   const [loading, setLoading] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [formData, setFormData] = useState({
@@ -185,12 +187,12 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
             <Label htmlFor="leave_type">Leave Type</Label>
             <Select value={formData.leave_type_id} onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select leave type" />
+                <SelectValue placeholder={t('selectLeaveType')} />
               </SelectTrigger>
               <SelectContent>
                 {leaveTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id}>
-                    {type.name} ({type.max_days_per_year} days/year max)
+                    {translateLeaveType(type.name)} ({type.max_days_per_year} {t('days')}/year max)
                   </SelectItem>
                 ))}
               </SelectContent>

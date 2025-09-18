@@ -98,9 +98,59 @@ const translations = {
     // Leave Types
     vacation: 'Vacation',
     sickLeave: 'Sick Leave',
-    maternity: 'Maternity',
-    paternity: 'Paternity',
+    maternityLeave: 'Maternity Leave',
+    paternityLeave: 'Paternity Leave',
+    annualLeave: 'Annual Leave',
+    emergencyLeave: 'Emergency Leave',
+    compassionateLeave: 'Compassionate Leave',
+    studyLeave: 'Study Leave',
+    unpaidLeave: 'Unpaid Leave',
     others: 'Others',
+    
+    // Cash Control Categories
+    general: 'General',
+    travel: 'Travel',
+    meals: 'Meals',
+    supplies: 'Office Supplies',
+    equipment: 'Equipment',
+    training: 'Training',
+    groceries: 'Groceries',
+    
+    // Transaction Types
+    request: 'Request',
+    expense: 'Expense',
+    reimbursement: 'Reimbursement',
+    
+    // Status Values
+    seniorApproved: 'Senior Approved',
+    
+    // View Modes
+    myRequests: 'My Requests',
+    teamRequests: 'Team Requests',
+    allRequests: 'All Requests',
+    
+    // Placeholders and Labels  
+    selectLeaveType: 'Select leave type',
+    selectCategory: 'Select category',
+    selectType: 'Select type',
+    selectStatus: 'Select status',
+    allTypes: 'All Types',
+    allStatus: 'All Status',
+    searchPlaceholder: 'Search by employee name, reason...',
+    receiptUploaded: 'Receipt uploaded successfully',
+    orEnterUrl: 'Or enter receipt URL manually',
+    clear: 'Clear',
+    newRequestReport: 'NEW REQUEST/REPORT',
+    createCashRequest: 'Create Cash Request',
+    submitCashRequest: 'Submit a new cash request or expense report',
+    submitLeaveRequest: 'Submit Request',
+    submitting: 'Submitting...',
+    requestSummary: 'Request Summary',
+    duration: 'Duration',
+    days: 'days',
+    day: 'day',
+    reasonOptional: 'Reason (Optional)',
+    reasonPlaceholder: 'Enter reason for leave request...',
     
     // Actions
     createRequest: 'Create Request',
@@ -329,11 +379,61 @@ const translations = {
     colorLegend: '顏色圖例',
     
     // Leave Types
-    vacation: '年假',
+    vacation: '假期',
     sickLeave: '病假',
-    maternity: '產假',
-    paternity: '陪產假',
+    maternityLeave: '產假',
+    paternityLeave: '陪產假',
+    annualLeave: '年假',
+    emergencyLeave: '緊急假',
+    compassionateLeave: '恩恤假',
+    studyLeave: '進修假',
+    unpaidLeave: '無薪假',
     others: '其他',
+    
+    // Cash Control Categories
+    general: '一般',
+    travel: '交通',
+    meals: '膳食',
+    supplies: '辦公用品',
+    equipment: '設備',
+    training: '培訓',
+    groceries: '日用品',
+    
+    // Transaction Types
+    request: '申請',
+    expense: '支出',
+    reimbursement: '報銷',
+    
+    // Status Values
+    seniorApproved: '高級管理層已批准',
+    
+    // View Modes
+    myRequests: '我的申請',
+    teamRequests: '團隊申請',
+    allRequests: '所有申請',
+    
+    // Placeholders and Labels
+    selectLeaveType: '選擇假期類型',
+    selectCategory: '選擇類別',
+    selectType: '選擇類型',
+    selectStatus: '選擇狀態',
+    allTypes: '所有類型',
+    allStatus: '所有狀態',
+    searchPlaceholder: '按員工姓名、原因搜索...',
+    receiptUploaded: '收據上傳成功',
+    orEnterUrl: '或手動輸入收據網址',
+    clear: '清除',
+    newRequestReport: '新申請/報告',
+    createCashRequest: '創建現金申請',
+    submitCashRequest: '提交新的現金申請或支出報告',
+    submitLeaveRequest: '提交申請',
+    submitting: '提交中...',
+    requestSummary: '申請摘要',
+    duration: '持續時間',
+    days: '天',
+    day: '天',
+    reasonOptional: '原因（可選）',
+    reasonPlaceholder: '輸入假期申請原因...',
     
     // Actions
     createRequest: '建立申請',
@@ -562,11 +662,61 @@ const translations = {
     colorLegend: '颜色图例',
     
     // Leave Types
-    vacation: '年假',
+    vacation: '假期',
     sickLeave: '病假',
-    maternity: '产假',
-    paternity: '陪产假',
+    maternityLeave: '产假',
+    paternityLeave: '陪产假',
+    annualLeave: '年假',
+    emergencyLeave: '紧急假',
+    compassionateLeave: '恩恤假',
+    studyLeave: '进修假',
+    unpaidLeave: '无薪假',
     others: '其他',
+    
+    // Cash Control Categories
+    general: '一般',
+    travel: '交通',
+    meals: '膳食',
+    supplies: '办公用品',
+    equipment: '设备',
+    training: '培训',
+    groceries: '日用品',
+    
+    // Transaction Types
+    request: '申请',
+    expense: '支出',
+    reimbursement: '报销',
+    
+    // Status Values
+    seniorApproved: '高级管理层已批准',
+    
+    // View Modes
+    myRequests: '我的申请',
+    teamRequests: '团队申请',
+    allRequests: '所有申请',
+    
+    // Placeholders and Labels
+    selectLeaveType: '选择假期类型',
+    selectCategory: '选择类别',
+    selectType: '选择类型',
+    selectStatus: '选择状态',
+    allTypes: '所有类型',
+    allStatus: '所有状态',
+    searchPlaceholder: '按员工姓名、原因搜索...',
+    receiptUploaded: '收据上传成功',
+    orEnterUrl: '或手动输入收据网址',
+    clear: '清除',
+    newRequestReport: '新申请/报告',
+    createCashRequest: '创建现金申请',
+    submitCashRequest: '提交新的现金申请或支出报告',
+    submitLeaveRequest: '提交申请',
+    submitting: '提交中...',
+    requestSummary: '申请摘要',
+    duration: '持续时间',
+    days: '天',
+    day: '天',
+    reasonOptional: '原因（可选）',
+    reasonPlaceholder: '输入假期申请原因...',
     
     // Actions
     createRequest: '创建申请',
@@ -797,9 +947,59 @@ const translations = {
     // Leave Types
     vacation: 'Liburan',
     sickLeave: 'Cuti Sakit',
-    maternity: 'Cuti Melahirkan',
-    paternity: 'Cuti Ayah',
+    maternityLeave: 'Cuti Melahirkan',
+    paternityLeave: 'Cuti Ayah',
+    annualLeave: 'Cuti Tahunan',
+    emergencyLeave: 'Cuti Darurat',
+    compassionateLeave: 'Cuti Bela Sungkawa',
+    studyLeave: 'Cuti Belajar',
+    unpaidLeave: 'Cuti Tanpa Gaji',
     others: 'Lainnya',
+    
+    // Cash Control Categories
+    general: 'Umum',
+    travel: 'Perjalanan',
+    meals: 'Makanan',
+    supplies: 'Perlengkapan Kantor',
+    equipment: 'Peralatan',
+    training: 'Pelatihan',
+    groceries: 'Bahan Makanan',
+    
+    // Transaction Types
+    request: 'Permintaan',
+    expense: 'Pengeluaran',
+    reimbursement: 'Penggantian',
+    
+    // Status Values
+    seniorApproved: 'Disetujui Manajemen Senior',
+    
+    // View Modes
+    myRequests: 'Permintaan Saya',
+    teamRequests: 'Permintaan Tim',
+    allRequests: 'Semua Permintaan',
+    
+    // Placeholders and Labels
+    selectLeaveType: 'Pilih jenis cuti',
+    selectCategory: 'Pilih kategori',
+    selectType: 'Pilih jenis',
+    selectStatus: 'Pilih status',
+    allTypes: 'Semua Jenis',
+    allStatus: 'Semua Status',
+    searchPlaceholder: 'Cari berdasarkan nama karyawan, alasan...',
+    receiptUploaded: 'Kwitansi berhasil diunggah',
+    orEnterUrl: 'Atau masukkan URL kwitansi secara manual',
+    clear: 'Hapus',
+    newRequestReport: 'PERMINTAAN/LAPORAN BARU',
+    createCashRequest: 'Buat Permintaan Uang Tunai',
+    submitCashRequest: 'Kirim permintaan uang tunai atau laporan pengeluaran baru',
+    submitLeaveRequest: 'Kirim Permintaan',
+    submitting: 'Mengirim...',
+    requestSummary: 'Ringkasan Permintaan',
+    duration: 'Durasi',
+    days: 'hari',
+    day: 'hari',
+    reasonOptional: 'Alasan (Opsional)',
+    reasonPlaceholder: 'Masukkan alasan permintaan cuti...',
     
     // Actions
     createRequest: 'Buat Permintaan',

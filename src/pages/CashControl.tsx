@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, DollarSign, Calendar, User, Check, X, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslationHelpers } from '@/lib/translations';
 
 interface CashTransaction {
   id: string;
@@ -51,6 +52,7 @@ const CashControl = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { translateTransactionType, translateCategory, translateStatus } = useTranslationHelpers();
   const [transactions, setTransactions] = useState<CashTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -294,16 +296,16 @@ const CashControl = () => {
   };
 
   const getViewModeOptions = () => {
-    const options = [{ value: 'my', label: 'My Requests' }];
+    const options = [{ value: 'my', label: t('myRequests') }];
     
     if (userRole === 'manager') {
-      options.push({ value: 'team', label: 'Team Requests' });
+      options.push({ value: 'team', label: t('teamRequests') });
     }
     
     if (userRole === 'hr_admin') {
       options.push(
-        { value: 'team', label: 'Team Requests' },
-        { value: 'all', label: 'All Requests' }
+        { value: 'team', label: t('teamRequests') },
+        { value: 'all', label: t('allRequests') }
       );
     }
     
@@ -361,7 +363,7 @@ const CashControl = () => {
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                NEW REQUEST/REPORT
+                {t('newRequestReport')}
               </Button>
             </DialogTrigger>
             <DialogContent>

@@ -17,6 +17,7 @@ import { RequestFilters } from '@/components/requests/RequestFilters';
 import { Plus, CalendarIcon, Check, X, Clock, Download, Filter, Shield, Crown, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { useTranslationHelpers } from '@/lib/translations';
 
 interface LeaveRequest {
   id: string;
@@ -47,6 +48,7 @@ interface LeaveType {
 export default function Requests() {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
+  const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
@@ -571,7 +573,7 @@ export default function Requests() {
                 defaultValue={leaveTypes.find(type => type.name === 'Sick Leave')?.id || ''}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select leave type" />
+                <SelectValue placeholder={t('selectLeaveType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {/* Reordered leave types: Sick Leave first (default), then Vacation, Maternity, Paternity, Others */}
