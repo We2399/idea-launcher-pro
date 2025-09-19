@@ -171,7 +171,13 @@ const translations = {
     orEnterUrl: 'Or enter receipt URL manually',
     clear: 'Clear',
     newRequestReport: 'NEW REQUEST/REPORT',
+    selectRequestType: 'Select Request Type',
     createCashRequest: 'Create Cash Request',
+    
+    // Accounting Format
+    credit: 'Credit',
+    debit: 'Debit',
+    balance: 'Balance',
     submitCashRequest: 'Submit a new cash request or expense report',
     submitLeaveRequest: 'Submit Request',
     submitting: 'Submitting...',
@@ -448,6 +454,14 @@ const translations = {
     allTypes: '所有類型',
     allStatus: '所有狀態',
     searchPlaceholder: '按員工姓名、原因搜索...',
+    cashRequest: '現金申請',
+    expenseReport: '支出報告',
+    selectRequestType: '選擇申請類型',
+    
+    // Accounting Format
+    credit: '進賬',
+    debit: '出賬',
+    balance: '餘額',
     receiptUploaded: '收據上傳成功',
     orEnterUrl: '或手動輸入收據網址',
     clear: '清除',
@@ -494,8 +508,6 @@ const translations = {
     
     // Cash Control
     cashControlTitle: '現金管理',
-    cashRequest: '現金申請',
-    expenseReport: '費用報告',
     amount: '金額',
     currency: '貨幣',
     category: '類別',
@@ -731,6 +743,14 @@ const translations = {
     allTypes: '所有类型',
     allStatus: '所有状态',
     searchPlaceholder: '按员工姓名、原因搜索...',
+    cashRequest: '现金申请',
+    expenseReport: '支出报告',
+    selectRequestType: '选择申请类型',
+    
+    // Accounting Format
+    credit: '进账',
+    debit: '出账',
+    balance: '余额',
     receiptUploaded: '收据上传成功',
     orEnterUrl: '或手动输入收据网址',
     clear: '清除',
@@ -777,8 +797,6 @@ const translations = {
     
     // Cash Control
     cashControlTitle: '现金管理',
-    cashRequest: '现金申请',
-    expenseReport: '费用报告',
     amount: '金额',
     currency: '货币',
     category: '类别',
@@ -1014,6 +1032,14 @@ const translations = {
     allTypes: 'Semua Jenis',
     allStatus: 'Semua Status',
     searchPlaceholder: 'Cari berdasarkan nama karyawan, alasan...',
+    cashRequest: 'Permintaan Kas',
+    expenseReport: 'Laporan Pengeluaran', 
+    selectRequestType: 'Pilih Jenis Permintaan',
+    
+    // Accounting Format
+    credit: 'Kredit',
+    debit: 'Debit',
+    balance: 'Saldo',
     receiptUploaded: 'Kwitansi berhasil diunggah',
     orEnterUrl: 'Atau masukkan URL kwitansi secara manual',
     clear: 'Hapus',
@@ -1060,8 +1086,6 @@ const translations = {
     
     // Cash Control
     cashControlTitle: 'Kontrol Kas',
-    cashRequest: 'Permintaan Kas',
-    expenseReport: 'Laporan Pengeluaran',
     amount: 'Jumlah',
     currency: 'Mata Uang',
     category: 'Kategori',
