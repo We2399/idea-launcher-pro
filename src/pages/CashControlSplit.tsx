@@ -372,8 +372,8 @@ const CashControl = () => {
           <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                + {t('cashRequest')}
+                <DollarSign className="h-4 w-4" />
+                {t('cashRequest')}
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -452,7 +452,7 @@ const CashControl = () => {
             <DialogTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
                 <Receipt className="h-4 w-4" />
-                + {t('newReport')}
+                {t('expenseReport')}
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -463,35 +463,6 @@ const CashControl = () => {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleExpenseReport} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">{t('amount')}</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      value={reportData.amount}
-                      onChange={(e) => setReportData({ ...reportData, amount: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="currency">{t('currency')}</Label>
-                    <Select onValueChange={(value) => setReportData({ ...reportData, currency: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="HKD" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="HKD">HKD</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="CNY">CNY</SelectItem>
-                        <SelectItem value="IDR">IDR</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="type">{t('type')}</Label>
@@ -520,6 +491,42 @@ const CashControl = () => {
                         <SelectItem value="training">Training</SelectItem>
                         <SelectItem value="groceries">Groceries</SelectItem>
                         <SelectItem value="others">Others</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">{t('amount')}</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      value={reportData.amount}
+                      onChange={(e) => {
+                        let amount = e.target.value;
+                        // For expenses, automatically make negative if positive number entered
+                        if (reportData.type === 'expense' && amount && !amount.startsWith('-') && parseFloat(amount) > 0) {
+                          amount = '-' + amount;
+                        }
+                        setReportData({ ...reportData, amount });
+                      }}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="currency">{t('currency')}</Label>
+                    <Select onValueChange={(value) => setReportData({ ...reportData, currency: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="HKD" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="HKD">HKD</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="CNY">CNY</SelectItem>
+                        <SelectItem value="IDR">IDR</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -619,64 +626,52 @@ const CashControl = () => {
         </Card>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Summary Cards - Accounting Format */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalRequested')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${transactions
-                .filter(t => t.employee_id === user?.id && t.status === 'pending')
-                .reduce((sum, t) => sum + t.amount, 0)
-                .toFixed(2)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('approved')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('credit')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
               ${transactions
-                .filter(t => t.employee_id === user?.id && t.status === 'approved')
-                .reduce((sum, t) => sum + t.amount, 0)
+                .filter(t => t.employee_id === user?.id && t.status === 'approved' && (t.type === 'request' || t.type === 'reimbursement'))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 .toFixed(2)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Money received</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t('rejected')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('debit')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
               ${transactions
-                .filter(t => t.employee_id === user?.id && t.status === 'rejected')
-                .reduce((sum, t) => sum + t.amount, 0)
+                .filter(t => t.employee_id === user?.id && t.status === 'approved' && t.type === 'expense')
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 .toFixed(2)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Money spent</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('balance')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${transactions
-                .filter(t => {
-                  const transactionDate = new Date(t.created_at);
-                  const now = new Date();
-                  return t.employee_id === user?.id && 
-                         transactionDate.getMonth() === now.getMonth() &&
-                         transactionDate.getFullYear() === now.getFullYear();
-                })
-                .reduce((sum, t) => sum + t.amount, 0)
-                .toFixed(2)}
+              ${(
+                transactions
+                  .filter(t => t.employee_id === user?.id && t.status === 'approved' && (t.type === 'request' || t.type === 'reimbursement'))
+                  .reduce((sum, t) => sum + Math.abs(t.amount), 0) -
+                transactions
+                  .filter(t => t.employee_id === user?.id && t.status === 'approved' && t.type === 'expense')
+                  .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+              ).toFixed(2)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Net position</p>
           </CardContent>
         </Card>
       </div>
