@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, User, Shield, Crown } from 'lucide-react';
@@ -10,6 +11,29 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 export function Header() {
   const { user, userRole, signOut } = useAuth();
   const { t } = useLanguage();
+  const [profile, setProfile] = useState<{ first_name: string; last_name: string } | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      // Fallback to email if profile fetch fails
+      setProfile(null);
+    }
+  };
 
   const getRoleColor = (role: string | null) => {
     switch (role) {
@@ -27,7 +51,20 @@ export function Header() {
     }
   };
 
+  const getRoleLabel = (role: string | null) => {
+    switch (role) {
+      case 'hr_admin': return t('roleHrAdmin');
+      case 'manager': return t('roleManager');
+      case 'employee': return t('roleEmployee');
+      default: return t('roleEmployee');
+    }
+  };
+
   const RoleIcon = getRoleIcon(userRole);
+  
+  const displayName = profile 
+    ? `${profile.first_name} ${profile.last_name}` 
+    : user?.email;
 
   return (
     <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4">
@@ -43,9 +80,9 @@ export function Header() {
             <div className="flex items-center gap-2">
               <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1">
                 <RoleIcon className="h-3 w-3" />
-                {userRole || 'employee'}
+                {getRoleLabel(userRole)}
               </Badge>
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <span className="text-sm text-muted-foreground">{displayName}</span>
             </div>
             <Button 
               variant="outline" 
@@ -54,7 +91,7 @@ export function Header() {
               className="flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              {t('signOut')}
             </Button>
           </>
         )}

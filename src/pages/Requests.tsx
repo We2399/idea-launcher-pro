@@ -181,7 +181,7 @@ export default function Requests() {
       if (await hasOverlap(startDate, endDate)) {
         toast({
           title: t('error'),
-          description: 'Your selected dates overlap with an existing leave request.',
+          description: t('overlappingDates'),
           variant: 'destructive'
         });
         return;
@@ -239,7 +239,7 @@ export default function Requests() {
       if (await hasOverlap(startDate, endDate, editingRequest.id)) {
         toast({
           title: t('error'),
-          description: 'Your selected dates overlap with an existing leave request.',
+          description: t('overlappingDates'),
           variant: 'destructive'
         });
         return;
@@ -324,7 +324,7 @@ export default function Requests() {
         if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
           toast({
             title: t('error'),
-            description: 'Cannot approve: this request overlaps with another approved leave request.',
+            description: t('overlappingDates'),
             variant: 'destructive'
           });
           return;
@@ -373,7 +373,7 @@ export default function Requests() {
         if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
           toast({
             title: t('error'),
-            description: 'Cannot approve: this request overlaps with another approved leave request.',
+            description: t('overlappingDates'),
             variant: 'destructive'
           });
           return;
@@ -602,7 +602,7 @@ export default function Requests() {
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Please provide a reason for your leave request"
+                placeholder={t('reasonPlaceholder')}
                 rows={3}
               />
             </div>

@@ -66,7 +66,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       setLeaveTypes(data || []);
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message || 'Failed to fetch leave types',
         variant: 'destructive',
       });
@@ -109,8 +109,8 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
 
       if (new Date(formData.end_date) < new Date(formData.start_date)) {
         toast({
-          title: 'Error',
-          description: 'End date cannot be before start date',
+          title: t('error'),
+          description: t('endDateBeforeStart'),
           variant: 'destructive',
         });
         return;
@@ -119,8 +119,8 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       // Check for overlapping requests
       if (await hasOverlap(formData.start_date, formData.end_date)) {
         toast({
-          title: 'Error',
-          description: 'Your selected dates overlap with an existing leave request.',
+          title: t('error'),
+          description: t('overlappingDates'),
           variant: 'destructive',
         });
         return;
@@ -143,8 +143,8 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Leave request submitted successfully',
+        title: t('success'),
+        description: t('requestSubmitted'),
       });
 
       onOpenChange(false);
@@ -157,7 +157,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       });
     } catch (error: any) {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: error.message || 'Failed to submit leave request',
         variant: 'destructive',
       });
@@ -172,19 +172,19 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5" />
-            Create Leave Request
+            {t('createLeaveRequest')}
           </DialogTitle>
           <DialogDescription>
             {selectedDate 
-              ? `Create a leave request starting from ${format(selectedDate, 'MMMM dd, yyyy')}`
-              : 'Submit a new leave request'
+              ? `${t('createLeaveRequest')} ${format(selectedDate, 'MMMM dd, yyyy')}`
+              : t('submitLeaveRequest')
             }
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="leave_type">Leave Type</Label>
+            <Label htmlFor="leave_type">{t('leaveType')}</Label>
             <Select value={formData.leave_type_id} onValueChange={(value) => setFormData({ ...formData, leave_type_id: value })}>
               <SelectTrigger>
                 <SelectValue placeholder={t('selectLeaveType')} />
@@ -201,7 +201,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_date">Start Date</Label>
+              <Label htmlFor="start_date">{t('startDate')}</Label>
               <Input
                 id="start_date"
                 type="date"
@@ -211,7 +211,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="end_date">End Date</Label>
+              <Label htmlFor="end_date">{t('endDate')}</Label>
               <Input
                 id="end_date"
                 type="date"
@@ -224,30 +224,30 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
 
           {formData.start_date && formData.end_date && (
             <div className="p-3 bg-muted rounded-lg">
-              <div className="text-sm font-medium">Request Summary</div>
+              <div className="text-sm font-medium">{t('requestSummary')}</div>
               <div className="text-sm text-muted-foreground">
-                Duration: {calculateDays()} day{calculateDays() !== 1 ? 's' : ''}
+                {t('duration')}: {calculateDays()} {calculateDays() !== 1 ? t('days') : t('day')}
               </div>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Label htmlFor="reason">{t('reasonOptional')}</Label>
             <Textarea
               id="reason"
               value={formData.reason}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              placeholder="Enter reason for leave request..."
+              placeholder={t('reasonPlaceholder')}
               rows={3}
             />
           </div>
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={loading || !formData.leave_type_id}>
-              {loading ? 'Submitting...' : 'Submit Request'}
+              {loading ? t('submitting') : t('submitLeaveRequest')}
             </Button>
           </div>
         </form>

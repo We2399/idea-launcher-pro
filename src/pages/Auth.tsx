@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Navigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -96,42 +98,42 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Leave Management System</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t('leaveManagementSystem')}</CardTitle>
+          <CardDescription>{t('signInToAccount')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">{t('email')}</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t('enterEmail')}
                     value={formData.email}
                     onChange={(e) => updateFormData('email', e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password">{t('password')}</Label>
                   <Input
                     id="signin-password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={t('enterPassword')}
                     value={formData.password}
                     onChange={(e) => updateFormData('password', e.target.value)}
                     required
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Signing In...' : 'Sign In'}
+                  {isLoading ? t('signingIn') : t('signIn')}
                 </Button>
                 <div className="flex justify-end pt-2">
                   <Link to="/reset-password" className="text-sm text-primary hover:underline">Forgot password?</Link>
@@ -143,20 +145,20 @@ const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="first-name">First Name</Label>
+                    <Label htmlFor="first-name">{t('firstName')}</Label>
                     <Input
                       id="first-name"
-                      placeholder="John"
+                      placeholder={t('firstNamePlaceholder')}
                       value={formData.firstName}
                       onChange={(e) => updateFormData('firstName', e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="last-name">Last Name</Label>
+                    <Label htmlFor="last-name">{t('lastName')}</Label>
                     <Input
                       id="last-name"
-                      placeholder="Doe"
+                      placeholder={t('lastNamePlaceholder')}
                       value={formData.lastName}
                       onChange={(e) => updateFormData('lastName', e.target.value)}
                       required
@@ -165,20 +167,20 @@ const Auth = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="employee-id">Employee ID (Optional)</Label>
+                  <Label htmlFor="employee-id">{t('employeeIdOptional')}</Label>
                   <Input
                     id="employee-id"
-                    placeholder="EMP001 (will be auto-generated if not provided)"
+                    placeholder={t('employeeIdPlaceholder')}
                     value={formData.employeeId}
                     onChange={(e) => updateFormData('employeeId', e.target.value)}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
+                  <Label htmlFor="department">{t('department')}</Label>
                   <Select value={formData.department} onValueChange={(value) => updateFormData('department', value)} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={t('selectDepartment')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="General">General</SelectItem>
@@ -196,10 +198,10 @@ const Auth = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="position">Position</Label>
+                  <Label htmlFor="position">{t('position')}</Label>
                   <Input
                     id="position"
-                    placeholder="Software Engineer"
+                    placeholder={t('positionPlaceholder')}
                     value={formData.position}
                     onChange={(e) => updateFormData('position', e.target.value)}
                     required
@@ -207,26 +209,26 @@ const Auth = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t('position')}</Label>
                   <Select value={formData.role} onValueChange={(value) => updateFormData('role', value)} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
+                      <SelectValue placeholder={t('selectYourRole')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="hr_admin">HR Admin</SelectItem>
+                      <SelectItem value="employee">{t('roleEmployee')}</SelectItem>
+                      <SelectItem value="manager">{t('roleManager')}</SelectItem>
+                      <SelectItem value="hr_admin">{t('roleHrAdmin')}</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t('email')}</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="john.doe@company.com"
+                    placeholder={t('emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => updateFormData('email', e.target.value)}
                     required
@@ -234,11 +236,11 @@ const Auth = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t('password')}</Label>
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="Create a strong password"
+                    placeholder={t('createStrongPassword')}
                     value={formData.password}
                     onChange={(e) => updateFormData('password', e.target.value)}
                     required
@@ -254,7 +256,7 @@ const Auth = () => {
                 )}
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading ? t('creatingAccount') : t('createAccount')}
                 </Button>
               </form>
             </TabsContent>

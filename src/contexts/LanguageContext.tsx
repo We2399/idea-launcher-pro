@@ -301,6 +301,41 @@ const translations = {
     divorced: 'Divorced',
     widowed: 'Widowed',
     
+    // Role translations
+    roleEmployee: 'Employee',
+    roleManager: 'Manager',
+    roleHrAdmin: 'HR Admin',
+    
+    // Date picker and form labels
+    pickADate: 'Pick a date',
+    selectADate: 'Select a date',
+    enterEmail: 'Enter your email',
+    enterPassword: 'Enter your password',
+    enterFirstName: 'Enter first name',
+    enterLastName: 'Enter last name',
+    
+    // Error messages
+    endDateBeforeStart: 'End date cannot be before start date',
+    overlappingDates: 'Your selected dates overlap with an existing leave request',
+    
+    // Auth form labels
+    createAccount: 'Create Account',
+    creatingAccount: 'Creating Account...',
+    signingIn: 'Signing In...',
+    leaveManagementSystem: 'Leave Management System',
+    signInToAccount: 'Sign in to your account or create a new one',
+    employeeIdOptional: 'Employee ID (Optional)',
+    employeeIdPlaceholder: 'EMP001 (will be auto-generated if not provided)',
+    selectDepartment: 'Select department',
+    selectYourRole: 'Select your role',
+    createStrongPassword: 'Create a strong password',
+    
+    // Profile form labels
+    firstNamePlaceholder: 'John',
+    lastNamePlaceholder: 'Doe',
+    positionPlaceholder: 'Software Engineer',
+    emailPlaceholder: 'john.doe@company.com',
+    
     // Document Management - New unique keys only  
     documents: 'Documents',
     uploadDocument: 'Upload Document',
@@ -587,6 +622,41 @@ const translations = {
     married: '已婚',
     divorced: '離婚',
     widowed: '寡居',
+    
+    // Role translations
+    roleEmployee: '員工',
+    roleManager: '經理',
+    roleHrAdmin: '人事管理員',
+    
+    // Date picker and form labels
+    pickADate: '選擇日期',
+    selectADate: '選擇日期',
+    enterEmail: '輸入您的電子郵件',
+    enterPassword: '輸入您的密碼',
+    enterFirstName: '輸入名字',
+    enterLastName: '輸入姓氏',
+    
+    // Error messages
+    endDateBeforeStart: '結束日期不能早於開始日期',
+    overlappingDates: '您選擇的日期與現有請假申請重疊',
+    
+    // Auth form labels
+    createAccount: '建立帳戶',
+    creatingAccount: '建立帳戶中...',
+    signingIn: '登入中...',
+    leaveManagementSystem: '請假管理系統',
+    signInToAccount: '登入您的帳戶或建立新帳戶',
+    employeeIdOptional: '員工編號（可選）',
+    employeeIdPlaceholder: 'EMP001（如未提供將自動生成）',
+    selectDepartment: '選擇部門',
+    selectYourRole: '選擇您的角色',
+    createStrongPassword: '建立強密碼',
+    
+    // Profile form labels
+    firstNamePlaceholder: '小明',
+    lastNamePlaceholder: '王',
+    positionPlaceholder: '軟體工程師',
+    emailPlaceholder: 'john.doe@company.com',
     
     // Document Management
     documents: '文件',
@@ -877,6 +947,41 @@ const translations = {
     divorced: '离婚',
     widowed: '丧偶',
     
+    // Role translations
+    roleEmployee: '员工',
+    roleManager: '经理',
+    roleHrAdmin: '人事管理员',
+    
+    // Date picker and form labels
+    pickADate: '选择日期',
+    selectADate: '选择日期',
+    enterEmail: '输入您的电子邮件',
+    enterPassword: '输入您的密码',
+    enterFirstName: '输入名字',
+    enterLastName: '输入姓氏',
+    
+    // Error messages
+    endDateBeforeStart: '结束日期不能早于开始日期',
+    overlappingDates: '您选择的日期与现有请假申请重叠',
+    
+    // Auth form labels
+    createAccount: '创建账户',
+    creatingAccount: '创建账户中...',
+    signingIn: '登录中...',
+    leaveManagementSystem: '请假管理系统',
+    signInToAccount: '登录您的账户或创建新账户',
+    employeeIdOptional: '员工编号（可选）',
+    employeeIdPlaceholder: 'EMP001（如未提供将自动生成）',
+    selectDepartment: '选择部门',
+    selectYourRole: '选择您的角色',
+    createStrongPassword: '创建强密码',
+    
+    // Profile form labels
+    firstNamePlaceholder: '小明',
+    lastNamePlaceholder: '王',
+    positionPlaceholder: '软件工程师',
+    emailPlaceholder: 'john.doe@company.com',
+    
     // Document Management
     documents: '文件',
     uploadDocument: '上传文件',
@@ -1165,6 +1270,11 @@ const translations = {
     married: 'Menikah',
     divorced: 'Cerai',
     widowed: 'Janda/Duda',
+    
+    // Role translations
+    roleEmployee: 'Karyawan',
+    roleManager: 'Manajer',
+    roleHrAdmin: 'Admin HR',
     
     // Document Management - New unique keys only (Indonesian)
     documents: 'Dokumen',
