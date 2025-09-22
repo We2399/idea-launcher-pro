@@ -628,6 +628,14 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      sync_all_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      sync_profile_from_auth: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "employee" | "manager" | "hr_admin"
