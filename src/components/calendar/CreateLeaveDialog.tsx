@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
 import { useTranslationHelpers } from '@/lib/translations';
 import { Calendar, CalendarDays } from 'lucide-react';
 
@@ -29,7 +30,7 @@ interface LeaveType {
 
 export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess }: CreateLeaveDialogProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const { translateLeaveType } = useTranslationHelpers();
   const [loading, setLoading] = useState(false);
@@ -176,7 +177,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
           </DialogTitle>
           <DialogDescription>
             {selectedDate 
-              ? `${t('createLeaveRequest')} ${format(selectedDate, 'MMMM dd, yyyy')}`
+              ? `${t('createLeaveRequest')} ${format(selectedDate, getLocalizedDateFormat(language), { locale: getDateLocale(language) })}`
               : t('submitLeaveRequest')
             }
           </DialogDescription>

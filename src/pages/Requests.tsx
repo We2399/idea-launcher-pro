@@ -17,6 +17,7 @@ import { RequestFilters } from '@/components/requests/RequestFilters';
 import { Plus, CalendarIcon, Check, X, Clock, Download, Filter, Shield, Crown, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
 import { useTranslationHelpers } from '@/lib/translations';
 
 interface LeaveRequest {
@@ -113,8 +114,8 @@ export default function Requests() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch leave requests",
+        title: t('error'),
+        description: error.message || t('operationFailed'),
         variant: "destructive"
       });
     } finally {
@@ -133,8 +134,8 @@ export default function Requests() {
       setLeaveTypes(data || []);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch leave types",
+        title: t('error'),
+        description: error.message || t('operationFailed'),
         variant: "destructive"
       });
     }

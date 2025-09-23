@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,9 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useTranslationHelpers } from '@/lib/translations';
+import { format } from 'date-fns';
+import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
 
 interface Profile {
   id: string;
@@ -36,22 +40,25 @@ interface LeaveBalance {
   };
 }
 
-const departments = [
-  'Human Resources',
-  'Engineering',
-  'Marketing',
-  'Sales',
-  'Finance',
-  'Operations',
-  'Customer Support',
-  'Product',
-  'Legal',
-  'Domestic Helper',
-  'Others'
+// Department mapping for translations
+const getDepartments = (t: (key: string) => string) => [
+  { key: 'Human Resources', label: t('humanResources') },
+  { key: 'Engineering', label: t('engineering') },
+  { key: 'Marketing', label: t('marketing') },
+  { key: 'Sales', label: t('sales') },
+  { key: 'Finance', label: t('finance') },
+  { key: 'Operations', label: t('operations') },
+  { key: 'Customer Support', label: t('customerSupport') },
+  { key: 'Product', label: t('product') },
+  { key: 'Legal', label: t('legal') },
+  { key: 'Domestic Helper', label: t('domesticHelper') },
+  { key: 'Others', label: t('others') }
 ];
 
 export default function Profile() {
   const { user, userRole } = useAuth();
+  const { t, language } = useLanguage();
+  const { translateLeaveType } = useTranslationHelpers();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,8 +95,8 @@ export default function Profile() {
       setPosition(data.position);
     } catch (error: any) {
       toast({
-        title: "Error", 
-        description: error.message || "Failed to fetch profile",
+        title: t('error'), 
+        description: error.message || t('profileUpdateError'),
         variant: "destructive"
       });
     } finally {
@@ -120,7 +127,7 @@ export default function Profile() {
         
         const enrichedBalances = balanceData.map(balance => ({
           ...balance,
-          leave_types: leaveTypesMap.get(balance.leave_type_id) || { name: 'Unknown' }
+          leave_types: leaveTypesMap.get(balance.leave_type_id) || { name: t('unknown') }
         }));
 
         setLeaveBalances(enrichedBalances);
@@ -129,8 +136,8 @@ export default function Profile() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch leave balances", 
+        title: t('error'),
+        description: error.message || t('profileUpdateError'), 
         variant: "destructive"
       });
     }
@@ -155,16 +162,16 @@ export default function Profile() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Profile updated successfully"
+        title: t('success'),
+        description: t('profileUpdateSuccess')
       });
 
       setEditMode(false);
       fetchProfile();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update profile",
+        title: t('error'),
+        description: t('profileUpdateError'),
         variant: "destructive"
       });
     } finally {
@@ -199,10 +206,12 @@ export default function Profile() {
   if (!profile) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Profile not found
+        {t('profileNotFound')}
       </div>
     );
   }
+
+  const departments = getDepartments(t);
 
   const RoleIcon = getRoleIcon(userRole);
 
@@ -210,8 +219,8 @@ export default function Profile() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-          <p className="text-muted-foreground">Manage your personal information and view leave balances</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('myProfile')}</h1>
+          <p className="text-muted-foreground">{t('managePersonalInfo')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1">
@@ -225,18 +234,18 @@ export default function Profile() {
         {/* Profile Information */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle>{t('personalInformation')}</CardTitle>
             <Button
               variant={editMode ? "outline" : "default"}
               onClick={() => setEditMode(!editMode)}
             >
-              {editMode ? "Cancel" : "Edit Profile"}
+              {editMode ? t('cancel') : t('editProfile')}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 {editMode ? (
                   <Input
                     id="firstName"
@@ -252,7 +261,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 {editMode ? (
                   <Input
                     id="lastName"
@@ -268,7 +277,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>{t('email')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{profile.email}</span>
@@ -276,7 +285,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <Label>Employee ID</Label>
+                <Label>{t('employeeId')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
                   <span>{profile.employee_id}</span>
@@ -284,16 +293,16 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">{t('department')}</Label>
                 {editMode ? (
                   <Select value={department} onValueChange={setDepartment}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={t('selectDepartment')} />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
+                        <SelectItem key={dept.key} value={dept.key}>
+                          {dept.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -307,7 +316,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="position">Position</Label>
+                <Label htmlFor="position">{t('position')}</Label>
                 {editMode ? (
                   <Input
                     id="position"
@@ -327,7 +336,7 @@ export default function Profile() {
               <div className="flex gap-2 pt-4">
                 <Button onClick={handleSaveProfile} disabled={saving} className="flex items-center gap-2">
                   <Save className="h-4 w-4" />
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving ? t('saving') : t('saveChanges')}
                 </Button>
               </div>
             )}
@@ -335,10 +344,10 @@ export default function Profile() {
             <Separator className="my-4" />
 
             <div className="space-y-2">
-              <Label>Account Created</Label>
+              <Label>{t('accountCreated')}</Label>
               <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{new Date(profile.created_at).toLocaleDateString()}</span>
+                <span>{format(new Date(profile.created_at), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</span>
               </div>
             </div>
           </CardContent>
@@ -348,9 +357,9 @@ export default function Profile() {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>Leave Balances ({new Date().getFullYear()})</CardTitle>
+              <CardTitle>{t('leaveBalances')} ({new Date().getFullYear()})</CardTitle>
               <Button variant="outline" size="sm">
-                Report
+                {t('report')}
               </Button>
             </div>
           </CardHeader>
@@ -360,13 +369,13 @@ export default function Profile() {
                 leaveBalances.map((balance) => (
                   <div key={balance.id} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-sm">{balance.leave_types.name}</span>
+                      <span className="font-medium text-sm">{translateLeaveType(balance.leave_types.name)}</span>
                       <Badge variant="outline">
                         {balance.remaining_days} / {balance.total_days}
                       </Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mb-2">
-                      Initial allocation: {balance.total_days} days/year
+                      {t('initialAllocation')}: {balance.total_days} {t('daysYear')}
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
@@ -377,14 +386,14 @@ export default function Profile() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Used: {balance.used_days} days</span>
-                      <span>Available: {balance.remaining_days} days</span>
+                      <span>{t('used')}: {balance.used_days} {t('days')}</span>
+                      <span>{t('available')}: {balance.remaining_days} {t('days')}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-4 text-muted-foreground text-sm">
-                  No leave balances configured for this year
+                  {t('noLeaveBalances')}
                 </div>
               )}
             </div>
