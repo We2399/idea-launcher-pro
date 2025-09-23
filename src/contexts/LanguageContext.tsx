@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Language = 'en' | 'zh-TW' | 'zh-CN' | 'id';
 
@@ -8,7 +8,7 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
@@ -40,7 +40,6 @@ const translations = {
     daysRemaining: 'Days Remaining',
     daysUsed: 'Days Used',
     leaveBalance: 'Leave Balance',
-    leaveBalances: 'Leave Balances',
     overview: 'Overview',
     quickActions: 'Quick Actions',
     recentActivity: 'Recent Activity',
@@ -63,130 +62,39 @@ const translations = {
     close: 'Close',
     edit: 'Edit',
     delete: 'Delete',
-    view: 'View',
-    filter: 'Filter',
-    search: 'Search',
+    
+    // Status Values
     pending: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
-    all: 'All',
-    newRequest: 'New Request',
-    leaveRequest: 'Leave Request',
-    requestLeave: 'Request Leave',
-    
-    // Profile
-    personalDetails: 'Personal Details',
-    profileChanges: 'Profile Changes',
-    requestChange: 'Request Change',
-    firstName: 'First Name',
-    lastName: 'Last Name',
-    email: 'Email',
-    department: 'Department',
-    position: 'Position',
-    employeeId: 'Employee ID',
-    manager: 'Manager',
-    joinDate: 'Join Date',
-    
-    // Leave Management
-    myLeave: 'My Leave',
-    teamLeave: 'Team Leave', 
-    allLeave: 'All Leave',
-    leaveHistory: 'Leave History',
-    leaveCalendar: 'Leave Calendar',
-    leaveCalendarDescription: 'View leave requests with color-coded status. Double-click dates to create requests.',
-    colorLegend: 'Color Legend',
-    calendarView: 'Calendar View',
-    selectDate: 'Select a Date',
-    unknownType: 'Unknown Type',
-    unknownEmployee: 'Unknown Employee',
-    noLeaveRequestsForDate: 'No leave requests for this date',
-    clickDateToSeeDetails: 'Click on a date to see leave details',
-    leaveAllocationManagement: 'Leave Allocation Management',
-    leaveAllocationDescription: 'Manage employee leave entitlements with dual approval workflow',
-    newAllocation: 'New Allocation',
-    createLeaveAllocation: 'Create Leave Allocation',
-    selectEmployeeOption: 'Select employee',
-    allocatedDays: 'Allocated Days',
-    enterNumberOfDays: 'Enter number of days',
-    enterYear: 'Enter year',
-    createAllocation: 'Create Allocation',
-    leaveAllocations: 'Leave Allocations',
-    noLeaveAllocationsFound: 'No leave allocations found',
-    pendingSeniorApproval: 'Pending Senior Approval',
-    pendingAdministratorApproval: 'Pending Administrator Approval',
-    analyticsReports: 'Analytics & Reports',
-    comprehensiveLeaveInsights: 'Comprehensive leave management insights',
-    last3Months: 'Last 3 months',
-    last6Months: 'Last 6 months',
-    last12Months: 'Last 12 months',
-    last24Months: 'Last 24 months',
-    totalEmployees: 'Total Employees',
-    onlyHRAdminAccess: 'Only HR administrators can access reports.',
-    monthlyTrends: 'Monthly Trends',
-    leaveTypesDistribution: 'Leave Types Distribution',
-    departmentUsage: 'Department Usage',
-    topLeaveUsage: 'Top Leave Usage',
-    searchByEmployeeReason: 'Search by employee name, reason...',
-    daysPerYear: 'days/year',
+    paid: 'Paid',
+    seniorApproved: 'Senior Management Approved',
     
     // Leave Types
-    vacation: 'Vacation',
+    annualLeave: 'Annual Leave',
     sickLeave: 'Sick Leave',
     maternityLeave: 'Maternity Leave',
     paternityLeave: 'Paternity Leave',
-    annualLeave: 'Annual Leave',
+    vacation: 'Vacation',
     emergencyLeave: 'Emergency Leave',
     compassionateLeave: 'Compassionate Leave',
     studyLeave: 'Study Leave',
     unpaidLeave: 'Unpaid Leave',
-    others: 'Others',
-    
-    // Cash Control Categories
-    general: 'General',
-    travel: 'Travel',
-    meals: 'Meals',
-    supplies: 'Office Supplies',
-    equipment: 'Equipment',
-    training: 'Training',
-    groceries: 'Groceries',
-    
-    // Transaction Types
-    request: 'Request',
-    expense: 'Expense',
-    reimbursement: 'Reimbursement',
-    paid: 'Paid',
     
     // View Modes
     myRequests: 'My Requests',
     teamRequests: 'Team Requests',
     allRequests: 'All Requests',
     
-    // Placeholders and Labels  
-    selectLeaveType: 'Select leave type',
-    selectCategory: 'Select category',
-    selectType: 'Select type',
-    selectStatus: 'Select status',
+    // Placeholders and Labels
+    selectLeaveType: 'Select Leave Type',
+    selectCategory: 'Select Category',
+    selectType: 'Select Type',
+    selectStatus: 'Select Status',
+    allTypes: 'All Types',
+    allStatus: 'All Status',
     searchPlaceholder: 'Search by employee name, reason...',
-    receiptUploaded: 'Receipt uploaded successfully',
-    orEnterUrl: 'Or enter receipt URL manually',
-    clear: 'Clear',
-    newRequestReport: 'NEW REQUEST/REPORT',
-    selectRequestType: 'Select Request Type',
-    createCashRequest: 'Create Cash Request',
-    
-    // Accounting Format
-    credit: 'Credit',
-    debit: 'Debit',
-    balance: 'Balance',
-    submitCashRequest: 'Submit a new cash request or expense report',
-    submitLeaveRequest: 'Submit Request',
-    submitting: 'Submitting...',
-    requestSummary: 'Request Summary',
-    duration: 'Duration',
-    days: 'days',
-    day: 'day',
-    reasonOptional: 'Reason (Optional)',
-    reasonPlaceholder: 'Enter reason for leave request...',
+    searchByEmployeeReason: 'Search by employee name, reason...',
     
     // Actions
     createRequest: 'Create Request',
@@ -206,34 +114,25 @@ const translations = {
     success: 'Success',
     error: 'Error',
     warning: 'Warning',
-    info: 'Information',
+    info: 'Info',
     loading: 'Loading...',
-    noData: 'No data available',
-    noResults: 'No results found',
+    noData: 'No Data',
+    noResults: 'No Results',
     
-    // Forms
-    required: 'Required',
-    optional: 'Optional',
-    pleaseSelect: 'Please select',
-    enterValue: 'Enter value',
+    // Categories
+    general: 'General',
+    travel: 'Travel',
+    meals: 'Meals',
+    supplies: 'Supplies',
+    equipment: 'Equipment',
+    training: 'Training',
+    groceries: 'Groceries',
+    others: 'Others',
     
-    // Cash Control
-    cashControlTitle: 'Cash Control',
-    cashRequest: 'Cash Request',
-    expenseReport: 'Expense Report',
-    amount: 'Amount',
-    currency: 'Currency',
-    category: 'Category',
-    description: 'Description',
-    receipt: 'Receipt',
-    uploadReceipt: 'Upload Receipt',
-    
-    // Time
-    today: 'Today',
-    yesterday: 'Yesterday',
-    thisWeek: 'This Week',
-    thisMonth: 'This Month',
-    thisYear: 'This Year',
+    // Transaction Types
+    request: 'Request',
+    expense: 'Expense',
+    reimbursement: 'Reimbursement',
     
     // Authentication
     signIn: 'Sign In',
@@ -244,132 +143,71 @@ const translations = {
     forgotPassword: 'Forgot Password',
     resetPassword: 'Reset Password',
     
-    // Tasks
-    task: 'Task',
-    title: 'Title',
-    assignee: 'Assignee',
-    dueDate: 'Due Date',
-    priority: 'Priority',
-    high: 'High',
-    medium: 'Medium',
-    low: 'Low',
-    completed: 'Completed',
-    inProgress: 'In Progress',
-    notStarted: 'Not Started',
-    
-    // Notifications
-    requestApproved: 'Request approved successfully',
-    requestRejected: 'Request rejected successfully',
-    requestSubmitted: 'Request submitted successfully',
-    requestUpdated: 'Request updated successfully',
-    requestDeleted: 'Request deleted successfully',
-    changesSaved: 'Changes saved successfully',
-    uploadSuccess: 'Upload successful',
-    
-    // Errors
-    invalidInput: 'Invalid input',
-    networkError: 'Network error',
-    serverError: 'Server error',
-    accessDenied: 'Access denied',
-    
-    // Form Validation
-    requiredField: 'This field is required',
-    invalidDate: 'Invalid date',
-    invalidAmount: 'Invalid amount',
-    selectOption: 'Please select an option',
-    
-    // File Upload
-    dragDropFiles: 'Drag and drop files here, or click to select',
-    supportedFormats: 'Supported formats',
-    maxFileSize: 'Maximum file size',
-    uploading: 'Uploading...',
-    uploadComplete: 'Upload complete',
-    uploadFailed: 'Upload failed',
-    
-    // Extended Profile Fields
-    idNumber: 'ID Number',
-    passportNumber: 'Passport Number', 
-    visaNumber: 'Visa Number',
-    dateOfBirth: 'Date of Birth',
-    homeAddress: 'Home Address',
-    maritalStatus: 'Marital Status',    
-    emergencyContactName: 'Emergency Contact Name',
-    emergencyContactPhone: 'Emergency Contact Phone',
-    phoneNumber: 'Phone Number',
-    single: 'Single',
-    married: 'Married',
-    divorced: 'Divorced',
-    widowed: 'Widowed',
-    
-    // Role translations
-    roleEmployee: 'Employee',
-    roleManager: 'Manager',
-    roleHrAdmin: 'HR Admin',
-    
-    // Date picker and form labels
-    pickADate: 'Pick a date',
-    selectADate: 'Select a date',
-    enterEmail: 'Enter your email',
-    enterPassword: 'Enter your password',
-    enterFirstName: 'Enter first name',
-    enterLastName: 'Enter last name',
-    
-    // Error messages
-    endDateBeforeStart: 'End date cannot be before start date',
-    overlappingDates: 'Your selected dates overlap with an existing leave request',
-    
-    // Auth form labels
-    createAccount: 'Create Account',
-    creatingAccount: 'Creating Account...',
-    signingIn: 'Signing In...',
-    leaveManagementSystem: 'Leave Management System',
-    signInToAccount: 'Sign in to your account or create a new one',
-    employeeIdOptional: 'Employee ID (Optional)',
-    employeeIdPlaceholder: 'EMP001 (will be auto-generated if not provided)',
+    // Profile page
+    myProfile: 'My Profile',
+    personalInformation: 'Personal Information',
+    editProfile: 'Edit Profile',
+    cancelEdit: 'Cancel',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    employeeId: 'Employee ID',
+    department: 'Department',
+    position: 'Position',
     selectDepartment: 'Select department',
-    selectYourRole: 'Select your role',
-    createStrongPassword: 'Create a strong password',
+    saveChanges: 'Save Changes',
+    saving: 'Saving...',
+    accountCreated: 'Account Created',
+    leaveBalances: 'Leave Balances',
+    report: 'Report',
+    initialAllocation: 'Initial allocation',
+    daysYear: 'days/year',
+    used: 'Used',
+    available: 'Available',
+    noLeaveBalances: 'No leave balances configured for this year',
+    profileNotFound: 'Profile not found',
+    profileUpdateSuccess: 'Profile updated successfully',
+    profileUpdateError: 'Failed to update profile',
+    managePersonalInfo: 'Manage your personal information and view leave balances',
     
-    // Profile form labels
-    firstNamePlaceholder: 'John',
-    lastNamePlaceholder: 'Doe',
-    positionPlaceholder: 'Software Engineer',
-    emailPlaceholder: 'john.doe@company.com',
-    
-    // Document Management - New unique keys only  
-    documents: 'Documents',
-    uploadDocument: 'Upload Document',
-    documentType: 'Document Type',
-    selectDocumentType: 'Select Document Type',
-    passport: 'Passport',
-    idCard: 'ID Card',
-    visa: 'Visa',
-    certificate: 'Certificate',
-    contract: 'Contract',
-    viewDocument: 'View Document',
-    deleteDocument: 'Delete Document',
-    documentUploaded: 'Document uploaded successfully',
-    documentDeleted: 'Document deleted successfully',
-    noDocuments: 'No documents uploaded',
-    
-    // Calendar Interactions - New unique keys only
+    // Leave Management
+    leaveRequest: 'Leave Request',
     createLeaveRequest: 'Create Leave Request',
-    clickToCreateLeave: 'Click on a date to create a leave request',
-    editLeaveRequest: 'Edit Leave Request',
-    deleteLeaveRequest: 'Delete Leave Request', 
-    cannotEditApproved: 'Cannot edit approved requests',
-    leaveUpdated: 'Leave request updated successfully',
+    submitLeaveRequest: 'Submit Leave Request',
+    duration: 'Duration',
+    day: 'Day',
+    days: 'Days',
+    reasonOptional: 'Reason (Optional)',
+    reasonPlaceholder: 'Please provide a reason for your leave request...',
+    requestSummary: 'Request Summary',
+    submitting: 'Submitting...',
+    requestSubmitted: 'Leave request submitted successfully',
+    requestUpdated: 'Leave request updated successfully',
+    requestDeleted: 'Leave request deleted successfully',
+    endDateBeforeStart: 'End date cannot be before start date',
+    overlappingDates: 'Leave dates overlap with an existing request',
+    requiredField: 'Please fill in all required fields',
+    operationFailed: 'Operation failed',
     
-    // Cash Control Dual Role - New unique keys only
-    personalView: 'Personal View',
-    managementView: 'Management View',
-    selectEmployee: 'Select Employee',
-    allEmployees: 'All Employees',
-    teamTransactions: 'Team Transactions',
-    bulkApprove: 'Bulk Approve',
-    filterByStatus: 'Filter by Status',
-    filterByEmployee: 'Filter by Employee',
-    approvalWorkflow: 'Approval Workflow'
+    // Department translations
+    humanResources: 'Human Resources',
+    engineering: 'Engineering',
+    marketing: 'Marketing',
+    sales: 'Sales',
+    finance: 'Finance',
+    operations: 'Operations',
+    customerSupport: 'Customer Support',
+    product: 'Product',
+    legal: 'Legal',
+    domesticHelper: 'Domestic Helper',
+    unknown: 'Unknown',
+    
+    // Common actions
+    add: 'Add',
+    clear: 'Clear',
+    search: 'Search',
+    type: 'Type',
+    requestStatus: 'Request status'
   },
   'zh-TW': {
     // Navigation
@@ -392,7 +230,6 @@ const translations = {
     daysRemaining: '剩餘天數',
     daysUsed: '已使用天數',
     leaveBalance: '休假餘額',
-    leaveBalances: '休假餘額',
     overview: '概覽',
     quickActions: '快速操作',
     recentActivity: '最近活動',
@@ -415,66 +252,24 @@ const translations = {
     close: '關閉',
     edit: '編輯',
     delete: '刪除',
-    view: '查看',
-    filter: '篩選',
-    search: '搜尋',
+    
+    // Status Values
     pending: '待審核',
     approved: '已批准',
     rejected: '已拒絕',
-    all: '全部',
-    newRequest: '新申請',
-    leaveRequest: '請假申請',
-    requestLeave: '申請休假',
-    
-    // Profile
-    personalDetails: '個人詳細資料',
-    profileChanges: '個人資料變更',
-    requestChange: '申請變更',
-    firstName: '名字',
-    lastName: '姓氏',
-    email: '電子郵件',
-    department: '部門',
-    position: '職位',
-    employeeId: '員工編號',
-    manager: '主管',
-    joinDate: '入職日期',
-    
-    // Leave Management
-    myLeave: '我的休假',
-    teamLeave: '團隊休假',
-    allLeave: '所有休假',
-    leaveHistory: '休假記錄',
-    leaveCalendar: '休假行事曆',
-    colorLegend: '顏色圖例',
+    paid: '已支付',
+    seniorApproved: '高級管理層已批准',
     
     // Leave Types
-    vacation: '假期',
+    annualLeave: '年假',
     sickLeave: '病假',
     maternityLeave: '產假',
     paternityLeave: '陪產假',
-    annualLeave: '年假',
+    vacation: '休假',
     emergencyLeave: '緊急假',
     compassionateLeave: '恩恤假',
     studyLeave: '進修假',
     unpaidLeave: '無薪假',
-    others: '其他',
-    
-    // Cash Control Categories
-    general: '一般',
-    travel: '交通',
-    meals: '膳食',
-    supplies: '辦公用品',
-    equipment: '設備',
-    training: '培訓',
-    groceries: '日用品',
-    
-    // Transaction Types
-    request: '申請',
-    expense: '支出',
-    reimbursement: '報銷',
-    
-    // Status Values
-    seniorApproved: '高級管理層已批准',
     
     // View Modes
     myRequests: '我的申請',
@@ -482,35 +277,14 @@ const translations = {
     allRequests: '所有申請',
     
     // Placeholders and Labels
-    selectLeaveType: '選擇假期類型',
+    selectLeaveType: '選擇休假類型',
     selectCategory: '選擇類別',
     selectType: '選擇類型',
     selectStatus: '選擇狀態',
     allTypes: '所有類型',
     allStatus: '所有狀態',
     searchPlaceholder: '按員工姓名、原因搜索...',
-    cashRequest: '現金申請',
-    expenseReport: '支出報告',
-    selectRequestType: '選擇申請類型',
-    
-    // Accounting Format
-    credit: '進賬',
-    debit: '出賬',
-    balance: '餘額',
-    receiptUploaded: '收據上傳成功',
-    orEnterUrl: '或手動輸入收據網址',
-    clear: '清除',
-    newRequestReport: '新申請/報告',
-    createCashRequest: '創建現金申請',
-    submitCashRequest: '提交新的現金申請或支出報告',
-    submitLeaveRequest: '提交申請',
-    submitting: '提交中...',
-    requestSummary: '申請摘要',
-    duration: '持續時間',
-    days: '天',
-    day: '天',
-    reasonOptional: '原因（可選）',
-    reasonPlaceholder: '輸入假期申請原因...',
+    searchByEmployeeReason: '按員工姓名、原因搜索...',
     
     // Actions
     createRequest: '建立申請',
@@ -530,32 +304,25 @@ const translations = {
     success: '成功',
     error: '錯誤',
     warning: '警告',
-    info: '資訊',
+    info: '信息',
     loading: '載入中...',
-    noData: '無資料',
+    noData: '無數據',
     noResults: '無結果',
     
-    // Forms
-    required: '必填',
-    optional: '選填',
-    pleaseSelect: '請選擇',
-    enterValue: '請輸入數值',
+    // Categories
+    general: '一般',
+    travel: '差旅',
+    meals: '餐費',
+    supplies: '辦公用品',
+    equipment: '設備',
+    training: '培訓',
+    groceries: '日用品',
+    others: '其他',
     
-    // Cash Control
-    cashControlTitle: '現金管理',
-    amount: '金額',
-    currency: '貨幣',
-    category: '類別',
-    description: '描述',
-    receipt: '收據',
-    uploadReceipt: '上傳收據',
-    
-    // Time
-    today: '今天',
-    yesterday: '昨天',
-    thisWeek: '本週',
-    thisMonth: '本月',
-    thisYear: '今年',
+    // Transaction Types
+    request: '申請',
+    expense: '支出',
+    reimbursement: '報銷',
     
     // Authentication
     signIn: '登入',
@@ -565,18 +332,6 @@ const translations = {
     confirmPassword: '確認密碼',
     forgotPassword: '忘記密碼',
     resetPassword: '重設密碼',
-    
-    // Success and error messages
-    success: '成功',
-    error: '錯誤',
-    loading: '載入中...',
-    save: '儲存',
-    cancel: '取消',
-    delete: '刪除',
-    edit: '編輯',
-    add: '新增',
-    clear: '清除',
-    search: '搜尋',
     
     // Profile page
     myProfile: '我的個人資料',
@@ -609,14 +364,9 @@ const translations = {
     leaveRequest: '休假申請',
     createLeaveRequest: '建立休假申請',
     submitLeaveRequest: '提交休假申請',
-    leaveType: '休假類型',
-    selectLeaveType: '選擇休假類型',
-    startDate: '開始日期',
-    endDate: '結束日期',
     duration: '時間長度',
     day: '日',
     days: '天',
-    reason: '原因',
     reasonOptional: '原因（可選）',
     reasonPlaceholder: '請提供您的休假申請原因...',
     requestSummary: '申請摘要',
@@ -627,6 +377,7 @@ const translations = {
     endDateBeforeStart: '結束日期不能早於開始日期',
     overlappingDates: '休假日期與現有申請重複',
     requiredField: '請填寫所有必填欄位',
+    operationFailed: '操作失敗',
     
     // Department translations
     humanResources: '人力資源',
@@ -639,151 +390,14 @@ const translations = {
     product: '產品部',
     legal: '法務部',
     domesticHelper: '家庭助理',
-    others: '其他',
     unknown: '未知',
     
-    // Date and time
-    january: '一月',
-    february: '二月', 
-    march: '三月',
-    april: '四月',
-    may: '五月',
-    june: '六月',
-    july: '七月',
-    august: '八月',
-    september: '九月',
-    october: '十月',
-    november: '十一月',
-    december: '十二月',
-
-    // Tasks
-    task: '任務',
-    title: '標題',
-    assignee: '指派人',
-    dueDate: '到期日',
-    priority: '優先順序',
-    high: '高',
-    medium: '中',
-    low: '低',
-    completed: '已完成',
-    inProgress: '進行中',
-    notStarted: '未開始',
-    
-    // Notifications
-    requestApproved: '申請已成功批准',
-    requestRejected: '申請已成功拒絕',
-    requestSubmitted: '申請已成功提交',
-    requestUpdated: '申請已成功更新',
-    requestDeleted: '申請已成功刪除',
-    changesSaved: '更改已成功儲存',
-    uploadSuccess: '上傳成功',
-    
-    // Errors
-    invalidInput: '輸入無效',
-    networkError: '網路錯誤',
-    serverError: '伺服器錯誤',
-    accessDenied: '存取被拒絕',
-    
-    // Form Validation
-    requiredField: '此欄位為必填',
-    invalidDate: '日期無效',
-    invalidAmount: '金額無效',
-    selectOption: '請選擇選項',
-    
-    // File Upload (Traditional Chinese)
-    dragDropFiles: '拖放檔案到此處，或點擊選擇',
-    supportedFormats: '支援格式',
-    maxFileSize: '最大檔案大小',
-    uploading: '上傳中...',
-    uploadComplete: '上傳完成',
-    uploadFailed: '上傳失敗',
-    
-    // Extended Profile Fields (Traditional Chinese)
-    idNumber: '身份證號碼',
-    passportNumber: '護照號碼',
-    visaNumber: '簽證號碼',
-    dateOfBirth: '出生日期',
-    homeAddress: '住址',
-    maritalStatus: '婚姻狀況',
-    emergencyContactName: '緊急聯絡人姓名',
-    emergencyContactPhone: '緊急聯絡人電話',
-    phoneNumber: '電話號碼',
-    single: '單身',
-    married: '已婚',
-    divorced: '離婚',
-    widowed: '寡居',
-    
-    // Role translations
-    roleEmployee: '員工',
-    roleManager: '經理',
-    roleHrAdmin: '人事管理員',
-    
-    // Date picker and form labels
-    pickADate: '選擇日期',
-    selectADate: '選擇日期',
-    enterEmail: '輸入您的電子郵件',
-    enterPassword: '輸入您的密碼',
-    enterFirstName: '輸入名字',
-    enterLastName: '輸入姓氏',
-    
-    // Error messages
-    endDateBeforeStart: '結束日期不能早於開始日期',
-    overlappingDates: '您選擇的日期與現有請假申請重疊',
-    
-    // Auth form labels
-    createAccount: '建立帳戶',
-    creatingAccount: '建立帳戶中...',
-    signingIn: '登入中...',
-    leaveManagementSystem: '請假管理系統',
-    signInToAccount: '登入您的帳戶或建立新帳戶',
-    employeeIdOptional: '員工編號（可選）',
-    employeeIdPlaceholder: 'EMP001（如未提供將自動生成）',
-    selectDepartment: '選擇部門',
-    selectYourRole: '選擇您的角色',
-    createStrongPassword: '建立強密碼',
-    
-    // Profile form labels
-    firstNamePlaceholder: '小明',
-    lastNamePlaceholder: '王',
-    positionPlaceholder: '軟體工程師',
-    emailPlaceholder: 'john.doe@company.com',
-    
-    // Document Management
-    documents: '文件',
-    uploadDocument: '上傳文件',
-    documentType: '文件類型',
-    selectDocumentType: '選擇文件類型',
-    passport: '護照',
-    idCard: '身份證',
-    visa: '簽證',
-    certificate: '證書',
-    contract: '合約',
-    viewDocument: '查看文件',
-    deleteDocument: '刪除文件',
-    documentUploaded: '文件上傳成功',
-    documentDeleted: '文件刪除成功',
-    noDocuments: '沒有上傳的文件',
-    
-    // Calendar Interactions
-    createLeaveRequest: '建立請假申請',
-    clickToCreateLeave: '點擊日期以建立請假申請',
-    editLeaveRequest: '編輯請假申請',
-    deleteLeaveRequest: '刪除請假申請',
-    confirmDeleteLeave: '確定要刪除此請假申請嗎？',
-    cannotEditApproved: '無法編輯已批准的申請',
-    leaveUpdated: '請假申請更新成功',
-    leaveDeleted: '請假申請刪除成功',
-    
-    // Cash Control Dual Role
-    personalView: '個人檢視',
-    managementView: '管理檢視',  
-    selectEmployee: '選擇員工',
-    allEmployees: '所有員工',
-    teamTransactions: '團隊交易',
-    bulkApprove: '批量批准',
-    filterByStatus: '按狀態篩選',
-    filterByEmployee: '按員工篩選',
-    approvalWorkflow: '批准流程'
+    // Common actions
+    add: '新增',
+    clear: '清除',
+    search: '搜尋',
+    type: '類型',
+    requestStatus: '申請狀態'
   },
   'zh-CN': {
     // Navigation
@@ -806,7 +420,6 @@ const translations = {
     daysRemaining: '剩余天数',
     daysUsed: '已使用天数',
     leaveBalance: '休假余额',
-    leaveBalances: '休假余额',
     overview: '概览',
     quickActions: '快速操作',
     recentActivity: '最近活动',
@@ -829,70 +442,86 @@ const translations = {
     close: '关闭',
     edit: '编辑',
     delete: '删除',
-    view: '查看',
-    filter: '筛选',
-    search: '搜索',
+    
+    // Status Values
     pending: '待审核',
     approved: '已批准',
     rejected: '已拒绝',
-    all: '全部',
-    newRequest: '新申请',
-    leaveRequest: '请假申请',
-    requestLeave: '申请休假',
-    
-    // Profile
-    personalDetails: '个人详细资料',
-    profileChanges: '个人资料变更',
-    requestChange: '申请变更',
-    firstName: '名字',
-    lastName: '姓氏',
-    email: '电子邮件',
-    department: '部门',
-    position: '职位',
-    employeeId: '员工编号',
-    manager: '主管',
-    joinDate: '入职日期',
-    
-    // Leave Management
-    myLeave: '我的休假',
-    teamLeave: '团队休假',
-    allLeave: '所有休假',
-    leaveHistory: '休假记录',
-    leaveCalendar: '休假日历',
-    colorLegend: '颜色图例',
+    paid: '已支付',
+    seniorApproved: '高级管理层已批准',
     
     // Leave Types
-    vacation: '假期',
+    annualLeave: '年假',
     sickLeave: '病假',
     maternityLeave: '产假',
     paternityLeave: '陪产假',
-    annualLeave: '年假',
+    vacation: '休假',
     emergencyLeave: '紧急假',
     compassionateLeave: '恩恤假',
     studyLeave: '进修假',
     unpaidLeave: '无薪假',
-    others: '其他',
     
-    // Cash Control Categories
+    // View Modes
+    myRequests: '我的申请',
+    teamRequests: '团队申请',
+    allRequests: '所有申请',
+    
+    // Placeholders and Labels
+    selectLeaveType: '选择休假类型',
+    selectCategory: '选择类别',
+    selectType: '选择类型',
+    selectStatus: '选择状态',
+    allTypes: '所有类型',
+    allStatus: '所有状态',
+    searchPlaceholder: '按员工姓名、原因搜索...',
+    searchByEmployeeReason: '按员工姓名、原因搜索...',
+    
+    // Actions
+    createRequest: '创建申请',
+    editRequest: '编辑申请',
+    deleteRequest: '删除申请',
+    confirmDelete: '确认删除',
+    approveRequest: '批准申请',
+    rejectRequest: '拒绝申请',
+    update: '更新',
+    bulkActions: '批量操作',
+    selectAll: '全选',
+    deselectAll: '取消全选',
+    export: '导出',
+    print: '打印',
+    
+    // Messages
+    success: '成功',
+    error: '错误',
+    warning: '警告',
+    info: '信息',
+    loading: '加载中...',
+    noData: '无数据',
+    noResults: '无结果',
+    
+    // Categories
     general: '一般',
-    travel: '交通',
-    meals: '膳食',
+    travel: '差旅',
+    meals: '餐费',
     supplies: '办公用品',
     equipment: '设备',
     training: '培训',
     groceries: '日用品',
+    others: '其他',
     
-    // Success and error messages
-    success: '成功',
-    error: '错误',
-    loading: '加载中...',
-    save: '保存',
-    cancel: '取消',
-    delete: '删除',
-    edit: '编辑',
-    add: '添加',
-    clear: '清除',
-    search: '搜索',
+    // Transaction Types
+    request: '申请',
+    expense: '支出',
+    reimbursement: '报销',
+    
+    // Authentication
+    signIn: '登录',
+    signOut: '登出',
+    signUp: '注册',
+    password: '密码',
+    confirmPassword: '确认密码',
+    forgotPassword: '忘记密码',
+    resetPassword: '重设密码',
     
     // Profile page
     myProfile: '我的个人资料',
@@ -925,14 +554,9 @@ const translations = {
     leaveRequest: '休假申请',
     createLeaveRequest: '创建休假申请',
     submitLeaveRequest: '提交休假申请',
-    leaveType: '休假类型',
-    selectLeaveType: '选择休假类型',
-    startDate: '开始日期',
-    endDate: '结束日期',
     duration: '持续时间',
     day: '日',
     days: '天',
-    reason: '原因',
     reasonOptional: '原因（可选）',
     reasonPlaceholder: '请提供您的休假申请原因...',
     requestSummary: '申请摘要',
@@ -943,6 +567,7 @@ const translations = {
     endDateBeforeStart: '结束日期不能早于开始日期',
     overlappingDates: '休假日期与现有申请重叠',
     requiredField: '请填写所有必填字段',
+    operationFailed: '操作失败',
     
     // Department translations
     humanResources: '人力资源',
@@ -955,262 +580,138 @@ const translations = {
     product: '产品部',
     legal: '法务部',
     domesticHelper: '家政助理',
-    others: '其他',
     unknown: '未知',
     
-    // Date and time
-    january: '一月',
-    february: '二月', 
-    march: '三月',
-    april: '四月',
-    may: '五月',
-    june: '六月',
-    july: '七月',
-    august: '八月',
-    september: '九月',
-    october: '十月',
-    november: '十一月',
-    december: '十二月',
-
-    // Transaction Types
-    request: '申请',
-    expense: '支出',
-    reimbursement: '报销',
-    
-    // Status Values
-    seniorApproved: '高级管理层已批准',
-    
-    // View Modes
-    myRequests: '我的申请',
-    teamRequests: '团队申请',
-    allRequests: '所有申请',
-    
-    // Placeholders and Labels
-    selectLeaveType: '选择假期类型',
-    selectCategory: '选择类别',
-    selectType: '选择类型',
-    selectStatus: '选择状态',
-    allTypes: '所有类型',
-    allStatus: '所有状态',
-    searchPlaceholder: '按员工姓名、原因搜索...',
-    cashRequest: '现金申请',
-    expenseReport: '支出报告',
-    selectRequestType: '选择申请类型',
-    
-    // Accounting Format
-    credit: '进账',
-    debit: '出账',
-    balance: '余额',
-    receiptUploaded: '收据上传成功',
-    orEnterUrl: '或手动输入收据网址',
+    // Common actions
+    add: '添加',
     clear: '清除',
-    newRequestReport: '新申请/报告',
-    createCashRequest: '创建现金申请',
-    submitCashRequest: '提交新的现金申请或支出报告',
-    submitLeaveRequest: '提交申请',
-    submitting: '提交中...',
-    requestSummary: '申请摘要',
-    duration: '持续时间',
-    days: '天',
-    day: '天',
-    reasonOptional: '原因（可选）',
-    reasonPlaceholder: '输入假期申请原因...',
-    
-    // Actions
-    createRequest: '创建申请',
-    editRequest: '编辑申请',
-    deleteRequest: '删除申请',
-    confirmDelete: '确认删除',
-    approveRequest: '批准申请',
-    rejectRequest: '拒绝申请',
-    update: '更新',
-    bulkActions: '批量操作',
-    selectAll: '全选',
-    deselectAll: '取消全选',
-    export: '导出',
-    print: '打印',
-    
-    // Messages
-    success: '成功',
-    error: '错误',
-    warning: '警告',
-    info: '信息',
-    loading: '加载中...',
-    noData: '无数据',
-    noResults: '无结果',
-    
-    // Forms
-    required: '必填',
-    optional: '选填',
-    pleaseSelect: '请选择',
-    enterValue: '请输入数值',
-    
-    // Cash Control
-    cashControlTitle: '现金管理',
-    amount: '金额',
-    currency: '货币',
-    category: '类别',
-    description: '描述',
-    receipt: '收据',
-    uploadReceipt: '上传收据',
-    
-    // Time
-    today: '今天',
-    yesterday: '昨天',
-    thisWeek: '本周',
-    thisMonth: '本月',
-    thisYear: '今年',
-    
-    // Authentication
-    signIn: '登录',
-    signOut: '登出',
-    signUp: '注册',
-    password: '密码',
-    confirmPassword: '确认密码',
-    forgotPassword: '忘记密码',
-    resetPassword: '重置密码',
-    
-    // Tasks
-    task: '任务',
-    title: '标题',
-    assignee: '指派人',
-    dueDate: '到期日',
-    priority: '优先级',
-    high: '高',
-    medium: '中',
-    low: '低',
-    completed: '已完成',
-    inProgress: '进行中',
-    notStarted: '未开始',
-    
-    // Notifications
-    requestApproved: '申请已成功批准',
-    requestRejected: '申请已成功拒绝',
-    requestSubmitted: '申请已成功提交',
-    requestUpdated: '申请已成功更新',
-    requestDeleted: '申请已成功删除',
-    changesSaved: '更改已成功保存',
-    uploadSuccess: '上传成功',
-    
-    // Errors
-    invalidInput: '输入无效',
-    networkError: '网络错误',
-    serverError: '服务器错误',
-    accessDenied: '访问被拒绝',
-    
-    // Form Validation
-    requiredField: '此字段为必填',
-    invalidDate: '日期无效',
-    invalidAmount: '金额无效',
-    selectOption: '请选择选项',
-    
-    // File Upload (Simplified Chinese)
-    dragDropFiles: '拖放文件到此处，或点击选择',
-    supportedFormats: '支持格式',
-    maxFileSize: '最大文件大小',
-    uploading: '上传中...',
-    uploadComplete: '上传完成',
-    uploadFailed: '上传失败',
-    
-    // Extended Profile Fields (Simplified Chinese)
-    idNumber: '身份证号码',
-    passportNumber: '护照号码',
-    visaNumber: '签证号码',
-    dateOfBirth: '出生日期',
-    homeAddress: '住址',
-    maritalStatus: '婚姻状况',
-    emergencyContactName: '紧急联系人姓名',  
-    emergencyContactPhone: '紧急联系人电话',
-    phoneNumber: '电话号码',
-    single: '单身',
-    married: '已婚',
-    divorced: '离婚',
-    widowed: '丧偶',
-    
-    // Role translations
-    roleEmployee: '员工',
-    roleManager: '经理',
-    roleHrAdmin: '人事管理员',
-    
-    // Date picker and form labels
-    pickADate: '选择日期',
-    selectADate: '选择日期',
-    enterEmail: '输入您的电子邮件',
-    enterPassword: '输入您的密码',
-    enterFirstName: '输入名字',
-    enterLastName: '输入姓氏',
-    
-    // Error messages
-    endDateBeforeStart: '结束日期不能早于开始日期',
-    overlappingDates: '您选择的日期与现有请假申请重叠',
-    
-    // Auth form labels
-    createAccount: '创建账户',
-    creatingAccount: '创建账户中...',
-    signingIn: '登录中...',
-    leaveManagementSystem: '请假管理系统',
-    signInToAccount: '登录您的账户或创建新账户',
-    employeeIdOptional: '员工编号（可选）',
-    employeeIdPlaceholder: 'EMP001（如未提供将自动生成）',
-    selectDepartment: '选择部门',
-    selectYourRole: '选择您的角色',
-    createStrongPassword: '创建强密码',
-    
-    // Profile form labels
-    firstNamePlaceholder: '小明',
-    lastNamePlaceholder: '王',
-    positionPlaceholder: '软件工程师',
-    emailPlaceholder: 'john.doe@company.com',
-    
-    // Document Management
-    documents: '文件',
-    uploadDocument: '上传文件',
-    documentType: '文件类型',
-    selectDocumentType: '选择文件类型',
-    passport: '护照',
-    idCard: '身份证',
-    visa: '签证',
-    certificate: '证书',
-    contract: '合同',
-    viewDocument: '查看文件',
-    deleteDocument: '删除文件',
-    documentUploaded: '文件上传成功',
-    documentDeleted: '文件删除成功',
-    noDocuments: '没有上传的文件',
-    
-    // Calendar Interactions
-    createLeaveRequest: '创建请假申请',
-    clickToCreateLeave: '点击日期以创建请假申请',
-    editLeaveRequest: '编辑请假申请',
-    deleteLeaveRequest: '删除请假申请',
-    confirmDeleteLeave: '确定要删除此请假申请吗？',
-    cannotEditApproved: '无法编辑已批准的申请',
-    leaveUpdated: '请假申请更新成功',
-    leaveDeleted: '请假申请删除成功',
-    
-    // Cash Control Dual Role
-    personalView: '个人视图',
-    managementView: '管理视图',
-    selectEmployee: '选择员工',
-    allEmployees: '所有员工',
-    teamTransactions: '团队交易',
-    bulkApprove: '批量批准',
-    filterByStatus: '按状态筛选',
-    filterByEmployee: '按员工筛选',
-    approvalWorkflow: '审批流程'
+    search: '搜索',
+    type: '类型',
+    requestStatus: '申请状态'
   },
   id: {
-    // Success and error messages
+    // Navigation
+    dashboard: 'Dasbor',
+    leaveRequests: 'Permohonan Cuti',
+    calendar: 'Kalender',
+    profile: 'Profil',
+    employees: 'Karyawan',
+    reports: 'Laporan',
+    tasks: 'Tugas',
+    cashControl: 'Kontrol Kas',
+    settings: 'Pengaturan',
+    staffProfile: 'Profil Staf',
+    
+    // Dashboard
+    pendingRequests: 'Permintaan Tertunda',
+    totalRequests: 'Total Permintaan',
+    remainingDays: 'Sisa Hari',
+    usedDays: 'Hari Terpakai',
+    daysRemaining: 'Sisa Hari',
+    daysUsed: 'Hari Terpakai',
+    leaveBalance: 'Saldo Cuti',
+    overview: 'Ikhtisar',
+    quickActions: 'Tindakan Cepat',
+    recentActivity: 'Aktivitas Terbaru',
+    upcomingLeave: 'Cuti Mendatang',
+    teamOverview: 'Ikhtisar Tim',
+    
+    // Leave Requests
+    startDate: 'Tanggal Mulai',
+    endDate: 'Tanggal Berakhir',
+    leaveType: 'Jenis Cuti',
+    daysRequested: 'Hari yang Diminta',
+    reason: 'Alasan',
+    status: 'Status',
+    requestDate: 'Tanggal Permintaan',
+    approve: 'Setujui',
+    reject: 'Tolak',
+    cancel: 'Batal',
+    submit: 'Kirim',
+    save: 'Simpan',
+    close: 'Tutup',
+    edit: 'Edit',
+    delete: 'Hapus',
+    
+    // Status Values
+    pending: 'Menunggu',
+    approved: 'Disetujui',
+    rejected: 'Ditolak',
+    paid: 'Dibayar',
+    seniorApproved: 'Disetujui Manajemen Senior',
+    
+    // Leave Types
+    annualLeave: 'Cuti Tahunan',
+    sickLeave: 'Cuti Sakit',
+    maternityLeave: 'Cuti Melahirkan',
+    paternityLeave: 'Cuti Ayah',
+    vacation: 'Liburan',
+    emergencyLeave: 'Cuti Darurat',
+    compassionateLeave: 'Cuti Duka',
+    studyLeave: 'Cuti Belajar',
+    unpaidLeave: 'Cuti Tanpa Gaji',
+    
+    // View Modes
+    myRequests: 'Permintaan Saya',
+    teamRequests: 'Permintaan Tim',
+    allRequests: 'Semua Permintaan',
+    
+    // Placeholders and Labels
+    selectLeaveType: 'Pilih Jenis Cuti',
+    selectCategory: 'Pilih Kategori',
+    selectType: 'Pilih Jenis',
+    selectStatus: 'Pilih Status',
+    allTypes: 'Semua Jenis',
+    allStatus: 'Semua Status',
+    searchPlaceholder: 'Cari berdasarkan nama karyawan, alasan...',
+    searchByEmployeeReason: 'Cari berdasarkan nama karyawan, alasan...',
+    
+    // Actions
+    createRequest: 'Buat Permintaan',
+    editRequest: 'Edit Permintaan',
+    deleteRequest: 'Hapus Permintaan',
+    confirmDelete: 'Konfirmasi Hapus',
+    approveRequest: 'Setujui Permintaan',
+    rejectRequest: 'Tolak Permintaan',
+    update: 'Perbarui',
+    bulkActions: 'Tindakan Massal',
+    selectAll: 'Pilih Semua',
+    deselectAll: 'Batalkan Pilihan',
+    export: 'Ekspor',
+    print: 'Cetak',
+    
+    // Messages
     success: 'Sukses',
     error: 'Error',
+    warning: 'Peringatan',
+    info: 'Info',
     loading: 'Memuat...',
-    save: 'Simpan',
-    cancel: 'Batal',
-    delete: 'Hapus',
-    edit: 'Edit',
-    add: 'Tambah',
-    clear: 'Bersihkan',
-    search: 'Cari',
+    noData: 'Tidak Ada Data',
+    noResults: 'Tidak Ada Hasil',
+    
+    // Categories
+    general: 'Umum',
+    travel: 'Perjalanan',
+    meals: 'Makan',
+    supplies: 'Perlengkapan',
+    equipment: 'Peralatan',
+    training: 'Pelatihan',
+    groceries: 'Kebutuhan Pokok',
+    others: 'Lainnya',
+    
+    // Transaction Types
+    request: 'Permintaan',
+    expense: 'Pengeluaran',
+    reimbursement: 'Penggantian',
+    
+    // Authentication
+    signIn: 'Masuk',
+    signOut: 'Keluar',
+    signUp: 'Daftar',
+    password: 'Kata Sandi',
+    confirmPassword: 'Konfirmasi Kata Sandi',
+    forgotPassword: 'Lupa Kata Sandi',
+    resetPassword: 'Reset Kata Sandi',
     
     // Profile page
     myProfile: 'Profil Saya',
@@ -1243,14 +744,9 @@ const translations = {
     leaveRequest: 'Cuti',
     createLeaveRequest: 'Buat Permohonan Cuti',
     submitLeaveRequest: 'Kirim Permohonan Cuti',
-    leaveType: 'Jenis Cuti',
-    selectLeaveType: 'Pilih Jenis Cuti',
-    startDate: 'Tanggal Mulai',
-    endDate: 'Tanggal Berakhir',
     duration: 'Durasi',
     day: 'Hari',
     days: 'Hari',
-    reason: 'Alasan',
     reasonOptional: 'Alasan (Opsional)',
     reasonPlaceholder: 'Silakan berikan alasan untuk permohonan cuti Anda...',
     requestSummary: 'Ringkasan Permohonan',
@@ -1261,6 +757,7 @@ const translations = {
     endDateBeforeStart: 'Tanggal berakhir tidak boleh sebelum tanggal mulai',
     overlappingDates: 'Tanggal cuti bertumpang tindih dengan permohonan yang sudah ada',
     requiredField: 'Harap isi semua field yang wajib diisi',
+    operationFailed: 'Operasi gagal',
     
     // Department translations
     humanResources: 'Sumber Daya Manusia',
@@ -1273,320 +770,19 @@ const translations = {
     product: 'Produk',
     legal: 'Hukum',
     domesticHelper: 'Asisten Rumah Tangga',
-    others: 'Lainnya',
     unknown: 'Tidak Diketahui',
     
-    // Date and time
-    january: 'Januari',
-    february: 'Februari', 
-    march: 'Maret',
-    april: 'April',
-    may: 'Mei',
-    june: 'Juni',
-    july: 'Juli',
-    august: 'Agustus',
-    september: 'September',
-    october: 'Oktober',
-    november: 'November',
-    december: 'Desember',
-
-    // Navigation
-    dashboard: 'Dasbor',
-    leaveRequests: 'Permohonan Cuti',
-    calendar: 'Kalender',
-    profile: 'Profil',
-    employees: 'Karyawan',
-    reports: 'Laporan',
-    tasks: 'Tugas',
-    cashControl: 'Kontrol Kas',
-    settings: 'Pengaturan',
-    staffProfile: 'Profil Staf',
-    
-    // Dashboard
-    pendingRequests: 'Permintaan Tertunda',
-    totalRequests: 'Total Permintaan',
-    remainingDays: 'Sisa Hari',
-    usedDays: 'Hari Terpakai',
-    daysRemaining: 'Sisa Hari',
-    daysUsed: 'Hari Terpakai',
-    leaveBalance: 'Saldo Cuti',
-    leaveBalances: 'Saldo Cuti',
-    overview: 'Ikhtisar',
-    quickActions: 'Tindakan Cepat',
-    recentActivity: 'Aktivitas Terbaru',
-    upcomingLeave: 'Cuti Mendatang',
-    teamOverview: 'Ikhtisar Tim',
-    
-    // Leave Requests
-    startDate: 'Tanggal Mulai',
-    endDate: 'Tanggal Selesai',
-    leaveType: 'Jenis Cuti',
-    daysRequested: 'Hari yang Diminta',
-    reason: 'Alasan',
-    status: 'Status',
-    requestDate: 'Tanggal Permintaan',
-    approve: 'Setujui',
-    reject: 'Tolak',
-    cancel: 'Batal',
-    submit: 'Kirim',
-    save: 'Simpan',
-    close: 'Tutup',
-    edit: 'Ubah',
-    delete: 'Hapus',
-    view: 'Lihat',
-    filter: 'Filter',
+    // Common actions
+    add: 'Tambah',
+    clear: 'Bersihkan',
     search: 'Cari',
-    pending: 'Menunggu',
-    approved: 'Disetujui',
-    rejected: 'Ditolak',
-    all: 'Semua',
-    newRequest: 'Permintaan Baru',
-    leaveRequest: 'Permohonan Cuti',
-    requestLeave: 'Ajukan Cuti',
-    
-    // Profile
-    personalDetails: 'Detail Pribadi',
-    profileChanges: 'Perubahan Profil',
-    requestChange: 'Minta Perubahan',
-    firstName: 'Nama Depan',
-    lastName: 'Nama Belakang',
-    email: 'Email',
-    department: 'Departemen',
-    position: 'Posisi',
-    employeeId: 'ID Karyawan',
-    manager: 'Manajer',
-    joinDate: 'Tanggal Bergabung',
-    
-    // Leave Management
-    myLeave: 'Cuti Saya',
-    teamLeave: 'Cuti Tim',
-    allLeave: 'Semua Cuti',
-    leaveHistory: 'Riwayat Cuti',
-    leaveCalendar: 'Kalender Cuti',
-    colorLegend: 'Legenda Warna',
-    
-    // Leave Types
-    vacation: 'Liburan',
-    sickLeave: 'Cuti Sakit',
-    maternityLeave: 'Cuti Melahirkan',
-    paternityLeave: 'Cuti Ayah',
-    annualLeave: 'Cuti Tahunan',
-    emergencyLeave: 'Cuti Darurat',
-    compassionateLeave: 'Cuti Bela Sungkawa',
-    studyLeave: 'Cuti Belajar',
-    unpaidLeave: 'Cuti Tanpa Gaji',
-    others: 'Lainnya',
-    
-    // Cash Control Categories
-    general: 'Umum',
-    travel: 'Perjalanan',
-    meals: 'Makanan',
-    supplies: 'Perlengkapan Kantor',
-    equipment: 'Peralatan',
-    training: 'Pelatihan',
-    groceries: 'Bahan Makanan',
-    
-    // Transaction Types
-    request: 'Permintaan',
-    expense: 'Pengeluaran',
-    reimbursement: 'Penggantian',
-    
-    // Status Values
-    seniorApproved: 'Disetujui Manajemen Senior',
-    
-    // View Modes
-    myRequests: 'Permintaan Saya',
-    teamRequests: 'Permintaan Tim',
-    allRequests: 'Semua Permintaan',
-    
-    // Placeholders and Labels
-    selectLeaveType: 'Pilih jenis cuti',
-    selectCategory: 'Pilih kategori',
-    selectType: 'Pilih jenis',
-    selectStatus: 'Pilih status',
-    allTypes: 'Semua Jenis',
-    allStatus: 'Semua Status',
-    searchPlaceholder: 'Cari berdasarkan nama karyawan, alasan...',
-    cashRequest: 'Permintaan Kas',
-    expenseReport: 'Laporan Pengeluaran', 
-    selectRequestType: 'Pilih Jenis Permintaan',
-    
-    // Accounting Format
-    credit: 'Kredit',
-    debit: 'Debit',
-    balance: 'Saldo',
-    receiptUploaded: 'Kwitansi berhasil diunggah',
-    orEnterUrl: 'Atau masukkan URL kwitansi secara manual',
-    clear: 'Hapus',
-    newRequestReport: 'PERMINTAAN/LAPORAN BARU',
-    createCashRequest: 'Buat Permintaan Uang Tunai',
-    submitCashRequest: 'Kirim permintaan uang tunai atau laporan pengeluaran baru',
-    submitLeaveRequest: 'Kirim Permintaan',
-    submitting: 'Mengirim...',
-    requestSummary: 'Ringkasan Permintaan',
-    duration: 'Durasi',
-    days: 'hari',
-    day: 'hari',
-    reasonOptional: 'Alasan (Opsional)',
-    reasonPlaceholder: 'Masukkan alasan permintaan cuti...',
-    
-    // Actions
-    createRequest: 'Buat Permintaan',
-    editRequest: 'Edit Permohonan',
-    deleteRequest: 'Hapus Permohonan',
-    confirmDelete: 'Konfirmasi Hapus',
-    approveRequest: 'Setujui Permintaan',
-    rejectRequest: 'Tolak Permintaan',
-    update: 'Perbarui',
-    bulkActions: 'Tindakan Massal',
-    selectAll: 'Pilih Semua',
-    deselectAll: 'Batal Pilih Semua',
-    export: 'Ekspor',
-    print: 'Cetak',
-    
-    // Messages
-    success: 'Berhasil',
-    error: 'Error',
-    warning: 'Peringatan',
-    info: 'Informasi',
-    loading: 'Memuat...',
-    noData: 'Tidak ada data',
-    noResults: 'Tidak ada hasil',
-    
-    // Forms
-    required: 'Wajib',
-    optional: 'Opsional',
-    pleaseSelect: 'Silakan pilih',
-    enterValue: 'Masukkan nilai',
-    
-    // Cash Control
-    cashControlTitle: 'Kontrol Kas',
-    amount: 'Jumlah',
-    currency: 'Mata Uang',
-    category: 'Kategori',
-    description: 'Deskripsi',
-    receipt: 'Kwitansi',
-    uploadReceipt: 'Unggah Kwitansi',
-    
-    // Time
-    today: 'Hari Ini',
-    yesterday: 'Kemarin',
-    thisWeek: 'Minggu Ini',
-    thisMonth: 'Bulan Ini',
-    thisYear: 'Tahun Ini',
-    
-    // Authentication
-    signIn: 'Masuk',
-    signOut: 'Keluar',
-    signUp: 'Daftar',
-    password: 'Kata Sandi',
-    confirmPassword: 'Konfirmasi Kata Sandi',
-    forgotPassword: 'Lupa Kata Sandi',
-    resetPassword: 'Reset Kata Sandi',
-    
-    // Tasks
-    task: 'Tugas',
-    title: 'Judul',
-    assignee: 'Penerima Tugas',
-    dueDate: 'Tanggal Jatuh Tempo',
-    priority: 'Prioritas',
-    high: 'Tinggi',
-    medium: 'Sedang',
-    low: 'Rendah',
-    completed: 'Selesai',
-    inProgress: 'Dalam Proses',
-    notStarted: 'Belum Dimulai',
-    
-    // Notifications
-    requestApproved: 'Permintaan berhasil disetujui',
-    requestRejected: 'Permintaan berhasil ditolak',
-    requestSubmitted: 'Permintaan berhasil dikirim',
-    requestUpdated: 'Permintaan berhasil diperbarui',
-    requestDeleted: 'Permohonan berhasil dihapus',
-    changesSaved: 'Perubahan berhasil disimpan',
-    uploadSuccess: 'Unggah berhasil',
-    
-    // Errors
-    invalidInput: 'Input tidak valid',
-    networkError: 'Error jaringan',
-    serverError: 'Error server',
-    accessDenied: 'Akses ditolak',
-    
-    // Form Validation
-    requiredField: 'Field ini wajib diisi',
-    invalidDate: 'Tanggal tidak valid',
-    invalidAmount: 'Jumlah tidak valid',
-    selectOption: 'Pilih opsi',
-    
-    // File Upload (Indonesian)
-    dragDropFiles: 'Seret dan lepas file di sini, atau klik untuk memilih',
-    supportedFormats: 'Format yang didukung',
-    maxFileSize: 'Ukuran file maksimum',
-    uploading: 'Mengunggah...',
-    uploadComplete: 'Unggah selesai',
-    uploadFailed: 'Unggah gagal',
-    
-    // Extended Profile Fields (Indonesian)
-    idNumber: 'Nomor ID',
-    passportNumber: 'Nomor Paspor',
-    visaNumber: 'Nomor Visa', 
-    dateOfBirth: 'Tanggal Lahir',
-    homeAddress: 'Alamat Rumah',
-    maritalStatus: 'Status Perkawinan',
-    emergencyContactName: 'Nama Kontak Darurat',
-    emergencyContactPhone: 'Telepon Kontak Darurat',
-    phoneNumber: 'Nomor Telepon',
-    single: 'Lajang',
-    married: 'Menikah',
-    divorced: 'Cerai',
-    widowed: 'Janda/Duda',
-    
-    // Role translations
-    roleEmployee: 'Karyawan',
-    roleManager: 'Manajer',
-    roleHrAdmin: 'Admin HR',
-    
-    // Document Management - New unique keys only (Indonesian)
-    documents: 'Dokumen',
-    uploadDocument: 'Unggah Dokumen',
-    documentType: 'Jenis Dokumen',
-    selectDocumentType: 'Pilih Jenis Dokumen',
-    passport: 'Paspor',
-    idCard: 'KTP',
-    visa: 'Visa',
-    certificate: 'Sertifikat',
-    contract: 'Kontrak',
-    viewDocument: 'Lihat Dokumen',
-    deleteDocument: 'Hapus Dokumen',
-    documentUploaded: 'Dokumen berhasil diunggah',
-    documentDeleted: 'Dokumen berhasil dihapus',
-    noDocuments: 'Belum ada dokumen',
-    
-    // Calendar Interactions - New unique keys only (Indonesian)
-    createLeaveRequest: 'Buat Permohonan Cuti',
-    clickToCreateLeave: 'Klik tanggal untuk membuat permohonan cuti',
-    editLeaveRequest: 'Edit Permohonan Cuti',
-    deleteLeaveRequest: 'Hapus Permohonan Cuti',
-    confirmDeleteLeave: 'Yakin ingin menghapus permohonan cuti ini?',
-    cannotEditApproved: 'Tidak dapat mengedit permohonan yang sudah disetujui',
-    leaveUpdated: 'Permohonan cuti berhasil diupdate',
-    leaveDeleted: 'Permohonan cuti berhasil dihapus',
-    
-    // Cash Control Dual Role - New unique keys only (Indonesian)
-    personalView: 'Tampilan Pribadi',
-    managementView: 'Tampilan Manajemen',
-    selectEmployee: 'Pilih Karyawan',
-    allEmployees: 'Semua Karyawan',
-    teamTransactions: 'Transaksi Tim',
-    bulkApprove: 'Setujui Semua',
-    filterByStatus: 'Filter by Status',
-    filterByEmployee: 'Filter by Karyawan',
-    approvalWorkflow: 'Alur Persetujuan'
-  },
+    type: 'Jenis',
+    requestStatus: 'Status permintaan'
+  }
 };
 
 interface LanguageProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
@@ -1594,7 +790,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage && translations[savedLanguage]) {
+    if (savedLanguage && ['en', 'zh-TW', 'zh-CN', 'id'].includes(savedLanguage)) {
       setLanguage(savedLanguage);
     }
   }, []);
@@ -1605,7 +801,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   };
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    return translations[language][key as keyof typeof translations[Language]] || key;
   };
 
   return (
