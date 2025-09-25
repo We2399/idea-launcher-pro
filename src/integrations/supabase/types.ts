@@ -107,6 +107,48 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_work_schedules: {
+        Row: {
+          created_at: string
+          friday: boolean
+          id: string
+          monday: boolean
+          saturday: boolean
+          sunday: boolean
+          thursday: boolean
+          tuesday: boolean
+          updated_at: string
+          user_id: string
+          wednesday: boolean
+        }
+        Insert: {
+          created_at?: string
+          friday?: boolean
+          id?: string
+          monday?: boolean
+          saturday?: boolean
+          sunday?: boolean
+          thursday?: boolean
+          tuesday?: boolean
+          updated_at?: string
+          user_id: string
+          wednesday?: boolean
+        }
+        Update: {
+          created_at?: string
+          friday?: boolean
+          id?: string
+          monday?: boolean
+          saturday?: boolean
+          sunday?: boolean
+          thursday?: boolean
+          tuesday?: boolean
+          updated_at?: string
+          user_id?: string
+          wednesday?: boolean
+        }
+        Relationships: []
+      }
       leave_allocations: {
         Row: {
           administrator_approved_at: string | null
@@ -508,6 +550,42 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      public_holidays: {
+        Row: {
+          country_code: string
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          is_recurring: boolean
+          name: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          is_recurring?: boolean
+          name: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          is_recurring?: boolean
+          name?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
       }
       system_settings: {
         Row: {

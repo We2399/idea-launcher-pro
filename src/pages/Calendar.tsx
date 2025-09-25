@@ -32,6 +32,24 @@ interface LeaveRequest {
   };
 }
 
+interface WorkSchedule {
+  user_id: string;
+  monday: boolean;
+  tuesday: boolean;
+  wednesday: boolean;
+  thursday: boolean;
+  friday: boolean;
+  saturday: boolean;
+  sunday: boolean;
+}
+
+interface PublicHoliday {
+  id: string;
+  name: string;
+  date: string;
+  country_code: string;
+}
+
 const leaveTypeColors = {
   'Sick Leave': {
     pending: 'hsl(30, 40%, 80%)', // Light brown
@@ -65,6 +83,8 @@ export default function CalendarPage() {
   const { t } = useLanguage();
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
+  const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>([]);
+  const [holidays, setHolidays] = useState<PublicHoliday[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
   const [loading, setLoading] = useState(true);
@@ -72,9 +92,48 @@ export default function CalendarPage() {
 
   useEffect(() => {
     if (user) {
-      fetchRequests();
+      fetchAllData();
     }
   }, [user, userRole, viewMode]);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchRequests(),
+      fetchWorkSchedules(),
+      fetchHolidays()
+    ]);
+    setLoading(false);
+  };
+
+  const fetchWorkSchedules = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employee_work_schedules')
+        .select('*');
+      
+      if (error) throw error;
+      setWorkSchedules(data || []);
+    } catch (error: any) {
+      console.error('Failed to fetch work schedules:', error);
+    }
+  };
+
+  const fetchHolidays = async () => {
+    try {
+      const currentYear = new Date().getFullYear();
+      const { data, error } = await supabase
+        .from('public_holidays')
+        .select('*')
+        .eq('year', currentYear)
+        .order('date');
+      
+      if (error) throw error;
+      setHolidays(data || []);
+    } catch (error: any) {
+      console.error('Failed to fetch holidays:', error);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -139,6 +198,33 @@ export default function CalendarPage() {
     }
   };
 
+  const isRestDay = (date: Date) => {
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = dayNames[dayOfWeek];
+
+    if (viewMode === 'my' && user) {
+      const userSchedule = workSchedules.find(ws => ws.user_id === user.id);
+      if (userSchedule) {
+        return !userSchedule[dayName as keyof Omit<WorkSchedule, 'user_id'>];
+      }
+    }
+    
+    // Default weekend detection for team/all views
+    return dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+  };
+
+  const isHoliday = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return holidays.some(holiday => holiday.date === dateStr);
+  };
+
+  const getHolidayName = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const holiday = holidays.find(h => h.date === dateStr);
+    return holiday?.name || '';
+  };
+
   const getRequestsForDate = (date: Date) => {
     return requests.filter(request => {
       const startDate = parseISO(request.start_date);
@@ -153,7 +239,10 @@ export default function CalendarPage() {
   };
 
   const getDayModifiers = () => {
-    const modifiers: any = {};
+    const modifiers: any = {
+      restDay: isRestDay,
+      holiday: isHoliday,
+    };
     
     // Create modifiers for each leave type and status
     Object.keys(leaveTypeColors).forEach(leaveType => {
@@ -172,7 +261,21 @@ export default function CalendarPage() {
   };
 
   const getDayModifiersStyles = () => {
-    const styles: any = {};
+    const styles: any = {
+      restDay: {
+        backgroundColor: 'hsl(var(--muted))',
+        color: 'hsl(var(--muted-foreground))',
+        borderRadius: '4px',
+        textDecoration: 'line-through',
+      },
+      holiday: {
+        backgroundColor: 'hsl(30, 70%, 90%)',
+        color: 'hsl(30, 70%, 30%)',
+        borderRadius: '4px',
+        fontWeight: 'bold',
+        border: '2px solid hsl(30, 70%, 60%)',
+      },
+    };
     
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
@@ -293,28 +396,54 @@ export default function CalendarPage() {
             {/* Color Legend */}
             <div className="mt-6">
               <h3 className="text-sm font-semibold mb-3">{t('colorLegend')}</h3>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {Object.entries(leaveTypeColors).map(([leaveType, colors]) => (
-                  <div key={leaveType} className="space-y-1">
-                    <div className="font-medium">{translateLeaveType(leaveType)}</div>
-                    <div className="flex gap-2">
-                      <div className="flex items-center gap-1">
-                        <div 
-                          className="w-3 h-3 rounded"
-                          style={{ backgroundColor: colors.pending }}
-                        ></div>
-                        <span>{translateStatus('pending')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div 
-                          className="w-3 h-3 rounded"
-                          style={{ backgroundColor: colors.approved }}
-                        ></div>
-                        <span>{translateStatus('approved')}</span>
+              <div className="space-y-3">
+                {/* Leave Types */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {Object.entries(leaveTypeColors).map(([leaveType, colors]) => (
+                    <div key={leaveType} className="space-y-1">
+                      <div className="font-medium">{translateLeaveType(leaveType)}</div>
+                      <div className="flex gap-2">
+                        <div className="flex items-center gap-1">
+                          <div 
+                            className="w-3 h-3 rounded"
+                            style={{ backgroundColor: colors.pending }}
+                          ></div>
+                          <span>{translateStatus('pending')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div 
+                            className="w-3 h-3 rounded"
+                            style={{ backgroundColor: colors.approved }}
+                          ></div>
+                          <span>{translateStatus('approved')}</span>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+                
+                {/* Rest Days and Holidays */}
+                <div className="border-t pt-3">
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded"
+                        style={{ backgroundColor: 'hsl(var(--muted))' }}
+                      ></div>
+                      <span>Rest Days</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded border-2"
+                        style={{ 
+                          backgroundColor: 'hsl(30, 70%, 90%)',
+                          borderColor: 'hsl(30, 70%, 60%)'
+                        }}
+                      ></div>
+                      <span>Public Holidays</span>
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -329,6 +458,22 @@ export default function CalendarPage() {
           <CardContent>
             {selectedDate ? (
               <div className="space-y-4">
+                {/* Show holiday info if applicable */}
+                {isHoliday(selectedDate) && (
+                  <div className="p-3 border border-orange-200 bg-orange-50 rounded-lg">
+                    <div className="font-medium text-orange-800">🎉 Public Holiday</div>
+                    <div className="text-sm text-orange-700">{getHolidayName(selectedDate)}</div>
+                  </div>
+                )}
+                
+                {/* Show rest day info if applicable */}
+                {isRestDay(selectedDate) && !isHoliday(selectedDate) && (
+                  <div className="p-3 border border-muted bg-muted/50 rounded-lg">
+                    <div className="font-medium text-muted-foreground">😴 Rest Day</div>
+                    <div className="text-sm text-muted-foreground">Non-working day</div>
+                  </div>
+                )}
+
                 {getSelectedDateRequests().length > 0 ? (
                   getSelectedDateRequests().map((request) => (
                     <div 
@@ -427,8 +572,13 @@ export default function CalendarPage() {
         <CardContent>
           <div className="space-y-3">
             {requests
-              .filter(request => parseISO(request.start_date) >= new Date())
-              .slice(0, 5)
+              .filter(request => {
+                const startDate = parseISO(request.start_date);
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                return startDate >= now;
+              })
+              .slice(0, 10)
               .map((request) => (
                 <div 
                   key={request.id} 
