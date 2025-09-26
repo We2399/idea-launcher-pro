@@ -203,14 +203,14 @@ export default function CalendarPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
 
-    if (viewMode === 'my' && user) {
+    // Prefer the viewer's configured schedule if available (any view mode)
+    if (user) {
       const userSchedule = workSchedules.find(ws => ws.user_id === user.id);
       if (userSchedule) {
         return !userSchedule[dayName as keyof Omit<WorkSchedule, 'user_id'>];
       }
     }
-    
-    // Default weekend detection for team/all views
+    // Fallback: weekend as rest days
     return dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
   };
 
@@ -263,17 +263,16 @@ export default function CalendarPage() {
   const getDayModifiersStyles = () => {
     const styles: any = {
       restDay: {
-        backgroundColor: 'hsl(var(--muted))',
-        color: 'hsl(var(--muted-foreground))',
+        backgroundColor: 'transparent',
+        border: '2px solid hsl(140 45% 45%)',
         borderRadius: '4px',
-        textDecoration: 'line-through',
+        boxSizing: 'border-box',
       },
       holiday: {
-        backgroundColor: 'hsl(30, 70%, 90%)',
-        color: 'hsl(30, 70%, 30%)',
+        backgroundColor: 'transparent',
+        border: '2px solid hsl(50 90% 55%)',
         borderRadius: '4px',
-        fontWeight: 'bold',
-        border: '2px solid hsl(30, 70%, 60%)',
+        boxSizing: 'border-box',
       },
     };
     
@@ -427,8 +426,8 @@ export default function CalendarPage() {
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center gap-2">
                       <div 
-                        className="w-3 h-3 rounded"
-                        style={{ backgroundColor: 'hsl(var(--muted))' }}
+                        className="w-3 h-3 rounded border-2"
+                        style={{ backgroundColor: 'transparent', borderColor: 'hsl(140 45% 45%)' }}
                       ></div>
                       <span>Rest Days</span>
                     </div>
@@ -436,8 +435,8 @@ export default function CalendarPage() {
                       <div 
                         className="w-3 h-3 rounded border-2"
                         style={{ 
-                          backgroundColor: 'hsl(30, 70%, 90%)',
-                          borderColor: 'hsl(30, 70%, 60%)'
+                          backgroundColor: 'transparent',
+                          borderColor: 'hsl(50 90% 55%)'
                         }}
                       ></div>
                       <span>Public Holidays</span>
@@ -573,10 +572,10 @@ export default function CalendarPage() {
           <div className="space-y-3">
             {requests
               .filter(request => {
-                const startDate = parseISO(request.start_date);
+                const endDate = parseISO(request.end_date);
                 const now = new Date();
                 now.setHours(0, 0, 0, 0);
-                return startDate >= now;
+                return endDate >= now;
               })
               .slice(0, 10)
               .map((request) => (
@@ -621,7 +620,11 @@ export default function CalendarPage() {
                   </div>
                 </div>
               ))}
-            {requests.filter(request => parseISO(request.start_date) >= new Date()).length === 0 && (
+            {(() => {
+              const now = new Date();
+              now.setHours(0, 0, 0, 0);
+              return requests.filter(request => parseISO(request.start_date) >= now).length === 0;
+            })() && (
               <div className="text-center py-8 text-muted-foreground">
                 {t('upcomingLeaveEmpty')}
               </div>

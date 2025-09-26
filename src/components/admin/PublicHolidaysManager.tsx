@@ -33,6 +33,8 @@ const countries = [
   { code: 'FR', name: 'France' },
   { code: 'JP', name: 'Japan' },
   { code: 'CN', name: 'China' },
+  { code: 'HK', name: 'Hong Kong' },
+  { code: 'MO', name: 'Macau' },
   { code: 'IN', name: 'India' },
   { code: 'BR', name: 'Brazil' },
   { code: 'MX', name: 'Mexico' },
