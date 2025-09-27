@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, isWithinInterval, parseISO } from 'date-fns';
@@ -89,6 +90,9 @@ export default function CalendarPage() {
   const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showRestDays, setShowRestDays] = useState(true);
+  const [showHolidays, setShowHolidays] = useState(true);
+
 
   useEffect(() => {
     if (user) {
@@ -239,10 +243,14 @@ export default function CalendarPage() {
   };
 
   const getDayModifiers = () => {
-    const modifiers: any = {
-      restDay: isRestDay,
-      holiday: isHoliday,
-    };
+    const modifiers: any = {};
+
+    if (showRestDays) {
+      modifiers.restDay = isRestDay;
+    }
+    if (showHolidays) {
+      modifiers.holiday = isHoliday;
+    }
     
     // Create modifiers for each leave type and status
     Object.keys(leaveTypeColors).forEach(leaveType => {
@@ -278,6 +286,24 @@ export default function CalendarPage() {
 
   const getDayModifiersStyles = () => {
     const styles: any = {};
+
+    if (showRestDays) {
+      styles.restDay = {
+        backgroundColor: 'transparent',
+        outline: '2px solid hsl(140 45% 45%)',
+        borderRadius: '4px',
+        boxSizing: 'border-box',
+      };
+    }
+
+    if (showHolidays) {
+      styles.holiday = {
+        backgroundColor: 'transparent',
+        outline: '2px solid hsl(50 90% 55%)',
+        borderRadius: '4px',
+        boxSizing: 'border-box',
+      };
+    }
     
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
@@ -386,6 +412,16 @@ export default function CalendarPage() {
             <CardTitle>{t('calendarView')}</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-3 flex flex-wrap items-center gap-4">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox checked={showRestDays} onCheckedChange={(v) => setShowRestDays(Boolean(v))} />
+                <span>Show rest days</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox checked={showHolidays} onCheckedChange={(v) => setShowHolidays(Boolean(v))} />
+                <span>Show public holidays</span>
+              </label>
+            </div>
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -393,7 +429,7 @@ export default function CalendarPage() {
               modifiers={getDayModifiers()}
               modifiersStyles={getDayModifiersStyles()}
               modifiersClassNames={getDayModifiersClassNames()}
-              className="rounded-md border [&_.rest-day-modifier]:!bg-transparent [&_.rest-day-modifier]:!border-2 [&_.rest-day-modifier]:!border-green-500 [&_.rest-day-modifier]:!rounded [&_.holiday-modifier]:!bg-transparent [&_.holiday-modifier]:!border-2 [&_.holiday-modifier]:!border-yellow-400 [&_.holiday-modifier]:!rounded"
+              className="rounded-md border"
             />
             
             {/* Color Legend */}
