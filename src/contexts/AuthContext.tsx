@@ -111,21 +111,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) {
+    // Treat missing session as already signed out to avoid noisy toasts
+    if (error && !/Auth session missing/i.test(error.message)) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive"
       });
-    } else {
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
-      toast({
-        title: "Success",
-        description: "Signed out successfully"
-      });
+      return;
     }
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+    toast({
+      title: "Success",
+      description: "Signed out successfully"
+    });
   };
 
   const value = {

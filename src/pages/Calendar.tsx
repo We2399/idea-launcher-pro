@@ -192,6 +192,10 @@ export default function CalendarPage() {
         setRequests([]);
       }
     } catch (error: any) {
+      if (error?.message && /Auth session missing/i.test(error.message)) {
+        setLoading(false);
+        return;
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to fetch calendar data",
@@ -290,7 +294,7 @@ export default function CalendarPage() {
     if (showRestDays) {
       styles.restDay = {
         backgroundColor: 'transparent',
-        outline: '2px solid hsl(140 45% 45%)',
+        boxShadow: 'inset 0 0 0 2px hsl(140 45% 45%)',
         borderRadius: '4px',
         boxSizing: 'border-box',
       };
@@ -299,7 +303,7 @@ export default function CalendarPage() {
     if (showHolidays) {
       styles.holiday = {
         backgroundColor: 'transparent',
-        outline: '2px solid hsl(50 90% 55%)',
+        boxShadow: 'inset 0 0 0 2px hsl(50 90% 55%)',
         borderRadius: '4px',
         boxSizing: 'border-box',
       };
