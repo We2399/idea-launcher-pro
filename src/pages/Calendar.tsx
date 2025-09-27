@@ -260,21 +260,24 @@ export default function CalendarPage() {
     return modifiers;
   };
 
-  const getDayModifiersStyles = () => {
-    const styles: any = {
-      restDay: {
-        backgroundColor: 'transparent',
-        border: '2px solid hsl(140 45% 45%)',
-        borderRadius: '4px',
-        boxSizing: 'border-box',
-      },
-      holiday: {
-        backgroundColor: 'transparent',
-        border: '2px solid hsl(50 90% 55%)',
-        borderRadius: '4px',
-        boxSizing: 'border-box',
-      },
+  const getDayModifiersClassNames = () => {
+    const classNames: any = {
+      restDay: 'rest-day-modifier',
+      holiday: 'holiday-modifier',
     };
+    
+    Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
+      ['pending', 'approved', 'senior_approved'].forEach(status => {
+        const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
+        classNames[key] = `leave-${key}`;
+      });
+    });
+
+    return classNames;
+  };
+
+  const getDayModifiersStyles = () => {
+    const styles: any = {};
     
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
@@ -389,7 +392,8 @@ export default function CalendarPage() {
               onSelect={setSelectedDate}
               modifiers={getDayModifiers()}
               modifiersStyles={getDayModifiersStyles()}
-              className="rounded-md border"
+              modifiersClassNames={getDayModifiersClassNames()}
+              className="rounded-md border [&_.rest-day-modifier]:!bg-transparent [&_.rest-day-modifier]:!border-2 [&_.rest-day-modifier]:!border-green-500 [&_.rest-day-modifier]:!rounded [&_.holiday-modifier]:!bg-transparent [&_.holiday-modifier]:!border-2 [&_.holiday-modifier]:!border-yellow-400 [&_.holiday-modifier]:!rounded"
             />
             
             {/* Color Legend */}
