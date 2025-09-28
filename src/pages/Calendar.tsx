@@ -293,23 +293,23 @@ export default function CalendarPage() {
 
     if (showRestDays) {
       styles.restDay = {
-        backgroundColor: 'hsl(140 45% 45% / 0.10)',
-        boxShadow: 'inset 0 0 0 2px hsl(140 45% 45%)',
-        borderRadius: '4px',
-        boxSizing: 'border-box',
+        backgroundColor: 'hsl(140 45% 45% / 0.15) !important',
+        boxShadow: 'inset 0 0 0 2px hsl(140 45% 45%) !important',
+        borderRadius: '4px !important',
+        boxSizing: 'border-box !important',
         position: 'relative' as const,
-        zIndex: 1,
+        zIndex: '10 !important',
       };
     }
 
     if (showHolidays) {
       styles.holiday = {
-        backgroundColor: 'hsl(50 90% 55% / 0.12)',
-        boxShadow: 'inset 0 0 0 2px hsl(50 90% 55%)',
-        borderRadius: '4px',
-        boxSizing: 'border-box',
+        backgroundColor: 'hsl(50 90% 55% / 0.15) !important',
+        boxShadow: 'inset 0 0 0 2px hsl(50 90% 55%) !important',
+        borderRadius: '4px !important',
+        boxSizing: 'border-box !important',
         position: 'relative' as const,
-        zIndex: 1,
+        zIndex: '10 !important',
       };
     }
     
