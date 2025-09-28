@@ -293,19 +293,23 @@ export default function CalendarPage() {
 
     if (showRestDays) {
       styles.restDay = {
-        backgroundColor: 'transparent',
+        backgroundColor: 'hsl(140 45% 45% / 0.10)',
         boxShadow: 'inset 0 0 0 2px hsl(140 45% 45%)',
         borderRadius: '4px',
         boxSizing: 'border-box',
+        position: 'relative' as const,
+        zIndex: 1,
       };
     }
 
     if (showHolidays) {
       styles.holiday = {
-        backgroundColor: 'transparent',
+        backgroundColor: 'hsl(50 90% 55% / 0.12)',
         boxShadow: 'inset 0 0 0 2px hsl(50 90% 55%)',
         borderRadius: '4px',
         boxSizing: 'border-box',
+        position: 'relative' as const,
+        zIndex: 1,
       };
     }
     
