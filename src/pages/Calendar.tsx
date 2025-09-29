@@ -290,29 +290,8 @@ export default function CalendarPage() {
 
   const getDayModifiersStyles = () => {
     const styles: any = {};
-
-    if (showRestDays) {
-      styles.restDay = {
-        backgroundColor: 'hsl(140 45% 45% / 0.15) !important',
-        boxShadow: 'inset 0 0 0 2px hsl(140 45% 45%) !important',
-        borderRadius: '4px !important',
-        boxSizing: 'border-box !important',
-        position: 'relative' as const,
-        zIndex: '10 !important',
-      };
-    }
-
-    if (showHolidays) {
-      styles.holiday = {
-        backgroundColor: 'hsl(50 90% 55% / 0.15) !important',
-        boxShadow: 'inset 0 0 0 2px hsl(50 90% 55%) !important',
-        borderRadius: '4px !important',
-        boxSizing: 'border-box !important',
-        position: 'relative' as const,
-        zIndex: '10 !important',
-      };
-    }
-    
+    // Use CSS classes for rest days and public holidays frames (see index.css)
+    // to avoid conflicts with DayPicker styles.
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
         const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
