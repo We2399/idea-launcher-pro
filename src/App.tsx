@@ -50,7 +50,7 @@ const App = () => {
                             <Routes>
                               <Route path="/" element={<Index />} />
                               <Route path="/requests" element={<Requests />} />
-                              <Route path="/calendar" element={<CalendarWithColors />} />
+                              <Route path="/calendar" element={<Calendar />} />
                               <Route path="/tasks" element={<Tasks />} />
                               <Route path="/cash-control" element={<CashControlSplit />} />
                               <Route path="/profile" element={<ProfileWithApproval />} />
