@@ -12,7 +12,8 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
 import { useTranslationHelpers } from '@/lib/translations';
-import { Calendar, CalendarDays } from 'lucide-react';
+import { Calendar, CalendarDays, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface CreateLeaveDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
   const { translateLeaveType } = useTranslationHelpers();
   const [loading, setLoading] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [overlapWarning, setOverlapWarning] = useState(false);
   const [formData, setFormData] = useState({
     leave_type_id: '',
     start_date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
@@ -45,6 +47,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
   React.useEffect(() => {
     if (open) {
       fetchLeaveTypes();
+      setOverlapWarning(false);
       if (selectedDate) {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         setFormData(prev => ({
@@ -55,6 +58,24 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       }
     }
   }, [open, selectedDate]);
+
+  // Real-time overlap checking when dates change
+  React.useEffect(() => {
+    const checkOverlap = async () => {
+      if (formData.start_date && formData.end_date) {
+        try {
+          const hasOverlapResult = await hasOverlap(formData.start_date, formData.end_date);
+          setOverlapWarning(hasOverlapResult);
+        } catch (error) {
+          console.error('Error checking overlap:', error);
+        }
+      } else {
+        setOverlapWarning(false);
+      }
+    };
+
+    checkOverlap();
+  }, [formData.start_date, formData.end_date]);
 
   const fetchLeaveTypes = async () => {
     try {
@@ -121,7 +142,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       if (await hasOverlap(formData.start_date, formData.end_date)) {
         toast({
           title: t('error'),
-          description: t('overlappingDates'),
+          description: 'You already have a leave request for these dates. Please choose different dates.',
           variant: 'destructive',
         });
         return;
@@ -223,7 +244,17 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
             </div>
           </div>
 
-          {formData.start_date && formData.end_date && (
+          {overlapWarning && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Overlapping Leave Request</AlertTitle>
+              <AlertDescription>
+                You already have a leave request for these dates. Please select different dates.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {formData.start_date && formData.end_date && !overlapWarning && (
             <div className="p-3 bg-muted rounded-lg">
               <div className="text-sm font-medium">{t('requestSummary')}</div>
               <div className="text-sm text-muted-foreground">
@@ -247,7 +278,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('cancel')}
             </Button>
-            <Button type="submit" disabled={loading || !formData.leave_type_id}>
+            <Button type="submit" disabled={loading || !formData.leave_type_id || overlapWarning}>
               {loading ? t('submitting') : t('submitLeaveRequest')}
             </Button>
           </div>
