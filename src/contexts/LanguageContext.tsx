@@ -207,7 +207,21 @@ const translations = {
     clear: 'Clear',
     search: 'Search',
     type: 'Type',
-    requestStatus: 'Request status'
+    requestStatus: 'Request status',
+    
+    // Calendar
+    leaveCalendarDescription: 'View and manage leave requests on the calendar',
+    calendarView: 'Calendar View',
+    colorLegend: 'Color Legend',
+    selectDate: 'Select Date',
+    myLeave: 'My Leave',
+    teamLeave: 'Team Leave',
+    allLeave: 'All Leave',
+    leaveAllocationManagement: 'Leave Allocation Management',
+    showRestDays: 'Show rest days',
+    showPublicHolidays: 'Show public holidays',
+    restDays: 'Rest Days',
+    publicHolidays: 'Public Holidays'
   },
   'zh-TW': {
     // Navigation
@@ -397,7 +411,21 @@ const translations = {
     clear: '清除',
     search: '搜尋',
     type: '類型',
-    requestStatus: '申請狀態'
+    requestStatus: '申請狀態',
+    
+    // Calendar
+    leaveCalendarDescription: '在日曆上查看和管理休假申請',
+    calendarView: '日曆視圖',
+    colorLegend: '顏色圖例',
+    selectDate: '選擇日期',
+    myLeave: '我的休假',
+    teamLeave: '團隊休假',
+    allLeave: '所有休假',
+    leaveAllocationManagement: '休假分配管理',
+    showRestDays: '顯示休息日',
+    showPublicHolidays: '顯示公眾假期',
+    restDays: '休息日',
+    publicHolidays: '公眾假期'
   },
   'zh-CN': {
     // Navigation
@@ -587,7 +615,21 @@ const translations = {
     clear: '清除',
     search: '搜索',
     type: '类型',
-    requestStatus: '申请状态'
+    requestStatus: '申请状态',
+    
+    // Calendar
+    leaveCalendarDescription: '在日历上查看和管理休假申请',
+    calendarView: '日历视图',
+    colorLegend: '颜色图例',
+    selectDate: '选择日期',
+    myLeave: '我的休假',
+    teamLeave: '团队休假',
+    allLeave: '所有休假',
+    leaveAllocationManagement: '休假分配管理',
+    showRestDays: '显示休息日',
+    showPublicHolidays: '显示公众假期',
+    restDays: '休息日',
+    publicHolidays: '公众假期'
   },
   id: {
     // Navigation
@@ -777,7 +819,21 @@ const translations = {
     clear: 'Bersihkan',
     search: 'Cari',
     type: 'Jenis',
-    requestStatus: 'Status permintaan'
+    requestStatus: 'Status permintaan',
+    
+    // Calendar
+    leaveCalendarDescription: 'Lihat dan kelola permohonan cuti di kalender',
+    calendarView: 'Tampilan Kalender',
+    colorLegend: 'Legenda Warna',
+    selectDate: 'Pilih Tanggal',
+    myLeave: 'Cuti Saya',
+    teamLeave: 'Cuti Tim',
+    allLeave: 'Semua Cuti',
+    leaveAllocationManagement: 'Manajemen Alokasi Cuti',
+    showRestDays: 'Tampilkan hari istirahat',
+    showPublicHolidays: 'Tampilkan hari libur umum',
+    restDays: 'Hari Istirahat',
+    publicHolidays: 'Hari Libur Umum'
   }
 };
 

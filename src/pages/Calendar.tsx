@@ -402,11 +402,11 @@ export default function CalendarPage() {
             <div className="mb-3 flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Checkbox checked={showRestDays} onCheckedChange={(v) => setShowRestDays(Boolean(v))} />
-                <span>Show rest days</span>
+                <span>{t('showRestDays')}</span>
               </label>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Checkbox checked={showHolidays} onCheckedChange={(v) => setShowHolidays(Boolean(v))} />
-                <span>Show public holidays</span>
+                <span>{t('showPublicHolidays')}</span>
               </label>
             </div>
             <Calendar
@@ -432,44 +432,44 @@ export default function CalendarPage() {
                         <div className="flex items-center gap-1">
                           <div 
                             className="w-3 h-3 rounded"
-                            style={{ backgroundColor: colors.pending }}
-                          ></div>
-                          <span>{translateStatus('pending')}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div 
-                            className="w-3 h-3 rounded"
-                            style={{ backgroundColor: colors.approved }}
-                          ></div>
-                          <span>{translateStatus('approved')}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Rest Days and Holidays */}
-                <div className="border-t pt-3">
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded border-2"
-                        style={{ backgroundColor: 'transparent', borderColor: 'hsl(140 45% 45%)' }}
+                        style={{ backgroundColor: colors.pending }}
                       ></div>
-                      <span>Rest Days</span>
+                      <span>{translateStatus('pending')}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <div 
-                        className="w-3 h-3 rounded border-2"
-                        style={{ 
-                          backgroundColor: 'transparent',
-                          borderColor: 'hsl(50 90% 55%)'
-                        }}
+                        className="w-3 h-3 rounded"
+                        style={{ backgroundColor: colors.approved }}
                       ></div>
-                      <span>Public Holidays</span>
+                      <span>{translateStatus('approved')}</span>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* Rest Days and Holidays */}
+            <div className="border-t pt-3">
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded border-2"
+                    style={{ backgroundColor: 'transparent', borderColor: 'hsl(140 45% 45%)' }}
+                  ></div>
+                  <span>{t('restDays')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded border-2"
+                    style={{ 
+                      backgroundColor: 'transparent',
+                      borderColor: 'hsl(50 90% 55%)'
+                    }}
+                  ></div>
+                  <span>{t('publicHolidays')}</span>
+                </div>
+              </div>
+            </div>
               </div>
             </div>
           </CardContent>
