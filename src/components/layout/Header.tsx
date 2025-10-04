@@ -67,22 +67,22 @@ export function Header() {
     : user?.email;
 
   return (
-    <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4">
-      <div className="flex items-center gap-4">
+    <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4 gap-2">
+      <div className="flex items-center gap-2 md:gap-4 min-w-0">
         <SidebarTrigger />
-        <h1 className="text-xl font-semibold text-foreground">SME EmpRecord Hub</h1>
+        <h1 className="text-base md:text-xl font-semibold text-foreground truncate">SME EmpRecord Hub</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
         <LanguageSwitcher />
         {user && (
           <>
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1">
                 <RoleIcon className="h-3 w-3" />
-                {getRoleLabel(userRole)}
+                <span className="hidden md:inline">{getRoleLabel(userRole)}</span>
               </Badge>
-              <span className="text-sm text-muted-foreground">{displayName}</span>
+              <span className="text-sm text-muted-foreground hidden lg:inline truncate max-w-[150px]">{displayName}</span>
             </div>
             <Button 
               variant="outline" 
@@ -91,7 +91,7 @@ export function Header() {
               className="flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              {t('signOut')}
+              <span className="hidden sm:inline">{t('signOut')}</span>
             </Button>
           </>
         )}

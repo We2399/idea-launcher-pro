@@ -87,15 +87,15 @@ const Index = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome Back!</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Welcome Back!</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Manage your leave requests and stay updated with your team's schedule
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {dashboardCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -121,7 +121,7 @@ const Index = () => {
       </div>
 
       {/* Real-time Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card className="card-professional animate-slide-up">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">

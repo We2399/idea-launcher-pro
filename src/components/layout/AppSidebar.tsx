@@ -45,7 +45,7 @@ const getAdminItems = (t: (key: string) => string) => [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const { userRole } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
@@ -69,8 +69,10 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-60"}>
-      <SidebarTrigger className="m-2 self-end" />
+    <Sidebar 
+      className={collapsed ? "w-14" : "w-60"}
+      collapsible={isMobile ? "offcanvas" : "icon"}
+    >
 
       <SidebarContent>
         <SidebarGroup>

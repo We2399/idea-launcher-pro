@@ -357,29 +357,31 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('calendar')}</h1>
-          <p className="text-muted-foreground">{t('leaveCalendarDescription')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('calendar')}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t('leaveCalendarDescription')}</p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full sm:w-auto">
           {userRole === 'hr_admin' && (
-            <Link to="/settings">
-              <Button variant="outline" className="flex items-center gap-2">
+            <Link to="/settings" className="w-full sm:w-auto">
+              <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto text-sm">
                 <Settings className="h-4 w-4" />
-                {t('leaveAllocationManagement')}
+                <span className="hidden md:inline">{t('leaveAllocationManagement')}</span>
+                <span className="md:hidden">Settings</span>
               </Button>
             </Link>
           )}
-          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
+          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2 w-full sm:w-auto text-sm">
             <Plus className="h-4 w-4" />
-            {t('createLeaveRequest')}
+            <span className="hidden sm:inline">{t('createLeaveRequest')}</span>
+            <span className="sm:hidden">New</span>
           </Button>
 
           <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -393,12 +395,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>{t('calendarView')}</CardTitle>
+            <CardTitle className="text-lg md:text-xl">{t('calendarView')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <div className="mb-3 flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Checkbox checked={showRestDays} onCheckedChange={(v) => setShowRestDays(Boolean(v))} />
@@ -416,7 +418,7 @@ export default function CalendarPage() {
               modifiers={getDayModifiers()}
               modifiersStyles={getDayModifiersStyles()}
               modifiersClassNames={getDayModifiersClassNames()}
-              className="rounded-md border"
+              className="rounded-md border w-full"
             />
             
             {/* Color Legend */}
@@ -477,7 +479,7 @@ export default function CalendarPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-lg md:text-xl">
               {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : t('selectDate')}
             </CardTitle>
           </CardHeader>
