@@ -754,9 +754,9 @@ export default function Requests() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
+        <CardContent className="p-0 overflow-hidden">
+          <div className="overflow-x-auto w-full">
+            <Table className="w-full min-w-[800px]">
               <TableHeader>
                 <TableRow>
                   {userRole !== 'employee' && <TableHead className="min-w-[200px]">Employee</TableHead>}

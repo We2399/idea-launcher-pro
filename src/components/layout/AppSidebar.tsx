@@ -74,6 +74,19 @@ export function AppSidebar() {
       collapsible={isMobile ? "offcanvas" : "icon"}
     >
       <SidebarContent className="pt-4">
+        {/* Logo Section */}
+        <div className={`px-4 mb-6 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+            <Home className="h-6 w-6 text-primary-foreground" />
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-foreground">SME EmpRecord</span>
+              <span className="text-xs text-muted-foreground">Hub</span>
+            </div>
+          )}
+        </div>
+
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
             {!collapsed && "Navigation"}
