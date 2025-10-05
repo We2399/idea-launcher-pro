@@ -150,14 +150,16 @@ export default function Requests() {
   const formatDateLocal = (date: Date) => format(date, 'yyyy-MM-dd');
 
   // Check if the requested range overlaps with any existing pending/approved requests
-  const hasOverlap = async (start: Date, end: Date, excludeId?: string) => {
+  const hasOverlap = async (start: Date, end: Date, excludeId?: string, userId?: string) => {
     if (!user) return false;
     const startStr = formatDateLocal(start);
     const endStr = formatDateLocal(end);
+    // Use provided userId or default to current user
+    const checkUserId = userId || user.id;
     const { data, error } = await supabase
       .from('leave_requests')
       .select('id,start_date,end_date,status')
-      .eq('user_id', user.id)
+      .eq('user_id', checkUserId)
       .in('status', ['pending', 'approved', 'senior_approved']);
     if (error) throw error;
     return (data || []).some((r) => {
@@ -322,7 +324,7 @@ export default function Requests() {
       // If approving, check for overlaps first
       if (status === 'approved') {
         const request = requests.find(r => r.id === requestId);
-        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
+        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId, request.user_id)) {
           toast({
             title: t('error'),
             description: t('overlappingDates'),
@@ -371,7 +373,7 @@ export default function Requests() {
       // If approving, check for overlaps first
       if (status === 'approved') {
         const request = requests.find(r => r.id === requestId);
-        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId)) {
+        if (request && await hasOverlap(new Date(request.start_date), new Date(request.end_date), requestId, request.user_id)) {
           toast({
             title: t('error'),
             description: t('overlappingDates'),
