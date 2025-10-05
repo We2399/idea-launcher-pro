@@ -70,22 +70,33 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={collapsed ? "w-14" : "w-60"}
+      className={collapsed ? "w-16" : "w-64"}
       collapsible={isMobile ? "offcanvas" : "icon"}
     >
-
-      <SidebarContent>
+      <SidebarContent className="pt-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
+            {!collapsed && "Navigation"}
+          </SidebarGroupLabel>
 
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1 px-2">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                  <SidebarMenuButton asChild tooltip={collapsed ? item.title : undefined}>
+                    <NavLink 
+                      to={item.url} 
+                      end 
+                      className={({ isActive }) => 
+                        `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
+                          isActive 
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm" 
+                            : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                        }`
+                      }
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -754,21 +754,22 @@ export default function Requests() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-               <TableRow>
-                 {userRole !== 'employee' && <TableHead>Employee</TableHead>}
-                 <TableHead>Leave Type</TableHead>
-                 <TableHead>Start Date</TableHead>
-                 <TableHead>End Date</TableHead>
-                 <TableHead>Days</TableHead>
-                 <TableHead>Reason</TableHead>
-                 <TableHead>Status</TableHead>
-                 <TableHead>Actions</TableHead>
-               </TableRow>
-            </TableHeader>
-            <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {userRole !== 'employee' && <TableHead className="min-w-[200px]">Employee</TableHead>}
+                  <TableHead className="min-w-[140px]">Leave Type</TableHead>
+                  <TableHead className="min-w-[120px]">Start Date</TableHead>
+                  <TableHead className="min-w-[120px]">End Date</TableHead>
+                  <TableHead className="min-w-[80px]">Days</TableHead>
+                  <TableHead className="min-w-[150px]">Reason</TableHead>
+                  <TableHead className="min-w-[120px]">Status</TableHead>
+                  <TableHead className="min-w-[200px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
               {filteredRequests.map((request) => (
                 <TableRow key={request.id}>
                   {userRole !== 'employee' && (
@@ -906,6 +907,7 @@ export default function Requests() {
               ))}
             </TableBody>
           </Table>
+          </div>
           {filteredRequests.length === 0 && requests.length > 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
