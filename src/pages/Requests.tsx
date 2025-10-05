@@ -755,8 +755,144 @@ export default function Requests() {
           </div>
         </CardHeader>
         <CardContent className="p-0 overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <Table className="w-full min-w-[800px]">
+          {/* Mobile-friendly list (shows all fields) */}
+          <div className="md:hidden divide-y">
+            {filteredRequests.map((request) => (
+              <div key={request.id} className="p-4">
+                {userRole !== 'employee' && (
+                  <div className="text-sm font-medium">
+                    {request.profiles
+                      ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})`
+                      : 'Unknown Employee'}
+                  </div>
+                )}
+                <div className="mt-1 grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Leave Type</div>
+                  <div>{request.leave_types?.name || 'Unknown'}</div>
+
+                  <div className="text-muted-foreground">Start</div>
+                  <div>{format(new Date(request.start_date), 'MMM dd, yyyy')}</div>
+
+                  <div className="text-muted-foreground">End</div>
+                  <div>{format(new Date(request.end_date), 'MMM dd, yyyy')}</div>
+
+                  <div className="text-muted-foreground">Days</div>
+                  <div>{request.days_requested}</div>
+
+                  <div className="text-muted-foreground">Reason</div>
+                  <div className="truncate">{request.reason}</div>
+
+                  <div className="text-muted-foreground">Status</div>
+                  <div>{getStatusBadge(request.status)}</div>
+                </div>
+
+                <div className="mt-3">
+                  {/* Employee actions for their own pending requests */}
+                  {userRole === 'employee' && request.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEditDialog(request)}
+                        className="flex items-center gap-1"
+                      >
+                        <Edit className="h-3 w-3" />
+                        {t('edit')}
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="destructive" className="flex items-center gap-1">
+                            <Trash2 className="h-3 w-3" />
+                            {t('delete')}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your leave request.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteRequest(request.id)}>
+                              {t('delete')}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+
+                  {/* Manager/HR Admin actions */}
+                  {(userRole === 'manager' || userRole === 'hr_admin') && (
+                    <>
+                      {/* Senior Management Approval (for pending requests) */}
+                      {userRole === 'manager' && request.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                            <Shield className="h-3 w-3" />
+                            Senior Approve
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                            <X className="h-3 w-3" />
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Administrator Final Approval */}
+                      {userRole === 'hr_admin' && (
+                        <div className="flex gap-2">
+                          {request.status === 'pending' && (
+                            <>
+                              <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                <Crown className="h-3 w-3" />
+                                Admin Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                <X className="h-3 w-3" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {request.status === 'senior_approved' && (
+                            <>
+                              <Button size="sm" onClick={() => handleFinalApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                <Check className="h-3 w-3" />
+                                Final Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                <X className="h-3 w-3" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {filteredRequests.length === 0 && requests.length > 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No requests match your current filters</p>
+                <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+            {requests.length === 0 && !loading && (
+              <div className="text-center py-8 text-muted-foreground">No leave requests found</div>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto w-full">
+            <Table className="w-full min-w-[1000px]">
               <TableHeader>
                 <TableRow>
                   {userRole !== 'employee' && <TableHead className="min-w-[200px]">Employee</TableHead>}
@@ -770,158 +906,108 @@ export default function Requests() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-              {filteredRequests.map((request) => (
-                <TableRow key={request.id}>
-                  {userRole !== 'employee' && (
+                {filteredRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    {userRole !== 'employee' && (
+                      <TableCell>
+                        {request.profiles
+                          ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})`
+                          : 'Unknown Employee'}
+                      </TableCell>
+                    )}
+                    <TableCell>{request.leave_types?.name || 'Unknown'}</TableCell>
+                    <TableCell>{format(new Date(request.start_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{format(new Date(request.end_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{request.days_requested}</TableCell>
+                    <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
+                    <TableCell>{getStatusBadge(request.status)}</TableCell>
                     <TableCell>
-                      {request.profiles ? 
-                        `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})` : 
-                        'Unknown Employee'
-                      }
-                    </TableCell>
-                  )}
-                  <TableCell>{request.leave_types?.name || 'Unknown'}</TableCell>
-                  <TableCell>{format(new Date(request.start_date), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{format(new Date(request.end_date), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>{request.days_requested}</TableCell>
-                  <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                   <TableCell>{getStatusBadge(request.status)}</TableCell>
-                   <TableCell>
-                     {/* Employee actions for their own pending requests */}
-                     {userRole === 'employee' && request.status === 'pending' && (
-                       <div className="flex gap-2">
-                         <Button
-                           size="sm"
-                           variant="outline"
-                           onClick={() => openEditDialog(request)}
-                           className="flex items-center gap-1"
-                         >
-                           <Edit className="h-3 w-3" />
-                           {t('edit')}
-                         </Button>
-                         <AlertDialog>
-                           <AlertDialogTrigger asChild>
-                             <Button
-                               size="sm"
-                               variant="destructive"
-                               className="flex items-center gap-1"
-                             >
-                               <Trash2 className="h-3 w-3" />
-                               {t('delete')}
-                             </Button>
-                           </AlertDialogTrigger>
-                           <AlertDialogContent>
-                             <AlertDialogHeader>
-                               <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
-                               <AlertDialogDescription>
-                                 This action cannot be undone. This will permanently delete your leave request.
-                               </AlertDialogDescription>
-                             </AlertDialogHeader>
-                             <AlertDialogFooter>
-                               <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                               <AlertDialogAction onClick={() => handleDeleteRequest(request.id)}>
-                                 {t('delete')}
-                               </AlertDialogAction>
-                             </AlertDialogFooter>
-                           </AlertDialogContent>
-                         </AlertDialog>
-                       </div>
-                     )}
-                     {/* Manager/HR Admin actions */}
-                     {(userRole === 'manager' || userRole === 'hr_admin') && (
-                       <>
-                         {/* Senior Management Approval (for pending requests) */}
-                         {userRole === 'manager' && request.status === 'pending' && (
+                      {/* Employee actions for their own pending requests */}
+                      {userRole === 'employee' && request.status === 'pending' && (
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleSeniorApproval(request.id, 'approved')}
-                            className="flex items-center gap-1"
-                          >
-                            <Shield className="h-3 w-3" />
-                            Senior Approve
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(request)} className="flex items-center gap-1">
+                            <Edit className="h-3 w-3" />
+                            {t('edit')}
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleSeniorApproval(request.id, 'rejected')}
-                            className="flex items-center gap-1"
-                          >
-                            <X className="h-3 w-3" />
-                            Reject
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="destructive" className="flex items-center gap-1">
+                                <Trash2 className="h-3 w-3" />
+                                {t('delete')}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete your leave request.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteRequest(request.id)}>
+                                  {t('delete')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       )}
-                      
-                      {/* Administrator Final Approval */}
-                      {userRole === 'hr_admin' && (
-                        <div className="flex gap-2">
-                          {request.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleSeniorApproval(request.id, 'approved')}
-                                className="flex items-center gap-1"
-                              >
-                                <Crown className="h-3 w-3" />
-                                Admin Approve
+
+                      {/* Manager/HR Admin actions */}
+                      {(userRole === 'manager' || userRole === 'hr_admin') && (
+                        <>
+                          {/* Senior Management Approval (for pending requests) */}
+                          {userRole === 'manager' && request.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                <Shield className="h-3 w-3" />
+                                Senior Approve
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleSeniorApproval(request.id, 'rejected')}
-                                className="flex items-center gap-1"
-                              >
+                              <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
                                 Reject
                               </Button>
-                            </>
+                            </div>
                           )}
-                          {request.status === 'senior_approved' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleFinalApproval(request.id, 'approved')}
-                                className="flex items-center gap-1"
-                              >
-                                <Check className="h-3 w-3" />
-                                Final Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleFinalApproval(request.id, 'rejected')}
-                                className="flex items-center gap-1"
-                              >
-                                <X className="h-3 w-3" />
-                                Reject
-                              </Button>
-                            </>
-                           )}
-                         </div>
-                       )}
-                       </>
-                     )}
-                   </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+
+                          {/* Administrator Final Approval */}
+                          {userRole === 'hr_admin' && (
+                            <div className="flex gap-2">
+                              {request.status === 'pending' && (
+                                <>
+                                  <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                    <Crown className="h-3 w-3" />
+                                    Admin Approve
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                    <X className="h-3 w-3" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {request.status === 'senior_approved' && (
+                                <>
+                                  <Button size="sm" onClick={() => handleFinalApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                    <Check className="h-3 w-3" />
+                                    Final Approve
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                    <X className="h-3 w-3" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          {filteredRequests.length === 0 && requests.length > 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No requests match your current filters</p>
-              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
-                Clear Filters
-              </Button>
-            </div>
-          )}
-          {requests.length === 0 && !loading && (
-            <div className="text-center py-8 text-muted-foreground">
-              No leave requests found
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
