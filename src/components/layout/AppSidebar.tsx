@@ -45,7 +45,7 @@ const getAdminItems = (t: (key: string) => string) => [
 ];
 
 export function AppSidebar() {
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const { userRole } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
@@ -66,7 +66,14 @@ export function AppSidebar() {
     navigationItems = [...navigationItems, ...getAdminItems(t)];
   }
 
-  const collapsed = state === 'collapsed';
+  // On mobile, never collapse. On desktop, respect the collapsed state
+  const collapsed = !isMobile && state === 'collapsed';
+
+  const handleMobileNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar 
@@ -75,7 +82,11 @@ export function AppSidebar() {
     >
       <SidebarContent className="pt-4">
         {/* Logo Section */}
-        <div className={`px-4 mb-6 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+        <NavLink 
+          to="/" 
+          onClick={handleMobileNavClick}
+          className={`px-4 mb-6 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity ${collapsed ? 'justify-center' : ''}`}
+        >
           <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
             <Home className="h-6 w-6 text-primary-foreground" />
           </div>
@@ -85,7 +96,7 @@ export function AppSidebar() {
               <span className="text-xs text-muted-foreground">Hub</span>
             </div>
           )}
-        </div>
+        </NavLink>
 
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
@@ -100,6 +111,7 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       end 
+                      onClick={handleMobileNavClick}
                       className={({ isActive }) => 
                         `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
                           isActive 
