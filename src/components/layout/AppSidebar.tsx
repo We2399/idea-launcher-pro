@@ -41,7 +41,7 @@ const getManagerItems = (t: (key: string) => string) => [
 
 const getAdminItems = (t: (key: string) => string) => [
   { title: t('reports'), url: '/reports', icon: BarChart3 },
-  { title: 'Settings', url: '/settings', icon: Settings },
+  { title: t('settings'), url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {

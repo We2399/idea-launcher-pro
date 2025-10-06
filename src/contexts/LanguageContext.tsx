@@ -85,6 +85,9 @@ const translations = {
     myRequests: 'My Requests',
     teamRequests: 'Team Requests',
     allRequests: 'All Requests',
+    myLeaveRequests: 'My Leave Requests',
+    teamLeaveRequests: 'Team Leave Requests',
+    requests: 'requests',
     
     // Placeholders and Labels
     selectLeaveType: 'Select Leave Type',
@@ -289,6 +292,9 @@ const translations = {
     myRequests: '我的申請',
     teamRequests: '團隊申請',
     allRequests: '所有申請',
+    myLeaveRequests: '我的請假申請',
+    teamLeaveRequests: '團隊請假申請',
+    requests: '筆申請',
     
     // Placeholders and Labels
     selectLeaveType: '選擇休假類型',
@@ -493,6 +499,9 @@ const translations = {
     myRequests: '我的申请',
     teamRequests: '团队申请',
     allRequests: '所有申请',
+    myLeaveRequests: '我的请假申请',
+    teamLeaveRequests: '团队请假申请',
+    requests: '个申请',
     
     // Placeholders and Labels
     selectLeaveType: '选择休假类型',
@@ -697,6 +706,9 @@ const translations = {
     myRequests: 'Permintaan Saya',
     teamRequests: 'Permintaan Tim',
     allRequests: 'Semua Permintaan',
+    myLeaveRequests: 'Permohonan Cuti Saya',
+    teamLeaveRequests: 'Permohonan Cuti Tim',
+    requests: 'permintaan',
     
     // Placeholders and Labels
     selectLeaveType: 'Pilih Jenis Cuti',

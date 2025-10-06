@@ -48,7 +48,7 @@ interface LeaveType {
 
 export default function Requests() {
   const { user, userRole } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -684,7 +684,7 @@ export default function Requests() {
               <label className="text-sm font-medium">{t('leaveType')}</label>
               <Select value={selectedLeaveType} onValueChange={setSelectedLeaveType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select leave type" />
+                  <SelectValue placeholder={t('selectLeaveType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {leaveTypes.map((type) => (
@@ -701,7 +701,7 @@ export default function Requests() {
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Please provide a reason for your leave request"
+                placeholder={t('reasonPlaceholder')}
                 rows={3}
               />
             </div>
@@ -743,13 +743,13 @@ export default function Requests() {
             <CardTitle>
               {userRole === 'employee' ? t('myLeaveRequests') : t('teamLeaveRequests')}
               <Badge variant="outline" className="ml-2">
-                {filteredRequests.length} {filteredRequests.length === 1 ? 'request' : 'requests'}
+                {filteredRequests.length} {filteredRequests.length === 1 ? t('request') : t('requests')}
               </Badge>
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={handleExport}>
                 <Download className="h-3 w-3" />
-                Export
+                {t('export')}
               </Button>
             </div>
           </div>
@@ -763,26 +763,26 @@ export default function Requests() {
                   <div className="text-sm font-medium">
                     {request.profiles
                       ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})`
-                      : 'Unknown Employee'}
+                       : t('unknown') }
                   </div>
                 )}
                 <div className="mt-1 grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-muted-foreground">Leave Type</div>
-                  <div>{request.leave_types?.name || 'Unknown'}</div>
+                  <div className="text-muted-foreground">{t('leaveType')}</div>
+                  <div>{request.leave_types?.name || t('unknown')}</div>
 
-                  <div className="text-muted-foreground">Start</div>
-                  <div>{format(new Date(request.start_date), 'MMM dd, yyyy')}</div>
+                  <div className="text-muted-foreground">{t('startDate')}</div>
+                  <div>{format(new Date(request.start_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</div>
 
-                  <div className="text-muted-foreground">End</div>
-                  <div>{format(new Date(request.end_date), 'MMM dd, yyyy')}</div>
+                  <div className="text-muted-foreground">{t('endDate')}</div>
+                  <div>{format(new Date(request.end_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</div>
 
-                  <div className="text-muted-foreground">Days</div>
+                  <div className="text-muted-foreground">{t('days')}</div>
                   <div>{request.days_requested}</div>
 
-                  <div className="text-muted-foreground">Reason</div>
+                  <div className="text-muted-foreground">{t('reason')}</div>
                   <div className="truncate">{request.reason}</div>
 
-                  <div className="text-muted-foreground">Status</div>
+                  <div className="text-muted-foreground">{t('status')}</div>
                   <div>{getStatusBadge(request.status)}</div>
                 </div>
 
@@ -836,7 +836,7 @@ export default function Requests() {
                           </Button>
                           <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
                             <X className="h-3 w-3" />
-                            Reject
+                             {t('reject')}
                           </Button>
                         </div>
                       )}
@@ -852,7 +852,7 @@ export default function Requests() {
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
-                                Reject
+                                 {t('reject')}
                               </Button>
                             </>
                           )}
@@ -864,7 +864,7 @@ export default function Requests() {
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
-                                Reject
+                                 {t('reject')}
                               </Button>
                             </>
                           )}
