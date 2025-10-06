@@ -768,7 +768,7 @@ export default function Requests() {
                 )}
                 <div className="mt-1 grid grid-cols-2 gap-2 text-sm">
                   <div className="text-muted-foreground">{t('leaveType')}</div>
-                  <div>{request.leave_types?.name || t('unknown')}</div>
+                  <div>{translateLeaveType(request.leave_types?.name || '') || t('unknown')}</div>
 
                   <div className="text-muted-foreground">{t('startDate')}</div>
                   <div>{format(new Date(request.start_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</div>
@@ -895,14 +895,14 @@ export default function Requests() {
             <Table className="w-full min-w-[1000px]">
               <TableHeader>
                 <TableRow>
-                  {userRole !== 'employee' && <TableHead className="min-w-[200px]">Employee</TableHead>}
-                  <TableHead className="min-w-[140px]">Leave Type</TableHead>
-                  <TableHead className="min-w-[120px]">Start Date</TableHead>
-                  <TableHead className="min-w-[120px]">End Date</TableHead>
-                  <TableHead className="min-w-[80px]">Days</TableHead>
-                  <TableHead className="min-w-[150px]">Reason</TableHead>
-                  <TableHead className="min-w-[120px]">Status</TableHead>
-                  <TableHead className="min-w-[200px]">Actions</TableHead>
+                  {userRole !== 'employee' && <TableHead className="min-w-[200px]">{t('employee')}</TableHead>}
+                  <TableHead className="min-w-[140px]">{t('leaveType')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('startDate')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('endDate')}</TableHead>
+                  <TableHead className="min-w-[80px]">{t('days')}</TableHead>
+                  <TableHead className="min-w-[150px]">{t('reason')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('status')}</TableHead>
+                  <TableHead className="min-w-[200px]">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -912,12 +912,12 @@ export default function Requests() {
                       <TableCell>
                         {request.profiles
                           ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})`
-                          : 'Unknown Employee'}
+                          : t('unknown')}
                       </TableCell>
                     )}
-                    <TableCell>{request.leave_types?.name || 'Unknown'}</TableCell>
-                    <TableCell>{format(new Date(request.start_date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>{format(new Date(request.end_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{translateLeaveType(request.leave_types?.name || '') || t('unknown')}</TableCell>
+                    <TableCell>{format(new Date(request.start_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</TableCell>
+                    <TableCell>{format(new Date(request.end_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}</TableCell>
                     <TableCell>{request.days_requested}</TableCell>
                     <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                     <TableCell>{getStatusBadge(request.status)}</TableCell>

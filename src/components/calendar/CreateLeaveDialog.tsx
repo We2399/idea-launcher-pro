@@ -142,7 +142,7 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
       if (await hasOverlap(formData.start_date, formData.end_date)) {
         toast({
           title: t('error'),
-          description: 'You already have a leave request for these dates. Please choose different dates.',
+          description: t('overlappingLeaveDescription'),
           variant: 'destructive',
         });
         return;
@@ -247,9 +247,9 @@ export function CreateLeaveDialog({ open, onOpenChange, selectedDate, onSuccess 
           {overlapWarning && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Overlapping Leave Request</AlertTitle>
+              <AlertTitle>{t('overlappingLeaveRequest')}</AlertTitle>
               <AlertDescription>
-                You already have a leave request for these dates. Please select different dates.
+                {t('overlappingLeaveDescription')}
               </AlertDescription>
             </Alert>
           )}
