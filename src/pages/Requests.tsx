@@ -424,7 +424,7 @@ export default function Requests() {
     
     const statusLabels = {
       pending: t('pending'),
-      senior_approved: 'Senior Approved',
+      senior_approved: t('seniorApproved'),
       approved: t('approved'),
       rejected: t('rejected')
     };
@@ -468,15 +468,15 @@ export default function Requests() {
 
   const handleExport = () => {
     const csvContent = [
-      ['Employee', 'Leave Type', 'Start Date', 'End Date', 'Days', 'Reason', 'Status'].join(','),
+      [t('employee'), t('leaveType'), t('startDate'), t('endDate'), t('days'), t('reason'), t('status')].join(','),
       ...filteredRequests.map(request => [
-        `"${request.profiles ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})` : 'Unknown Employee'}"`,
-        `"${request.leave_types?.name || 'Unknown'}"`,
-        `"${format(new Date(request.start_date), 'MMM dd, yyyy')}"`,
-        `"${format(new Date(request.end_date), 'MMM dd, yyyy')}"`,
+        `"${request.profiles ? `${request.profiles.first_name} ${request.profiles.last_name} (${request.profiles.employee_id})` : t('unknown')}"`,
+        `"${translateLeaveType(request.leave_types?.name || '')}"`,
+        `"${format(new Date(request.start_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}"`,
+        `"${format(new Date(request.end_date), getLocalizedDateFormat(language), { locale: getDateLocale(language) })}"`,
         request.days_requested,
         `"${request.reason}"`,
-        `"${request.status}"`
+        `"${translateStatus(request.status)}"`
       ].join(','))
     ].join('\n');
     
@@ -523,7 +523,7 @@ export default function Requests() {
         <Card>
           <CardHeader>
             <CardTitle>{t('newRequest')}</CardTitle>
-            <CardDescription>Submit a new leave request for approval</CardDescription>
+            <CardDescription>{t('submitLeaveRequestDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -533,7 +533,7 @@ export default function Requests() {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
+                      {startDate ? format(startDate, getLocalizedDateFormat(language), { locale: getDateLocale(language) }) : t('selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -553,7 +553,7 @@ export default function Requests() {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      {endDate ? format(endDate, getLocalizedDateFormat(language), { locale: getDateLocale(language) }) : t('selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -573,29 +573,16 @@ export default function Requests() {
               <Select 
                 value={selectedLeaveType} 
                 onValueChange={setSelectedLeaveType}
-                defaultValue={leaveTypes.find(type => type.name === 'Sick Leave')?.id || ''}
               >
                 <SelectTrigger>
                 <SelectValue placeholder={t('selectLeaveType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Reordered leave types: Sick Leave first (default), then Vacation, Maternity, Paternity, Others */}
-                  {leaveTypes
-                    .sort((a, b) => {
-                      const order = ['Sick Leave', 'Vacation', 'Maternity', 'Paternity', 'Others'];
-                      const aIndex = order.indexOf(a.name);
-                      const bIndex = order.indexOf(b.name);
-                      
-                      if (aIndex === -1 && bIndex === -1) return a.name.localeCompare(b.name);
-                      if (aIndex === -1) return 1;
-                      if (bIndex === -1) return -1;
-                      return aIndex - bIndex;
-                    })
-                    .map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name} (Max: {type.max_days_per_year} days/year)
-                      </SelectItem>
-                    ))}
+                  {leaveTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {translateLeaveType(type.name)} ({t('max')}: {type.max_days_per_year} {t('daysPerYear')})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -634,7 +621,7 @@ export default function Requests() {
           <DialogHeader>
             <DialogTitle>{t('editRequest')}</DialogTitle>
             <DialogDescription>
-              Edit your leave request details
+              {t('editRequestDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -645,7 +632,7 @@ export default function Requests() {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
+                      {startDate ? format(startDate, getLocalizedDateFormat(language), { locale: getDateLocale(language) }) : t('selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -665,7 +652,7 @@ export default function Requests() {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      {endDate ? format(endDate, getLocalizedDateFormat(language), { locale: getDateLocale(language) }) : t('selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -689,7 +676,7 @@ export default function Requests() {
                 <SelectContent>
                   {leaveTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
-                      {type.name} (Max: {type.max_days_per_year} days/year)
+                      {translateLeaveType(type.name)} ({t('max')}: {type.max_days_per_year} {t('daysPerYear')})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -810,7 +797,7 @@ export default function Requests() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>{t('confirmDeleteLeave')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete your leave request.
+                              {t('confirmDeleteDescription')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -832,7 +819,7 @@ export default function Requests() {
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
                             <Shield className="h-3 w-3" />
-                            Senior Approve
+                            {t('seniorApprove')}
                           </Button>
                           <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
                             <X className="h-3 w-3" />
@@ -848,7 +835,7 @@ export default function Requests() {
                             <>
                               <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
                                 <Crown className="h-3 w-3" />
-                                Admin Approve
+                                {t('adminApprove')}
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
@@ -860,7 +847,7 @@ export default function Requests() {
                             <>
                               <Button size="sm" onClick={() => handleFinalApproval(request.id, 'approved')} className="flex items-center gap-1">
                                 <Check className="h-3 w-3" />
-                                Final Approve
+                                {t('finalApprove')}
                               </Button>
                               <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
@@ -879,14 +866,14 @@ export default function Requests() {
             {filteredRequests.length === 0 && requests.length > 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No requests match your current filters</p>
+                <p>{t('noMatchingRequests')}</p>
                 <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
-                  Clear Filters
+                  {t('clearFilters')}
                 </Button>
               </div>
             )}
             {requests.length === 0 && !loading && (
-              <div className="text-center py-8 text-muted-foreground">No leave requests found</div>
+              <div className="text-center py-8 text-muted-foreground">{t('noLeaveRequestsFound')}</div>
             )}
           </div>
 
