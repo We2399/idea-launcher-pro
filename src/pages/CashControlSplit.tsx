@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, DollarSign, Receipt, Check, X, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslationHelpers } from '@/lib/translations';
 
 interface CashTransaction {
   id: string;
@@ -46,6 +48,8 @@ const CashControl = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const { translateStatus, translateTransactionType, translateCategory } = useTranslationHelpers();
   const [transactions, setTransactions] = useState<CashTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
@@ -129,8 +133,8 @@ const CashControl = () => {
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch transactions',
+        title: t('error'),
+        description: error.message || t('failedToFetch'),
         variant: 'destructive',
       });
     } finally {
@@ -163,15 +167,15 @@ const CashControl = () => {
       setReportData({ ...reportData, receipt_url: publicUrl });
 
       toast({
-        title: 'Success',
-        description: 'Receipt uploaded successfully',
+        title: t('success'),
+        description: t('receiptUploadSuccess'),
       });
 
       return publicUrl;
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to upload receipt',
+        title: t('error'),
+        description: error.message || t('receiptUploadError'),
         variant: 'destructive',
       });
       return null;
@@ -200,8 +204,8 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Cash request submitted for approval',
+        title: t('success'),
+        description: t('cashRequestSuccess'),
       });
 
       setShowRequestDialog(false);
@@ -214,8 +218,8 @@ const CashControl = () => {
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create cash request',
+        title: t('error'),
+        description: error.message || t('failedToCreate'),
         variant: 'destructive',
       });
     }
@@ -242,8 +246,8 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Expense report submitted successfully',
+        title: t('success'),
+        description: t('expenseReportSuccess'),
       });
 
       setShowReportDialog(false);
@@ -258,8 +262,8 @@ const CashControl = () => {
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create expense report',
+        title: t('error'),
+        description: error.message || t('failedToSubmit'),
         variant: 'destructive',
       });
     }
@@ -297,16 +301,16 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Transaction approved',
+        title: t('success'),
+        description: t('transactionApproved'),
       });
 
       fetchTransactions();
       fetchCashBalance();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to approve transaction',
+        title: t('error'),
+        description: error.message || t('failedToApprove'),
         variant: 'destructive',
       });
     }
@@ -329,15 +333,15 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Transaction rejected',
+        title: t('success'),
+        description: t('transactionRejected'),
       });
 
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to reject transaction',
+        title: t('error'),
+        description: error.message || t('failedToReject'),
         variant: 'destructive',
       });
     }
@@ -362,29 +366,29 @@ const CashControl = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('cashControlTitle')}</h1>
-          <p className="text-muted-foreground">Manage cash requests and expense reports</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('cashControlTitle')}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t('cashControlDescription')}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center justify-center gap-2 w-full sm:w-auto">
                 <DollarSign className="h-4 w-4" />
                 {t('cashRequest')}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[95vw] md:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Cash Request</DialogTitle>
+                <DialogTitle>{t('cashRequestTitle')}</DialogTitle>
                 <DialogDescription>
-                  Request cash advance from the company
+                  {t('cashRequestDescription')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCashRequest} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="amount">{t('amount')}</Label>
                     <Input
@@ -398,9 +402,9 @@ const CashControl = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="currency">{t('currency')}</Label>
-                    <Select onValueChange={(value) => setRequestData({ ...requestData, currency: value })}>
+                    <Select value={requestData.currency} onValueChange={(value) => setRequestData({ ...requestData, currency: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="HKD" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="HKD">HKD</SelectItem>
@@ -415,16 +419,16 @@ const CashControl = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">{t('category')}</Label>
-                  <Select onValueChange={(value) => setRequestData({ ...requestData, category: value })}>
+                  <Select value={requestData.category} onValueChange={(value) => setRequestData({ ...requestData, category: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="General" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="travel">Travel</SelectItem>
-                      <SelectItem value="supplies">Office Supplies</SelectItem>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="others">Others</SelectItem>
+                      <SelectItem value="general">{translateCategory('general')}</SelectItem>
+                      <SelectItem value="travel">{translateCategory('travel')}</SelectItem>
+                      <SelectItem value="supplies">{translateCategory('officeSupplies')}</SelectItem>
+                      <SelectItem value="training">{translateCategory('training')}</SelectItem>
+                      <SelectItem value="others">{translateCategory('others')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -434,7 +438,7 @@ const CashControl = () => {
                     id="description"
                     value={requestData.description}
                     onChange={(e) => setRequestData({ ...requestData, description: e.target.value })}
-                    placeholder="Please explain why you need this cash advance..."
+                    placeholder={t('cashRequestPlaceholder')}
                     required
                   />
                 </div>
@@ -450,52 +454,52 @@ const CashControl = () => {
 
           <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
                 <Receipt className="h-4 w-4" />
                 {t('expenseReport')}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[95vw] md:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Expense Report</DialogTitle>
+                <DialogTitle>{t('expenseReportTitle')}</DialogTitle>
                 <DialogDescription>
-                  Submit an expense or reimbursement report
+                  {t('expenseReportDescription')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleExpenseReport} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="type">{t('type')}</Label>
-                    <Select onValueChange={(value: any) => setReportData({ ...reportData, type: value })}>
+                    <Select value={reportData.type} onValueChange={(value: any) => setReportData({ ...reportData, type: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Expense" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="expense">Expense</SelectItem>
-                        <SelectItem value="reimbursement">Reimbursement</SelectItem>
+                        <SelectItem value="expense">{translateTransactionType('expense')}</SelectItem>
+                        <SelectItem value="reimbursement">{translateTransactionType('reimbursement')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="category">{t('category')}</Label>
-                    <Select onValueChange={(value) => setReportData({ ...reportData, category: value })}>
+                    <Select value={reportData.category} onValueChange={(value) => setReportData({ ...reportData, category: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="General" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="general">General</SelectItem>
-                        <SelectItem value="travel">Travel</SelectItem>
-                        <SelectItem value="meals">Meals</SelectItem>
-                        <SelectItem value="supplies">Office Supplies</SelectItem>
-                        <SelectItem value="equipment">Equipment</SelectItem>
-                        <SelectItem value="training">Training</SelectItem>
-                        <SelectItem value="groceries">Groceries</SelectItem>
-                        <SelectItem value="others">Others</SelectItem>
+                        <SelectItem value="general">{translateCategory('general')}</SelectItem>
+                        <SelectItem value="travel">{translateCategory('travel')}</SelectItem>
+                        <SelectItem value="meals">{translateCategory('meals')}</SelectItem>
+                        <SelectItem value="supplies">{translateCategory('officeSupplies')}</SelectItem>
+                        <SelectItem value="equipment">{translateCategory('equipment')}</SelectItem>
+                        <SelectItem value="training">{translateCategory('training')}</SelectItem>
+                        <SelectItem value="groceries">{translateCategory('groceries')}</SelectItem>
+                        <SelectItem value="others">{translateCategory('others')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="amount">{t('amount')}</Label>
                     <Input
@@ -516,9 +520,9 @@ const CashControl = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="currency">{t('currency')}</Label>
-                    <Select onValueChange={(value) => setReportData({ ...reportData, currency: value })}>
+                    <Select value={reportData.currency} onValueChange={(value) => setReportData({ ...reportData, currency: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="HKD" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="HKD">HKD</SelectItem>
@@ -563,7 +567,7 @@ const CashControl = () => {
                           className="w-full justify-start"
                         >
                           <Upload className="h-4 w-4 mr-2" />
-                          {uploadingFile ? 'Uploading...' : 'Upload Receipt'}
+                          {uploadingFile ? t('uploading') : t('uploadReceipt')}
                         </Button>
                       </div>
                       <Button
@@ -583,12 +587,12 @@ const CashControl = () => {
                     </div>
                     {reportData.receipt_url && (
                       <div className="text-sm text-muted-foreground">
-                        ✓ Receipt uploaded successfully
+                        ✓ {t('receiptUploaded')}
                       </div>
                     )}
                     <Input
                       type="url"
-                      placeholder="Or enter receipt URL manually"
+                      placeholder={t('enterReceiptUrl')}
                       value={reportData.receipt_url}
                       onChange={(e) => setReportData({ ...reportData, receipt_url: e.target.value })}
                     />
@@ -616,11 +620,11 @@ const CashControl = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">
+            <div className="text-2xl md:text-3xl font-bold text-primary">
               ${cashBalance.toFixed(2)}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Available cash balance
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
+              {t('availableCashBalance')}
             </p>
           </CardContent>
         </Card>
@@ -633,13 +637,13 @@ const CashControl = () => {
             <CardTitle className="text-sm font-medium">{t('credit')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl md:text-2xl font-bold text-green-600">
               ${transactions
                 .filter(t => t.employee_id === user?.id && t.status === 'approved' && (t.type === 'request' || t.type === 'reimbursement'))
                 .reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 .toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Money received</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('moneyReceived')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -647,13 +651,13 @@ const CashControl = () => {
             <CardTitle className="text-sm font-medium">{t('debit')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-xl md:text-2xl font-bold text-red-600">
               ${transactions
                 .filter(t => t.employee_id === user?.id && t.status === 'approved' && t.type === 'expense')
                 .reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 .toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Money spent</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('moneySpent')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -661,7 +665,7 @@ const CashControl = () => {
             <CardTitle className="text-sm font-medium">{t('balance')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl md:text-2xl font-bold">
               ${(
                 transactions
                   .filter(t => t.employee_id === user?.id && t.status === 'approved' && (t.type === 'request' || t.type === 'reimbursement'))
@@ -671,7 +675,7 @@ const CashControl = () => {
                   .reduce((sum, t) => sum + Math.abs(t.amount), 0)
               ).toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Net position</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('netPosition')}</p>
           </CardContent>
         </Card>
       </div>
@@ -679,52 +683,160 @@ const CashControl = () => {
       {/* Transactions List */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>
-            {canApprove ? 'Manage cash requests and expense reports' : 'Your cash transaction history'}
+          <CardTitle className="text-lg md:text-xl">{t('recentTransactions')}</CardTitle>
+          <CardDescription className="text-xs md:text-sm">
+            {canApprove ? t('manageCashRequests') : t('yourCashHistory')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {transactions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No transactions found
+              <div className="text-center py-8 text-sm md:text-base text-muted-foreground">
+                {t('noTransactionsFound')}
               </div>
+            ) : isMobile ? (
+              // Mobile Card Layout
+              transactions.map((transaction) => (
+                <Card key={transaction.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={getStatusColor(transaction.status)}>
+                          {translateStatus(transaction.status)}
+                        </Badge>
+                        <Badge variant="outline">
+                          {translateTransactionType(transaction.type)}
+                        </Badge>
+                        {transaction.affects_balance && (
+                          <Badge variant="secondary">{t('affectsBalance')}</Badge>
+                        )}
+                      </div>
+                      <div className="text-lg font-bold whitespace-nowrap">
+                        {transaction.currency} ${Math.abs(transaction.amount).toFixed(2)}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="font-medium text-sm">
+                      {transaction.description}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">{t('employee')}:</span>
+                        <div className="font-medium">
+                          {transaction.employee && `${transaction.employee.first_name} ${transaction.employee.last_name}`}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">{t('category')}:</span>
+                        <div className="font-medium">{translateCategory(transaction.category)}</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">{t('requestDate')}:</span>
+                        <div className="font-medium">
+                          {new Date(transaction.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      {transaction.receipt_url && (
+                        <div className="col-span-2">
+                          <a 
+                            href={transaction.receipt_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-xs flex items-center gap-1"
+                          >
+                            <Receipt className="h-3 w-3" />
+                            {t('receipt')}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    {transaction.rejection_reason && (
+                      <div className="text-xs text-destructive bg-destructive/10 p-2 rounded">
+                        <span className="font-medium">{t('rejectionReason')}:</span> {transaction.rejection_reason}
+                      </div>
+                    )}
+                    {canApprove && transaction.status === 'pending' && (
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          onClick={() => approveTransaction(transaction.id)}
+                          className="flex-1"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          {t('approve')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const reason = prompt(t('reasonForRejection'));
+                            if (reason) rejectTransaction(transaction.id, reason);
+                          }}
+                          className="flex-1"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          {t('reject')}
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
             ) : (
+              // Desktop List Layout
               transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg"
+                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-2 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant={getStatusColor(transaction.status)}>
-                        {transaction.status}
+                        {translateStatus(transaction.status)}
                       </Badge>
                       <Badge variant="outline">
-                        {transaction.type}
+                        {translateTransactionType(transaction.type)}
                       </Badge>
                       {transaction.affects_balance && (
-                        <Badge variant="secondary">Affects Balance</Badge>
+                        <Badge variant="secondary">{t('affectsBalance')}</Badge>
                       )}
                     </div>
                     <div className="font-medium">
                       {transaction.description}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {transaction.employee && `${transaction.employee.first_name} ${transaction.employee.last_name}`} • 
-                      {transaction.category} • 
-                      {new Date(transaction.created_at).toLocaleDateString()}
+                    <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+                      <span>
+                        {transaction.employee && `${transaction.employee.first_name} ${transaction.employee.last_name}`}
+                      </span>
+                      <span>•</span>
+                      <span>{translateCategory(transaction.category)}</span>
+                      <span>•</span>
+                      <span>{new Date(transaction.created_at).toLocaleDateString()}</span>
+                      {transaction.receipt_url && (
+                        <>
+                          <span>•</span>
+                          <a 
+                            href={transaction.receipt_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline flex items-center gap-1"
+                          >
+                            <Receipt className="h-3 w-3" />
+                            {t('receipt')}
+                          </a>
+                        </>
+                      )}
                     </div>
                     {transaction.rejection_reason && (
-                      <div className="text-sm text-red-600">
-                        Reason: {transaction.rejection_reason}
+                      <div className="text-sm text-destructive">
+                        {t('rejectionReason')}: {transaction.rejection_reason}
                       </div>
                     )}
                   </div>
-                  <div className="text-right space-y-2">
-                    <div className="text-xl font-semibold">
-                      {transaction.currency} ${transaction.amount.toFixed(2)}
+                  <div className="text-right space-y-2 ml-4">
+                    <div className="text-xl font-semibold whitespace-nowrap">
+                      {transaction.currency} ${Math.abs(transaction.amount).toFixed(2)}
                     </div>
                     {canApprove && transaction.status === 'pending' && (
                       <div className="flex gap-2">
@@ -734,19 +846,19 @@ const CashControl = () => {
                           className="h-8"
                         >
                           <Check className="h-3 w-3 mr-1" />
-                          Approve
+                          {t('approve')}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            const reason = prompt('Reason for rejection:');
+                            const reason = prompt(t('reasonForRejection'));
                             if (reason) rejectTransaction(transaction.id, reason);
                           }}
                           className="h-8"
                         >
                           <X className="h-3 w-3 mr-1" />
-                          Reject
+                          {t('reject')}
                         </Button>
                       </div>
                     )}
