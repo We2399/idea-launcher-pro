@@ -263,8 +263,113 @@ export default function Employees() {
         </CardContent>
       </Card>
 
-      {/* Employee Table */}
-      <Card>
+      {/* Employee Directory - Mobile cards */}
+      <div className="md:hidden space-y-4">
+        {filteredEmployees.map((employee) => {
+          const role = employee.user_roles?.[0]?.role || 'employee';
+          const RoleIcon = getRoleIcon(role);
+          return (
+            <Card key={employee.id}>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between gap-2 text-base">
+                  <div>
+                    <div className="font-semibold">{employee.first_name} {employee.last_name}</div>
+                    <div className="text-xs text-muted-foreground">{employee.employee_id} • {employee.email}</div>
+                  </div>
+                  <Badge variant={getRoleColor(role)} className="flex items-center gap-1">
+                    <RoleIcon className="h-3 w-3" />
+                    {getRoleDisplayName(role)}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Department</div>
+                    <div className="font-medium">{employee.department}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Position</div>
+                    <div className="font-medium">{employee.position}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-xs text-muted-foreground">Leave Balance</div>
+                    <div className="font-medium">{getTotalLeaveBalance(employee)} days</div>
+                  </div>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedEmployee(employee)}>
+                      View Details
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Employee Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedEmployee && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                            <p className="text-sm">{selectedEmployee.first_name} {selectedEmployee.last_name}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Employee ID</label>
+                            <p className="text-sm">{selectedEmployee.employee_id}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Email</label>
+                            <p className="text-sm">{selectedEmployee.email}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Department</label>
+                            <p className="text-sm">{selectedEmployee.department}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Position</label>
+                            <p className="text-sm">{selectedEmployee.position}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Role</label>
+                            <Badge variant={getRoleColor(selectedEmployee.user_roles?.[0]?.role || 'employee')}>
+                              {getRoleDisplayName(selectedEmployee.user_roles?.[0]?.role || 'employee')}
+                            </Badge>
+                          </div>
+                        </div>
+                        {selectedEmployee.leave_balances && selectedEmployee.leave_balances.length > 0 && (
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Leave Balances</label>
+                            <div className="space-y-2">
+                              {selectedEmployee.leave_balances.map((balance, index) => (
+                                <div key={index} className="flex justify-between items-center p-2 border border-border rounded">
+                                  <span className="text-sm">{balance.leave_types.name}</span>
+                                  <div className="text-sm">
+                                    <span className="font-medium">{balance.remaining_days}</span> / {balance.total_days} days
+                                    <span className="text-muted-foreground ml-2">({balance.used_days} used)</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {filteredEmployees.length === 0 && (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">No employees found</CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Employee Directory - Desktop table */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>Employee Directory</CardTitle>
         </CardHeader>
@@ -285,17 +390,12 @@ export default function Employees() {
               {filteredEmployees.map((employee) => {
                 const role = employee.user_roles?.[0]?.role || 'employee';
                 const RoleIcon = getRoleIcon(role);
-                
                 return (
                   <TableRow key={employee.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">
-                          {employee.first_name} {employee.last_name}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {employee.employee_id} • {employee.email}
-                        </div>
+                        <div className="font-medium">{employee.first_name} {employee.last_name}</div>
+                        <div className="text-sm text-muted-foreground">{employee.employee_id} • {employee.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>{employee.department}</TableCell>
@@ -306,20 +406,12 @@ export default function Employees() {
                         {getRoleDisplayName(role)}
                       </Badge>
                     </TableCell>
-                     <TableCell>
-                       No Manager
-                     </TableCell>
-                    <TableCell>
-                      <span className="font-medium">{getTotalLeaveBalance(employee)}</span> days
-                    </TableCell>
+                    <TableCell>No Manager</TableCell>
+                    <TableCell><span className="font-medium">{getTotalLeaveBalance(employee)}</span> days</TableCell>
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setSelectedEmployee(employee)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setSelectedEmployee(employee)}>
                             View Details
                           </Button>
                         </DialogTrigger>
@@ -357,7 +449,6 @@ export default function Employees() {
                                   </Badge>
                                 </div>
                               </div>
-
                               {selectedEmployee.leave_balances && selectedEmployee.leave_balances.length > 0 && (
                                 <div>
                                   <label className="text-sm font-medium text-muted-foreground mb-2 block">Leave Balances</label>
@@ -385,9 +476,7 @@ export default function Employees() {
             </TableBody>
           </Table>
           {filteredEmployees.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No employees found matching your criteria
-            </div>
+            <div className="text-center py-8 text-muted-foreground">No employees found matching your criteria</div>
           )}
         </CardContent>
       </Card>

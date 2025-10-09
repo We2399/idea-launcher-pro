@@ -1123,7 +1123,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   };
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[Language]] || key;
+    const dict = translations[language] || translations['en'];
+    return (dict[key as keyof typeof dict] as string) || (translations['en'][key as keyof typeof translations['en']] as string) || key;
   };
 
   return (
