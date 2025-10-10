@@ -689,13 +689,13 @@ const CashControl = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          {/* Mobile Card Layout */}
+          <div className="md:hidden space-y-4">
             {transactions.length === 0 ? (
               <div className="text-center py-8 text-sm md:text-base text-muted-foreground">
                 {t('noTransactionsFound')}
               </div>
-            ) : isMobile ? (
-              // Mobile Card Layout
+            ) : (
               transactions.map((transaction) => (
                 <Card key={transaction.id} className="overflow-hidden">
                   <CardHeader className="pb-3">
@@ -783,8 +783,16 @@ const CashControl = () => {
                   </CardContent>
                 </Card>
               ))
+            )}
+          </div>
+
+          {/* Desktop List Layout */}
+          <div className="hidden md:block space-y-4">
+            {transactions.length === 0 ? (
+              <div className="text-center py-8 text-sm md:text-base text-muted-foreground">
+                {t('noTransactionsFound')}
+              </div>
             ) : (
-              // Desktop List Layout
               transactions.map((transaction) => (
                 <div
                   key={transaction.id}
