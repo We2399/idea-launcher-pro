@@ -264,7 +264,7 @@ export default function Employees() {
       </Card>
 
       {/* Employee Directory - Mobile cards */}
-      <div className="md:hidden space-y-4">
+      <div className="block md:hidden space-y-4">
         {filteredEmployees.map((employee) => {
           const role = employee.user_roles?.[0]?.role || 'employee';
           const RoleIcon = getRoleIcon(role);

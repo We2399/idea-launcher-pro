@@ -689,7 +689,7 @@ const CashControl = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto">
             {transactions.length === 0 ? (
               <div className="text-center py-8 text-sm md:text-base text-muted-foreground">
                 {t('noTransactionsFound')}
