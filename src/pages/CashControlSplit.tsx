@@ -366,13 +366,13 @@ const CashControl = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('cashControlTitle')}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('cashControl')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">{t('cashControlDescription')}</p>
         </div>
-        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full sm:w-auto">
           <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center justify-center gap-2 w-full sm:w-auto">
@@ -631,7 +631,7 @@ const CashControl = () => {
       )}
 
       {/* Summary Cards - Accounting Format */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">{t('credit')}</CardTitle>
