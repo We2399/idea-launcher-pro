@@ -375,15 +375,15 @@ const CashControl = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
-          <p className="text-muted-foreground">Manage cash requests and expenses</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('cashControl')}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t('cashControlDescription')}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full sm:w-auto">
           <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -394,17 +394,16 @@ const CashControl = () => {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex gap-2">
-            <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t('cashRequest')}
-            </Button>
-            <Button onClick={() => openDialog('expense')} variant="outline" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t('expenseReport')}
-            </Button>
-          </div>
+          <Button onClick={() => openDialog('request')} className="flex items-center justify-center gap-2 w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            {t('cashRequest')}
+          </Button>
+          <Button onClick={() => openDialog('expense')} variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            {t('expenseReport')}
+          </Button>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+
             <DialogContent>
             <DialogHeader>
               <DialogTitle>
