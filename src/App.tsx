@@ -24,7 +24,7 @@ import NotFound from './pages/NotFound';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
-import CashControlSplit from './pages/CashControlSplit';
+
 import ResetPassword from './pages/ResetPassword';
 
 const queryClient = new QueryClient();
@@ -52,7 +52,7 @@ const App = () => {
                               <Route path="/requests" element={<Requests />} />
                               <Route path="/calendar" element={<Calendar />} />
                               <Route path="/tasks" element={<Tasks />} />
-                              <Route path="/cash-control" element={<CashControlSplit />} />
+                              <Route path="/cash-control" element={<CashControl />} />
                               <Route path="/profile" element={<ProfileWithApproval />} />
                               <Route path="/employees" element={
                                 <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
