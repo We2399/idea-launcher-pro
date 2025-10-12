@@ -366,8 +366,8 @@ const CashControl = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('cashControl')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">{t('cashControlDescription')}</p>
