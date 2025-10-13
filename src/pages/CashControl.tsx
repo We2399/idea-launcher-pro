@@ -379,31 +379,17 @@ const CashControl = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
-          <p className="text-muted-foreground">{t('cashControlDescription')}</p>
+          <p className="text-muted-foreground">
+            {viewMode === 'my' ? 'My Cash Transactions' : viewMode === 'team' ? 'Team Transactions' : 'All Transactions'}
+          </p>
         </div>
-        <div className="flex items-center gap-4">
-          <Select value={viewMode} onValueChange={(value: 'my' | 'team' | 'all') => setViewMode(value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getViewModeOptions().map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="flex gap-2">
-            <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t('cashRequest')}
-            </Button>
-            <Button onClick={() => openDialog('expense')} variant="outline" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t('expenseReport')}
-            </Button>
-          </div>
+        <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          {t('cashRequest')}
+        </Button>
+      </div>
+
+      {/* Create Transaction Dialog */}
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogContent>
             <DialogHeader>
@@ -555,8 +541,6 @@ const CashControl = () => {
             </form>
           </DialogContent>
         </Dialog>
-        </div>
-      </div>
 
       {/* Summary Cards - Accounting Format */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
