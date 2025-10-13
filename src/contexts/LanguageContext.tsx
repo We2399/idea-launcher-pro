@@ -159,6 +159,7 @@ const translations = {
     // Cash Control
     cashControlTitle: 'Cash Control',
     cashControlDescription: 'Manage cash requests and expense reports',
+    newTransaction: 'New Transaction',
     cashRequest: 'Cash Request',
     expenseReport: 'Expense Report',
     cashRequestTitle: 'Cash Request',
@@ -427,6 +428,7 @@ const translations = {
     // Cash Control
     cashControlTitle: '現金管理',
     cashControlDescription: '管理現金申請和報銷報告',
+    newTransaction: '新交易',
     cashRequest: '現金申請',
     expenseReport: '報銷報告',
     cashRequestTitle: '現金申請',
@@ -698,6 +700,7 @@ const translations = {
     // Cash Control
     cashControlTitle: '现金管理',
     cashControlDescription: '管理现金申请和报销报告',
+    newTransaction: '新交易',
     cashRequest: '现金申请',
     expenseReport: '报销报告',
     cashRequestTitle: '现金申请',
@@ -969,6 +972,7 @@ const translations = {
     // Cash Control
     cashControlTitle: 'Kontrol Kas',
     cashControlDescription: 'Kelola permintaan kas dan laporan pengeluaran',
+    newTransaction: 'Transaksi Baru',
     cashRequest: 'Permintaan Kas',
     expenseReport: 'Laporan Pengeluaran',
     cashRequestTitle: 'Permintaan Kas',
