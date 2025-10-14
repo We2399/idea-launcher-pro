@@ -74,6 +74,7 @@ const CashControl = () => {
   const canApprove = userRole === 'manager' || userRole === 'hr_admin';
 
   useEffect(() => {
+    console.log('[CashControlSplit] mounted');
     if (user) {
       fetchTransactions();
       fetchCashBalance();
@@ -376,8 +377,8 @@ const CashControl = () => {
           <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                {t('cashRequest')}
+                <Plus className="h-4 w-4" />
+                {t('newTransaction')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] md:max-w-lg max-h-[90vh] overflow-y-auto">

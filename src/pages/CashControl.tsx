@@ -71,6 +71,7 @@ const CashControl = () => {
   const canApprove = userRole === 'manager' || userRole === 'hr_admin';
 
   useEffect(() => {
+    console.log('[CashControl] mounted');
     if (user) {
       fetchTransactions();
     }
