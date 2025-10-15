@@ -287,7 +287,26 @@ const translations = {
     showRestDays: 'Show rest days',
     showPublicHolidays: 'Show public holidays',
     restDays: 'Rest Days',
-    publicHolidays: 'Public Holidays'
+    publicHolidays: 'Public Holidays',
+
+    // Tasks
+    manageTasks: 'Manage tasks and assignments',
+    createTask: 'Create Task',
+    selectTeamMember: 'Select team member',
+    noTasksFound: 'No tasks found',
+    start: 'Start',
+    complete: 'Complete',
+
+    // Task Status
+    inProgress: 'In Progress',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+
+    // Priority
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    urgent: 'Urgent'
   },
   'zh-TW': {
     // Navigation
@@ -560,6 +579,25 @@ const translations = {
     showPublicHolidays: '顯示公眾假期',
     restDays: '休息日',
     publicHolidays: '公眾假期',
+
+    // 任務
+    manageTasks: '管理任務與派工',
+    createTask: '建立任務',
+    selectTeamMember: '選擇團隊成員',
+    noTasksFound: '未找到任務',
+    start: '開始',
+    complete: '完成',
+
+    // 任務狀態
+    inProgress: '進行中',
+    completed: '已完成',
+    cancelled: '已取消',
+
+    // 優先順序
+    low: '低',
+    medium: '中',
+    high: '高',
+    urgent: '緊急',
   },
   'zh-CN': {
     // Navigation
@@ -831,7 +869,26 @@ const translations = {
     showRestDays: '显示休息日',
     showPublicHolidays: '显示公众假期',
     restDays: '休息日',
-    publicHolidays: '公众假期'
+    publicHolidays: '公众假期',
+
+    // 任务
+    manageTasks: '管理任务与指派',
+    createTask: '创建任务',
+    selectTeamMember: '选择团队成员',
+    noTasksFound: '未找到任务',
+    start: '开始',
+    complete: '完成',
+
+    // 任务状态
+    inProgress: '进行中',
+    completed: '已完成',
+    cancelled: '已取消',
+
+    // 优先级
+    low: '低',
+    medium: '中',
+    high: '高',
+    urgent: '紧急'
   },
   id: {
     // Navigation
@@ -1103,7 +1160,26 @@ const translations = {
     showRestDays: 'Tampilkan hari istirahat',
     showPublicHolidays: 'Tampilkan hari libur umum',
     restDays: 'Hari Istirahat',
-    publicHolidays: 'Hari Libur Umum'
+    publicHolidays: 'Hari Libur Umum',
+
+    // Tugas
+    manageTasks: 'Kelola tugas dan penugasan',
+    createTask: 'Buat Tugas',
+    selectTeamMember: 'Pilih anggota tim',
+    noTasksFound: 'Tidak ada tugas ditemukan',
+    start: 'Mulai',
+    complete: 'Selesai',
+
+    // Status Tugas
+    inProgress: 'Sedang berlangsung',
+    completed: 'Selesai',
+    cancelled: 'Dibatalkan',
+
+    // Prioritas
+    low: 'Rendah',
+    medium: 'Sedang',
+    high: 'Tinggi',
+    urgent: 'Mendesak'
   }
 };
 

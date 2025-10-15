@@ -226,6 +226,16 @@ const Tasks = () => {
     }
   };
 
+  const translateTaskStatus = (status: Task['status']) => {
+    switch (status) {
+      case 'pending': return t('pending');
+      case 'in_progress': return t('inProgress');
+      case 'completed': return t('completed');
+      case 'cancelled': return t('cancelled');
+      default: return status;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -239,7 +249,7 @@ const Tasks = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('tasks')}</h1>
-          <p className="text-muted-foreground">Manage tasks and assignments</p>
+          <p className="text-muted-foreground">{t('manageTasks')}</p>
         </div>
         {canCreateTasks && (
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -278,7 +288,7 @@ const Tasks = () => {
                   <Label htmlFor="assigned_to">{t('assignTo')}</Label>
                   <Select onValueChange={(value) => setFormData({ ...formData, assigned_to: value })} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select team member" />
+                      <SelectValue placeholder={t('selectTeamMember')} />
                     </SelectTrigger>
                     <SelectContent>
                       {profiles.map((profile) => (
@@ -294,13 +304,13 @@ const Tasks = () => {
                     <Label htmlFor="priority">{t('priority')}</Label>
                     <Select onValueChange={(value: any) => setFormData({ ...formData, priority: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Medium" />
+                        <SelectValue placeholder={t('medium')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="low">{t('low')}</SelectItem>
+                        <SelectItem value="medium">{t('medium')}</SelectItem>
+                        <SelectItem value="high">{t('high')}</SelectItem>
+                        <SelectItem value="urgent">{t('urgent')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -330,7 +340,7 @@ const Tasks = () => {
         {tasks.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
-              <p className="text-muted-foreground">No tasks found</p>
+              <p className="text-muted-foreground">{t('noTasksFound')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -343,13 +353,13 @@ const Tasks = () => {
                       {task.title}
                       <Badge variant={getPriorityColor(task.priority)}>
                         <Flag className="h-3 w-3 mr-1" />
-                        {task.priority}
+                        {t(task.priority)}
                       </Badge>
                     </CardTitle>
                     <CardDescription>{task.description}</CardDescription>
                   </div>
                   <Badge variant={getStatusColor(task.status)}>
-                    {task.status.replace('_', ' ')}
+                    {translateTaskStatus(task.status)}
                   </Badge>
                 </div>
               </CardHeader>
@@ -359,7 +369,7 @@ const Tasks = () => {
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4" />
                       <span>
-                        {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : 'Unknown'}
+                        {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
                       </span>
                     </div>
                     {task.due_date && (
@@ -377,7 +387,7 @@ const Tasks = () => {
                           variant="outline"
                           onClick={() => updateTaskStatus(task.id, 'in_progress')}
                         >
-                          Start
+                          {t('start')}
                         </Button>
                       )}
                       {task.status === 'in_progress' && (
@@ -385,7 +395,7 @@ const Tasks = () => {
                           size="sm"
                           onClick={() => updateTaskStatus(task.id, 'completed')}
                         >
-                          Complete
+                          {t('complete')}
                         </Button>
                       )}
                     </div>
