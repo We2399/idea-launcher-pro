@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'idea-launcher-pro',
   webDir: 'dist',
   server: {
-    url: 'https://id-preview--bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovable.app/?forceHideBadge=true&v=2',
+    url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=3',
     cleartext: true
   },
   plugins: {
