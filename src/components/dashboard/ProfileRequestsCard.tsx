@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileEdit, Clock, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProfileChangeRequestStats {
   pending: number;
@@ -18,19 +19,20 @@ interface ProfileRequestsCardProps {
 
 export function ProfileRequestsCard({ stats, loading }: ProfileRequestsCardProps) {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
   
   const getTitle = () => {
     if (userRole === 'employee') {
-      return 'My Profile Requests';
+      return t('myProfileRequests');
     }
-    return 'Profile Change Requests';
+    return t('profileChangeRequests');
   };
 
   const getDescription = () => {
     if (userRole === 'employee') {
-      return 'Your profile change requests';
+      return t('yourProfileChangeRequests');
     }
-    return 'Team profile change requests';
+    return t('teamProfileChangeRequests');
   };
 
   if (loading) {
@@ -67,7 +69,7 @@ export function ProfileRequestsCard({ stats, loading }: ProfileRequestsCardProps
                 {stats.pending > 0 && (
                   <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
                     <Clock className="h-3 w-3 mr-1" />
-                    {stats.pending} pending
+                    {stats.pending} {t('pending')}
                   </Badge>
                 )}
               </div>
@@ -78,13 +80,13 @@ export function ProfileRequestsCard({ stats, loading }: ProfileRequestsCardProps
                 {stats.pending > 0 && (
                   <div className="flex items-center gap-1 text-xs text-orange-600">
                     <Clock className="h-3 w-3" />
-                    <span>{stats.pending} pending</span>
+                    <span>{stats.pending} {t('pending')}</span>
                   </div>
                 )}
                 {stats.approved > 0 && (
                   <div className="flex items-center gap-1 text-xs text-green-600">
                     <CheckCircle className="h-3 w-3" />
-                    <span>{stats.approved} approved</span>
+                    <span>{stats.approved} {t('approved')}</span>
                   </div>
                 )}
               </div>

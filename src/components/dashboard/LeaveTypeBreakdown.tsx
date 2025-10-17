@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LeaveTypeBalance {
   leaveTypeId: string;
@@ -20,6 +21,7 @@ interface LeaveTypeBreakdownProps {
 
 export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdownProps) {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
   
   if (loading) {
     return (
@@ -27,7 +29,7 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Leave Balance Details
+            {t('leaveBalanceDetails')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -58,10 +60,10 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
             ) : (
               <Users className="h-5 w-5" />
             )}
-            {userRole === 'employee' ? 'My Leave Balance' : 'Team Leave Overview'}
+            {userRole === 'employee' ? t('myLeaveBalance') : t('teamLeaveOverview')}
           </CardTitle>
           <div className="text-sm text-muted-foreground">
-            {totalRemaining} of {totalAllocated} days remaining
+            {totalRemaining} {t('of')} {totalAllocated} {t('daysRemaining')}
           </div>
         </div>
       </CardHeader>
@@ -95,8 +97,8 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
                     } as React.CSSProperties}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Used: {balance.usedDays}</span>
-                    <span>Remaining: {balance.remainingDays}</span>
+                    <span>{t('used')}: {balance.usedDays}</span>
+                    <span>{t('remaining')}: {balance.remainingDays}</span>
                   </div>
                 </div>
               </div>
@@ -107,7 +109,7 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
         {totalAllocated === 0 && (
           <div className="text-center py-6 text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No leave allocations found for this year</p>
+            <p className="text-sm">{t('noLeaveAllocations')}</p>
           </div>
         )}
       </CardContent>

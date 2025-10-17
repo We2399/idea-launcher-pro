@@ -52,6 +52,8 @@ const translations = {
     upcomingLeave: 'Upcoming Leave',
     teamOverview: 'Team Overview',
     remaining: 'Remaining',
+    of: 'of',
+    noLeaveAllocations: 'No leave allocations found for this year',
     // Dashboard card descriptions
     manageLeaveRequestsDescription: 'Submit and manage your leave requests',
     dashboardCalendarDescription: 'View leave calendar and upcoming time off',
@@ -364,6 +366,8 @@ const translations = {
     upcomingLeave: '即將到來的休假',
     teamOverview: '團隊概覽',
     remaining: '剩餘',
+    of: '的',
+    noLeaveAllocations: '今年沒有假期分配',
     // Dashboard card descriptions
     manageLeaveRequestsDescription: '提交及管理您的請假申請',
     dashboardCalendarDescription: '查看行事曆與即將到來的休假',
@@ -678,6 +682,8 @@ const translations = {
     upcomingLeave: '即将到来的休假',
     teamOverview: '团队概览',
     remaining: '剩余',
+    of: '的',
+    noLeaveAllocations: '今年没有假期分配',
     // Dashboard card descriptions
     manageLeaveRequestsDescription: '提交并管理您的请假申请',
     dashboardCalendarDescription: '查看日历及即将到来的休假',
@@ -992,6 +998,8 @@ const translations = {
     upcomingLeave: 'Cuti Mendatang',
     teamOverview: 'Ikhtisar Tim',
     remaining: 'Sisa',
+    of: 'dari',
+    noLeaveAllocations: 'Tidak ada alokasi cuti untuk tahun ini',
     // Dashboard card descriptions
     manageLeaveRequestsDescription: 'Ajukan dan kelola permintaan cuti Anda',
     dashboardCalendarDescription: 'Lihat kalender cuti dan waktu libur yang akan datang',
