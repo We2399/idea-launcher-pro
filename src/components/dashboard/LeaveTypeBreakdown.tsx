@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Calendar, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationHelpers } from '@/lib/translations';
 
 interface LeaveTypeBalance {
   leaveTypeId: string;
@@ -22,6 +23,7 @@ interface LeaveTypeBreakdownProps {
 export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdownProps) {
   const { userRole } = useAuth();
   const { t } = useLanguage();
+  const { translateLeaveType } = useTranslationHelpers();
   
   if (loading) {
     return (
@@ -82,7 +84,7 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: balance.color }}
                     />
-                    <span className="font-medium text-sm">{balance.leaveTypeName}</span>
+                    <span className="font-medium text-sm">{translateLeaveType(balance.leaveTypeName)}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {balance.remainingDays}/{balance.totalDays}

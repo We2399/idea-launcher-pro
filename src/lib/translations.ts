@@ -17,6 +17,7 @@ export const useTranslationHelpers = () => {
       'Compassionate Leave': t('compassionateLeave'),
       'Study Leave': t('studyLeave'),
       'Unpaid Leave': t('unpaidLeave'),
+      'Others': t('others'),
     };
     
     return leaveTypeMap[leaveTypeName] || leaveTypeName;
