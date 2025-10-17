@@ -963,7 +963,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.phone_number ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.phone_number || "Not provided"}
+                      {currentProfile.phone_number || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -990,7 +990,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : "Not provided"}
+                      {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1017,7 +1017,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.id_number ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.id_number || "Not provided"}
+                      {currentProfile.id_number || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1044,7 +1044,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.passport_number ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.passport_number || "Not provided"}
+                      {currentProfile.passport_number || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1071,7 +1071,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.visa_number ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.visa_number || "Not provided"}
+                      {currentProfile.visa_number || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1107,7 +1107,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Heart className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.marital_status ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.marital_status || "Not provided"}
+                      {currentProfile.marital_status || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1134,7 +1134,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.emergency_contact_name ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.emergency_contact_name || "Not provided"}
+                      {currentProfile.emergency_contact_name || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1161,7 +1161,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.emergency_contact_phone ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.emergency_contact_phone || "Not provided"}
+                      {currentProfile.emergency_contact_phone || t('notProvided')}
                     </span>
                   </div>
                 )}
