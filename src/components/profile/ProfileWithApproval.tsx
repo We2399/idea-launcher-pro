@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,7 +80,8 @@ const departments = [
 
 export default function ProfileWithApproval() {
   const { user, userRole } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { translateLeaveType } = useTranslationHelpers();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
   const [changeRequests, setChangeRequests] = useState<ProfileChangeRequest[]>([]);
@@ -698,9 +700,9 @@ export default function ProfileWithApproval() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Request Profile Change</DialogTitle>
+                      <DialogTitle>{t('requestProfileChange')}</DialogTitle>
                           <DialogDescription>
-                            Submit a request to change profile information that requires approval.
+                            {t('submitRequestDescription')}
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4">
@@ -746,19 +748,19 @@ export default function ProfileWithApproval() {
                                   <SelectItem value="widowed">Widowed</SelectItem>
                                 </SelectContent>
                               </Select>
-                            ) : (
-                              <Input
-                                value={newValue}
-                                onChange={(e) => setNewValue(e.target.value)}
-                                placeholder="Enter new value"
-                              />
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button onClick={handleRequestChange}>Submit Request</Button>
-                            <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
-                              Cancel
-                            </Button>
+                              ) : (
+                                <Input
+                                  value={newValue}
+                                  onChange={(e) => setNewValue(e.target.value)}
+                                  placeholder={t('enterNewValue')}
+                                />
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={handleRequestChange}>{t('submitRequest')}</Button>
+                              <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
+                                {t('cancel')}
+                              </Button>
                           </div>
                         </div>
                       </DialogContent>
@@ -810,7 +812,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('last_name', e.target.value)
                         : updateHrEditValue('last_name', e.target.value)
                     }
-                    placeholder="Enter last name"
+                    placeholder={t('enterLastName')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -835,7 +837,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('email', e.target.value)
                         : updateHrEditValue('email', e.target.value)
                     }
-                    placeholder="Enter email address"
+                    placeholder={t('enterEmailAddress')}
                     type="email"
                     className="flex items-center gap-2"
                   />
@@ -848,7 +850,7 @@ export default function ProfileWithApproval() {
               </div>
 
               <div className="space-y-2">
-                <Label>Account Email (Login)</Label>
+                <Label>{t('accountEmailLogin')}</Label>
                 <div className="flex items-center gap-2 p-2 border border-border rounded">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{user?.email || '—'}</span>
@@ -869,7 +871,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('employee_id', e.target.value)
                         : updateHrEditValue('employee_id', e.target.value)
                     }
-                    placeholder="Enter employee ID"
+                    placeholder={t('enterEmployeeId')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -896,7 +898,7 @@ export default function ProfileWithApproval() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={t('selectDepartmentPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.map((dept) => (
@@ -928,7 +930,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('position', e.target.value)
                         : updateHrEditValue('position', e.target.value)
                     }
-                    placeholder="Enter position/job title"
+                    placeholder={t('enterPosition')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -954,7 +956,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('phone_number', e.target.value)
                         : updateHrEditValue('phone_number', e.target.value)
                     }
-                    placeholder="Enter phone number or NIL if not applicable"
+                    placeholder={t('enterPhoneNumber')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1008,7 +1010,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('id_number', e.target.value)
                         : updateHrEditValue('id_number', e.target.value)
                     }
-                    placeholder="Enter ID number or NIL if not applicable"
+                    placeholder={t('enterIdNumber')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1035,7 +1037,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('passport_number', e.target.value)
                         : updateHrEditValue('passport_number', e.target.value)
                     }
-                    placeholder="Enter passport number or NIL if not applicable"
+                    placeholder={t('enterPassportNumber')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1062,7 +1064,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('visa_number', e.target.value)
                         : updateHrEditValue('visa_number', e.target.value)
                     }
-                    placeholder="Enter visa number or NIL if not applicable"
+                    placeholder={t('enterVisaNumber')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1091,7 +1093,7 @@ export default function ProfileWithApproval() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select marital status" />
+                      <SelectValue placeholder={t('selectMaritalStatus')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="single">{t('single') || 'Single'}</SelectItem>
@@ -1125,7 +1127,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('emergency_contact_name', e.target.value)
                         : updateHrEditValue('emergency_contact_name', e.target.value)
                     }
-                    placeholder="Enter emergency contact name or NIL if not applicable"
+                    placeholder={t('enterEmergencyContactName')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1152,7 +1154,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('emergency_contact_phone', e.target.value)
                         : updateHrEditValue('emergency_contact_phone', e.target.value)
                     }
-                    placeholder="Enter emergency contact phone or NIL if not applicable"
+                    placeholder={t('enterEmergencyContactPhone')}
                     className="flex items-center gap-2"
                   />
                 ) : (
@@ -1179,7 +1181,7 @@ export default function ProfileWithApproval() {
                         ? updateSetupValue('home_address', e.target.value)
                         : updateHrEditValue('home_address', e.target.value)
                     }
-                    placeholder="Enter home address or NIL if not applicable"
+                    placeholder={t('enterHomeAddress')}
                     rows={3}
                     className="flex items-center gap-2"
                   />
@@ -1187,7 +1189,7 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.home_address ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.home_address || "Not provided"}
+                      {currentProfile.home_address || t('notProvided')}
                     </span>
                   </div>
                 )}
@@ -1213,7 +1215,7 @@ export default function ProfileWithApproval() {
             <div className="flex justify-between items-center">
               <CardTitle>{t('leaveBalances')} ({new Date().getFullYear()})</CardTitle>
               <Button variant="outline" size="sm">
-                Report
+                {t('report')}
               </Button>
             </div>
           </CardHeader>
@@ -1223,13 +1225,13 @@ export default function ProfileWithApproval() {
                 leaveBalances.map((balance) => (
                   <div key={balance.id} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-sm">{balance.leave_types.name}</span>
+                      <span className="font-medium text-sm">{translateLeaveType(balance.leave_types.name)}</span>
                       <Badge variant="outline">
                         {balance.remaining_days} / {balance.total_days}
                       </Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mb-2">
-                      Initial allocation: {balance.total_days} days/year
+                      {t('initialAllocation')}: {balance.total_days} {t('daysYear')}
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
@@ -1240,14 +1242,14 @@ export default function ProfileWithApproval() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Used: {balance.used_days} days</span>
-                      <span>Available: {balance.remaining_days} days</span>
+                      <span>{t('used')}: {balance.used_days} {t('days')}</span>
+                      <span>{t('available')}: {balance.remaining_days} {t('days')}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-4 text-muted-foreground text-sm">
-                  No leave balances configured for this year
+                  {t('noLeaveBalances')}
                 </div>
               )}
             </div>
