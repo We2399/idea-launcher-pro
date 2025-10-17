@@ -220,7 +220,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
               <DialogHeader>
                 <DialogTitle>{t('uploadDocument')}</DialogTitle>
                 <DialogDescription>
-                  Upload a new document for this profile
+                  {t('uploadDocumentDescription')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -240,7 +240,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>File</Label>
+                  <Label>{t('file')}</Label>
                   <Input
                     type="file"
                     onChange={handleFileSelect}
@@ -248,7 +248,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                   />
                   {selectedFile && (
                     <p className="text-sm text-muted-foreground">
-                      Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                      {t('selected')}: {selectedFile.name} ({formatFileSize(selectedFile.size)})
                     </p>
                   )}
                 </div>
@@ -307,7 +307,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                         <AlertDialogHeader>
                           <AlertDialogTitle>{t('deleteDocument')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this document? This action cannot be undone.
+                            {t('deleteDocumentConfirm')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
