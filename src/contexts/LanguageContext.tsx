@@ -154,6 +154,7 @@ const translations = {
     selectAll: 'Select All',
     deselectAll: 'Deselect All',
     export: 'Export',
+    exportSuccess: 'Data exported successfully',
     print: 'Print',
     
     // Messages
@@ -468,6 +469,7 @@ const translations = {
     selectAll: '全選',
     deselectAll: '取消全選',
     export: '匯出',
+    exportSuccess: '數據匯出成功',
     print: '列印',
     
     // Messages
@@ -784,6 +786,7 @@ const translations = {
     selectAll: '全选',
     deselectAll: '取消全选',
     export: '导出',
+    exportSuccess: '数据导出成功',
     print: '打印',
     
     // Messages
@@ -1100,6 +1103,7 @@ const translations = {
     selectAll: 'Pilih Semua',
     deselectAll: 'Batalkan Pilihan',
     export: 'Ekspor',
+    exportSuccess: 'Data berhasil diekspor',
     print: 'Cetak',
     
     // Messages

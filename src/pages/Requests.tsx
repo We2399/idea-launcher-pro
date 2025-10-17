@@ -490,7 +490,7 @@ export default function Requests() {
     
     toast({
       title: t('success'),
-      description: t('operationFailed')
+      description: t('exportSuccess')
     });
   };
 
