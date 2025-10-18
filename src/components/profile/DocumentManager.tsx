@@ -142,15 +142,17 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
 
   const handleViewDocument = async (document: Document) => {
     try {
-      const { data } = supabase.storage
+      const { data, error } = await supabase.storage
         .from('profile-documents')
-        .getPublicUrl(document.file_path);
+        .createSignedUrl(document.file_path, 60); // 60 seconds expiry
 
-      window.open(data.publicUrl, '_blank');
+      if (error) throw error;
+
+      window.open(data.signedUrl, '_blank');
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to view document",
+        description: error.message || "Failed to view document",
         variant: "destructive"
       });
     }
