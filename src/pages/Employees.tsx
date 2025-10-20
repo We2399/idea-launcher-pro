@@ -155,24 +155,24 @@ export default function Employees() {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'hr_admin': return Crown;
-      case 'manager': return Shield;
+      case 'administrator': return Crown;
+      case 'hr_admin': return Shield;
       default: return User;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'hr_admin': return 'destructive';
-      case 'manager': return 'secondary';
+      case 'administrator': return 'destructive';
+      case 'hr_admin': return 'secondary';
       default: return 'outline';
     }
   };
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
-      case 'hr_admin': return 'Administrator';
-      case 'manager': return 'Senior Management';
+      case 'administrator': return 'Administrator';
+      case 'hr_admin': return 'HR Admin';
       case 'employee': return 'Employee';
       default: return role;
     }
@@ -255,8 +255,8 @@ export default function Employees() {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="employee">Employee</SelectItem>
-                  <SelectItem value="manager">Senior Management</SelectItem>
-                  <SelectItem value="hr_admin">Administrator</SelectItem>
+                  <SelectItem value="hr_admin">HR Admin</SelectItem>
+                  <SelectItem value="administrator">Administrator</SelectItem>
                 </SelectContent>
             </Select>
           </div>

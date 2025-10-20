@@ -63,8 +63,8 @@ const Index = () => {
     }
   ];
 
-  // Add manager/HR specific cards
-  if (userRole === 'manager' || userRole === 'hr_admin') {
+  // Add management-specific cards for hr_admin and administrator
+  if (userRole === 'hr_admin' || userRole === 'administrator') {
     dashboardCards.push({
       title: t('employees'),
       description: 'Manage your team\'s leave requests',
@@ -72,9 +72,7 @@ const Index = () => {
       href: '/employees',
       color: 'from-orange-500/10 to-orange-600/10 border-orange-500/20'
     });
-  }
-
-  if (userRole === 'hr_admin') {
+    
     dashboardCards.push({
       title: t('reports'),
       description: t('viewLeaveReportsDescription'),
@@ -87,8 +85,12 @@ const Index = () => {
   return (
     <div className="space-y-6 md:space-y-8">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('welcomeBack')}</h1>
-        <p className="text-sm md:text-base text-muted-foreground">{t('dashboardSubtitle')}</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          {userRole === 'administrator' ? 'Administrator Dashboard' : t('welcomeBack')}
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          {userRole === 'administrator' ? 'System-wide management and settings' : t('dashboardSubtitle')}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

@@ -149,8 +149,8 @@ export default function CalendarPage() {
 
       if (viewMode === 'my') {
         query = query.eq('user_id', user?.id);
-      } else if (viewMode === 'team' && (userRole === 'manager' || userRole === 'hr_admin')) {
-        // For managers/HR, show their team's requests by joining with profiles
+      } else if (viewMode === 'team' && (userRole === 'hr_admin' || userRole === 'administrator')) {
+        // For management, show their team's requests by joining with profiles
         const { data: teamProfiles } = await supabase
           .from('profiles')
           .select('user_id')
@@ -334,11 +334,7 @@ export default function CalendarPage() {
   const getViewModeOptions = () => {
     const options = [{ value: 'my', label: t('myLeave') }];
     
-    if (userRole === 'manager') {
-      options.push({ value: 'team', label: t('teamLeave') });
-    }
-    
-    if (userRole === 'hr_admin') {
+    if (userRole === 'hr_admin' || userRole === 'administrator') {
       options.push(
         { value: 'team', label: t('teamLeave') },
         { value: 'all', label: t('allLeave') }

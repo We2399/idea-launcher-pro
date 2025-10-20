@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Navigate, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,30 @@ const Auth = () => {
     role: 'employee'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isFirstUser, setIsFirstUser] = useState(false);
+
+  // Check if this is the first user registration
+  useEffect(() => {
+    checkFirstUser();
+  }, []);
+
+  const checkFirstUser = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('setting_value')
+        .eq('setting_key', 'first_admin_created')
+        .maybeSingle();
+
+      if (!error && data) {
+        const settingValue = data.setting_value as { admin_created?: boolean };
+        const adminCreated = settingValue?.admin_created || false;
+        setIsFirstUser(!adminCreated);
+      }
+    } catch (error) {
+      console.error('Failed to check first user status:', error);
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -72,7 +97,12 @@ const Auth = () => {
     setIsLoading(true);
     setErrors({});
     
-    const metadata = {
+    // For first user, metadata is minimal (will become administrator)
+    // For subsequent users, include full employee data
+    const metadata = isFirstUser ? {
+      first_name: formData.firstName.trim(),
+      last_name: formData.lastName.trim(),
+    } : {
       first_name: formData.firstName.trim(),
       last_name: formData.lastName.trim(),
       employee_id: formData.employeeId.trim() || `EMP${Date.now()}`,
@@ -85,6 +115,9 @@ const Auth = () => {
     
     if (result?.error) {
       setErrors({ submit: result.error.message });
+    } else if (isFirstUser) {
+      // Refresh the first user status after successful registration
+      await checkFirstUser();
     }
     
     setIsLoading(false);
@@ -208,20 +241,28 @@ const Auth = () => {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="role">{t('position')}</Label>
-                  <Select value={formData.role} onValueChange={(value) => updateFormData('role', value)} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectYourRole')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="employee">{t('roleEmployee')}</SelectItem>
-                      <SelectItem value="manager">{t('roleManager')}</SelectItem>
-                      <SelectItem value="hr_admin">{t('roleHrAdmin')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
-                </div>
+                {!isFirstUser && (
+                  <div className="space-y-2">
+                    <Label htmlFor="role">{t('role')}</Label>
+                    <Select value={formData.role} onValueChange={(value) => updateFormData('role', value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectYourRole')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="employee">{t('roleEmployee')}</SelectItem>
+                        <SelectItem value="hr_admin">HR Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
+                  </div>
+                )}
+                
+                {isFirstUser && (
+                  <div className="p-3 text-sm bg-primary/10 border border-primary/20 rounded-md">
+                    <p className="font-medium mb-1">First Administrator Account</p>
+                    <p className="text-muted-foreground text-xs">You will be registered as the system administrator with full access.</p>
+                  </div>
+                )}
                 
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">{t('email')}</Label>

@@ -76,7 +76,7 @@ export function useDashboardStats(): DashboardStats {
             }
           }
         } else {
-          // For managers/HR, show team totals
+          // For management (hr_admin/administrator), show team totals
           const { data: teamBalances } = await supabase
             .from('leave_balances')
             .select('remaining_days, used_days')

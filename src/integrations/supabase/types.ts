@@ -463,22 +463,22 @@ export type Database = {
           cash_balance: number | null
           created_at: string
           date_of_birth: string | null
-          department: string
-          email: string
+          department: string | null
+          email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
-          employee_id: string
-          first_name: string
+          employee_id: string | null
+          first_name: string | null
           home_address: string | null
           id: string
           id_number: string | null
           initial_setup_completed_at: string | null
-          last_name: string
+          last_name: string | null
           manager_id: string | null
           marital_status: string | null
           passport_number: string | null
           phone_number: string | null
-          position: string
+          position: string | null
           profile_completed: boolean | null
           updated_at: string
           user_id: string
@@ -488,22 +488,22 @@ export type Database = {
           cash_balance?: number | null
           created_at?: string
           date_of_birth?: string | null
-          department: string
-          email: string
+          department?: string | null
+          email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
-          employee_id: string
-          first_name: string
+          employee_id?: string | null
+          first_name?: string | null
           home_address?: string | null
           id?: string
           id_number?: string | null
           initial_setup_completed_at?: string | null
-          last_name: string
+          last_name?: string | null
           manager_id?: string | null
           marital_status?: string | null
           passport_number?: string | null
           phone_number?: string | null
-          position: string
+          position?: string | null
           profile_completed?: boolean | null
           updated_at?: string
           user_id: string
@@ -513,22 +513,22 @@ export type Database = {
           cash_balance?: number | null
           created_at?: string
           date_of_birth?: string | null
-          department?: string
-          email?: string
+          department?: string | null
+          email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
-          employee_id?: string
-          first_name?: string
+          employee_id?: string | null
+          first_name?: string | null
           home_address?: string | null
           id?: string
           id_number?: string | null
           initial_setup_completed_at?: string | null
-          last_name?: string
+          last_name?: string | null
           manager_id?: string | null
           marital_status?: string | null
           passport_number?: string | null
           phone_number?: string | null
-          position?: string
+          position?: string | null
           profile_completed?: boolean | null
           updated_at?: string
           user_id?: string
@@ -698,7 +698,7 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
-      is_manager: {
+      is_management: {
         Args: { user_id: string }
         Returns: boolean
       }
@@ -716,7 +716,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "employee" | "manager" | "hr_admin"
+      app_role: "employee" | "hr_admin" | "administrator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -844,7 +844,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["employee", "manager", "hr_admin"],
+      app_role: ["employee", "hr_admin", "administrator"],
     },
   },
 } as const

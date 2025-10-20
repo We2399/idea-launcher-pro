@@ -10,7 +10,7 @@ import { Settings as SettingsIcon, Users, Shield, Clock, Globe } from 'lucide-re
 export default function Settings() {
   const { userRole } = useAuth();
 
-  if (userRole !== 'hr_admin') {
+  if (userRole !== 'hr_admin' && userRole !== 'administrator') {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">

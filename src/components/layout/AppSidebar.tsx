@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const getBaseItems = (t: (key: string) => string) => [
+const getPersonalItems = (t: (key: string) => string) => [
   { title: t('dashboard'), url: '/', icon: Home },
   { title: t('leaveRequests'), url: '/requests', icon: FileText },
   { title: t('calendar'), url: '/calendar', icon: Calendar },
@@ -35,11 +35,8 @@ const getBaseItems = (t: (key: string) => string) => [
   { title: t('profile'), url: '/profile', icon: User },
 ];
 
-const getManagerItems = (t: (key: string) => string) => [
+const getManagementItems = (t: (key: string) => string) => [
   { title: t('employees'), url: '/employees', icon: Users },
-];
-
-const getAdminItems = (t: (key: string) => string) => [
   { title: t('reports'), url: '/reports', icon: BarChart3 },
   { title: t('settings'), url: '/settings', icon: Settings },
 ];
@@ -56,14 +53,17 @@ export function AppSidebar() {
     isActive ? "bg-sidebar-accent text-sidebar-primary-foreground font-medium" : "hover:bg-sidebar-accent/50";
 
   // Build navigation items based on role
-  let navigationItems = [...getBaseItems(t)];
+  let navigationItems: typeof getPersonalItems extends (...args: any) => infer R ? R : never = [];
   
-  if (userRole === 'manager' || userRole === 'hr_admin') {
-    navigationItems = [...navigationItems, ...getManagerItems(t)];
-  }
-  
-  if (userRole === 'hr_admin') {
-    navigationItems = [...navigationItems, ...getAdminItems(t)];
+  if (userRole === 'administrator') {
+    // Administrator: Only management pages
+    navigationItems = getManagementItems(t);
+  } else if (userRole === 'hr_admin') {
+    // HR Admin: Personal + management pages
+    navigationItems = [...getPersonalItems(t), ...getManagementItems(t)];
+  } else {
+    // Employee: Only personal pages
+    navigationItems = getPersonalItems(t);
   }
 
   // On mobile, never collapse. On desktop, respect the collapsed state

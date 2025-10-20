@@ -334,7 +334,7 @@ export default function Requests() {
         }
       }
 
-      const updateData = userRole === 'manager' ? {
+      const updateData = userRole === 'hr_admin' ? {
         senior_management_approved_by: user?.id,
         senior_management_approved_at: new Date().toISOString(),
         status: status === 'approved' ? 'senior_approved' : 'rejected'
@@ -355,7 +355,7 @@ export default function Requests() {
 
       toast({
         title: t('success'),
-        description: `${t('requestStatus')} ${status} ${userRole === 'manager' ? 'by Senior Management' : 'by Administrator'}`
+        description: `${t('requestStatus')} ${status} ${userRole === 'hr_admin' ? 'by HR Admin' : 'by Administrator'}`
       });
       
       fetchRequests();
