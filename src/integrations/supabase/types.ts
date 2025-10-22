@@ -706,6 +706,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      is_senior_position: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       sync_all_profiles: {
         Args: Record<PropertyKey, never>
         Returns: string
