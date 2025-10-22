@@ -24,26 +24,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         // Fetch user role when user logs in
         if (session?.user) {
-          setTimeout(async () => {
-            try {
-              const { data: roleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .single();
-              
-              setUserRole(roleData?.role || 'employee');
-            } catch (error) {
-              console.error('Error fetching user role:', error);
-              setUserRole('employee');
-            }
-          }, 0);
+          supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+            .then(({ data: roleData, error }) => {
+              if (error) {
+                console.error('Error fetching role:', error);
+                setUserRole('employee'); // Fallback to employee
+              } else {
+                setUserRole(roleData?.role ?? 'employee');
+              }
+            });
         } else {
           setUserRole(null);
         }

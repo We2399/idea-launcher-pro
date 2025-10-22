@@ -37,6 +37,7 @@ export function Header() {
 
   const getRoleColor = (role: string | null) => {
     switch (role) {
+      case 'administrator': return 'default';
       case 'hr_admin': return 'destructive';
       case 'manager': return 'secondary';
       default: return 'outline';
@@ -45,6 +46,7 @@ export function Header() {
 
   const getRoleIcon = (role: string | null) => {
     switch (role) {
+      case 'administrator': return Shield;
       case 'hr_admin': return Crown;
       case 'manager': return Shield;
       default: return User;
@@ -53,6 +55,7 @@ export function Header() {
 
   const getRoleLabel = (role: string | null) => {
     switch (role) {
+      case 'administrator': return t('roleAdministrator');
       case 'hr_admin': return t('roleHrAdmin');
       case 'manager': return t('roleManager');
       case 'employee': return t('roleEmployee');

@@ -386,7 +386,13 @@ const translations = {
     low: 'Low',
     medium: 'Medium',
     high: 'High',
-    urgent: 'Urgent'
+    urgent: 'Urgent',
+    
+    // Roles
+    roleEmployee: 'Employee',
+    roleHrAdmin: 'HR Admin',
+    roleAdministrator: 'Administrator',
+    roleManager: 'Manager'
   },
   'zh-TW': {
     // Navigation
@@ -758,6 +764,12 @@ const translations = {
     medium: '中',
     high: '高',
     urgent: '緊急',
+    
+    // 角色
+    roleEmployee: '員工',
+    roleHrAdmin: '人力資源管理員',
+    roleAdministrator: '系統管理員',
+    roleManager: '經理'
   },
   'zh-CN': {
     // Navigation
@@ -1128,7 +1140,13 @@ const translations = {
     low: '低',
     medium: '中',
     high: '高',
-    urgent: '紧急'
+    urgent: '紧急',
+    
+    // 角色
+    roleEmployee: '员工',
+    roleHrAdmin: '人力资源管理员',
+    roleAdministrator: '系统管理员',
+    roleManager: '经理'
   },
   id: {
     // Navigation
@@ -1499,7 +1517,13 @@ const translations = {
     low: 'Rendah',
     medium: 'Sedang',
     high: 'Tinggi',
-    urgent: 'Mendesak'
+    urgent: 'Mendesak',
+    
+    // Peran
+    roleEmployee: 'Karyawan',
+    roleHrAdmin: 'Admin SDM',
+    roleAdministrator: 'Administrator',
+    roleManager: 'Manajer'
   }
 };
 
