@@ -19,7 +19,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -31,7 +31,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -43,7 +43,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -682,38 +682,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: string
-      }
-      has_delegation_rights: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_administrator: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_hr_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_management: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_senior_management: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      is_senior_position: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
-      sync_all_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_user_role: { Args: { user_id: string }; Returns: string }
+      has_delegation_rights: { Args: { user_id: string }; Returns: boolean }
+      is_administrator: { Args: { user_id: string }; Returns: boolean }
+      is_hr_admin: { Args: { user_id: string }; Returns: boolean }
+      is_management: { Args: { user_id: string }; Returns: boolean }
+      is_senior_management: { Args: { user_id: string }; Returns: boolean }
+      is_senior_position: { Args: { user_id: string }; Returns: boolean }
+      sync_all_profiles: { Args: never; Returns: string }
       sync_profile_from_auth: {
         Args: { target_user_id: string }
         Returns: undefined

@@ -55,17 +55,17 @@ const App = () => {
                               <Route path="/cash-control" element={<CashControl />} />
                               <Route path="/profile" element={<ProfileWithApproval />} />
                               <Route path="/employees" element={
-                                <ProtectedRoute requiredRole={['manager', 'hr_admin']}>
+                                <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
                                   <Employees />
                                 </ProtectedRoute>
                               } />
                               <Route path="/reports" element={
-                                <ProtectedRoute requiredRole={['hr_admin']}>
+                                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
                                   <Reports />
                                 </ProtectedRoute>
                               } />
                               <Route path="/settings" element={
-                                <ProtectedRoute requiredRole={['hr_admin']}>
+                                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
                                   <Settings />
                                 </ProtectedRoute>
                               } />
