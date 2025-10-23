@@ -54,48 +54,6 @@ export function DelegationSettings() {
     }
   };
 
-  const handleToggleDelegation = async () => {
-    setUpdating(true);
-    try {
-      const newValue = !delegationActive;
-      
-      const { error } = await supabase
-        .from('system_settings')
-        .upsert({
-          setting_key: 'senior_management_delegation',
-          setting_value: { delegation_active: newValue },
-          updated_by: user?.id
-        }, {
-          onConflict: 'setting_key'
-        });
-
-      if (error) throw error;
-
-      setDelegationActive(newValue);
-      
-      toast({
-        title: "Success",
-        description: `Delegation ${newValue ? 'enabled' : 'disabled'} successfully`
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update delegation settings",
-        variant: "destructive"
-      });
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   const fetchHRAdmins = async () => {
     try {
       const { data: rolesData, error: rolesError } = await supabase
@@ -152,6 +110,40 @@ export function DelegationSettings() {
     }
   };
 
+  const handleToggleDelegation = async () => {
+    setUpdating(true);
+    try {
+      const newValue = !delegationActive;
+      
+      const { error } = await supabase
+        .from('system_settings')
+        .upsert({
+          setting_key: 'senior_management_delegation',
+          setting_value: { delegation_active: newValue },
+          updated_by: user?.id
+        }, {
+          onConflict: 'setting_key'
+        });
+
+      if (error) throw error;
+
+      setDelegationActive(newValue);
+      
+      toast({
+        title: "Success",
+        description: `Delegation ${newValue ? 'enabled' : 'disabled'} successfully`
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update delegation settings",
+        variant: "destructive"
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const promoteToHRAdmin = async () => {
     if (!selectedEmployeeId) return;
     
@@ -204,6 +196,14 @@ export function DelegationSettings() {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (userRole !== 'hr_admin' && userRole !== 'administrator') {
     return (
