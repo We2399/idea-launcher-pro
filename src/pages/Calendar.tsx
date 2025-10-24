@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,8 +82,12 @@ const leaveTypeColors = {
 
 export default function CalendarPage() {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId } = useImpersonation();
   const { t } = useLanguage();
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
+  
+  // Use impersonated user ID if active, otherwise use logged-in user
+  const effectiveUserId = impersonatedUserId || user?.id;
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [workSchedules, setWorkSchedules] = useState<WorkSchedule[]>([]);
   const [holidays, setHolidays] = useState<PublicHoliday[]>([]);
@@ -95,10 +100,10 @@ export default function CalendarPage() {
 
 
   useEffect(() => {
-    if (user) {
+    if (effectiveUserId) {
       fetchAllData();
     }
-  }, [user, userRole, viewMode]);
+  }, [effectiveUserId, userRole, viewMode, impersonatedUserId]);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -144,11 +149,11 @@ export default function CalendarPage() {
       let query = supabase
         .from('leave_requests')
         .select('*')
-        .in('status', userRole === 'employee' ? ['approved', 'senior_approved'] : ['pending', 'approved', 'senior_approved'])
+        .in('status', (userRole === 'employee' || impersonatedUserId) ? ['approved', 'senior_approved'] : ['pending', 'approved', 'senior_approved'])
         .order('start_date');
 
       if (viewMode === 'my') {
-        query = query.eq('user_id', user?.id);
+        query = query.eq('user_id', effectiveUserId);
       } else if (viewMode === 'team' && (userRole === 'hr_admin' || userRole === 'administrator')) {
         // For management, show their team's requests by joining with profiles
         const { data: teamProfiles } = await supabase
@@ -211,9 +216,10 @@ export default function CalendarPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
 
-    // Prefer the viewer's configured schedule if available (any view mode)
-    if (user) {
-      const userSchedule = workSchedules.find(ws => ws.user_id === user.id);
+    // When impersonating, use the impersonated user's schedule
+    const scheduleUserId = impersonatedUserId || user?.id;
+    if (scheduleUserId) {
+      const userSchedule = workSchedules.find(ws => ws.user_id === scheduleUserId);
       if (userSchedule) {
         return !userSchedule[dayName as keyof Omit<WorkSchedule, 'user_id'>];
       }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -25,6 +26,7 @@ interface ImpersonationPanelProps {
 }
 
 export function ImpersonationPanel({ open, onOpenChange }: ImpersonationPanelProps) {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -77,6 +79,7 @@ export function ImpersonationPanel({ open, onOpenChange }: ImpersonationPanelPro
       description: `Now viewing as ${employee.first_name} ${employee.last_name}`
     });
     onOpenChange(false);
+    navigate('/'); // Redirect to dashboard
   };
 
   const getInitials = (firstName: string, lastName: string) => {

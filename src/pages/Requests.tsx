@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -48,8 +49,12 @@ interface LeaveType {
 
 export default function Requests() {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
+  
+  // Use impersonated user ID if active, otherwise use logged-in user
+  const effectiveUserId = impersonatedUserId || user?.id;
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
@@ -69,11 +74,11 @@ export default function Requests() {
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    if (user) {
+    if (effectiveUserId) {
       fetchRequests();
       fetchLeaveTypes();
     }
-  }, [user, userRole]);
+  }, [effectiveUserId, userRole, impersonatedUserId]);
 
   const fetchRequests = async () => {
     try {
@@ -82,8 +87,8 @@ export default function Requests() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (userRole === 'employee') {
-        query = query.eq('user_id', user?.id);
+      if (userRole === 'employee' || impersonatedUserId) {
+        query = query.eq('user_id', effectiveUserId);
       }
 
       const { data: requestsData, error: requestsError } = await query;
@@ -151,11 +156,11 @@ export default function Requests() {
 
   // Check if the requested range overlaps with any existing pending/approved requests
   const hasOverlap = async (start: Date, end: Date, excludeId?: string, userId?: string) => {
-    if (!user) return false;
+    if (!effectiveUserId) return false;
     const startStr = formatDateLocal(start);
     const endStr = formatDateLocal(end);
-    // Use provided userId or default to current user
-    const checkUserId = userId || user.id;
+    // Use provided userId or default to effective user
+    const checkUserId = userId || effectiveUserId;
     const { data, error } = await supabase
       .from('leave_requests')
       .select('id,start_date,end_date,status')
@@ -195,7 +200,7 @@ export default function Requests() {
       const { error } = await supabase
         .from('leave_requests')
         .insert({
-          user_id: user?.id,
+          user_id: effectiveUserId,
           start_date: formatDateLocal(startDate),
           end_date: formatDateLocal(endDate),
           days_requested: daysRequested,

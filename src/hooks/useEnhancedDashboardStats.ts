@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface LeaveTypeBalance {
@@ -37,6 +38,7 @@ const getLeaveTypeColor = (name: string): string => {
 
 export function useEnhancedDashboardStats(): EnhancedDashboardStats {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId } = useImpersonation();
   const [stats, setStats] = useState<EnhancedDashboardStats>({
     pendingRequests: 0,
     totalRequests: 0,
@@ -45,8 +47,11 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
     loading: true,
   });
 
+  // Use impersonated user ID if active, otherwise use logged-in user
+  const effectiveUserId = impersonatedUserId || user?.id;
+
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
 
     const fetchStats = async () => {
       try {
@@ -69,10 +74,10 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
           .select('id', { count: 'exact' })
           .gte('created_at', `${new Date().getFullYear()}-01-01`);
 
-        // For employees, filter by their own requests
-        if (userRole === 'employee') {
-          pendingQuery = pendingQuery.eq('user_id', user.id);
-          totalQuery = totalQuery.eq('user_id', user.id);
+        // For employees or when impersonating, filter by their own requests
+        if (userRole === 'employee' || impersonatedUserId) {
+          pendingQuery = pendingQuery.eq('user_id', effectiveUserId);
+          totalQuery = totalQuery.eq('user_id', effectiveUserId);
         }
 
         const [pendingResult, totalResult] = await Promise.all([
@@ -83,12 +88,12 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
         // Fetch leave balances with detailed breakdown
         let leaveBalances: LeaveTypeBalance[] = [];
         
-        if (userRole === 'employee') {
+        if (userRole === 'employee' || impersonatedUserId) {
           // Get user's leave balances
           const { data: balanceData } = await supabase
             .from('leave_balances')
             .select('leave_type_id, remaining_days, used_days, total_days')
-            .eq('user_id', user.id)
+            .eq('user_id', effectiveUserId)
             .eq('year', new Date().getFullYear());
 
           if (balanceData && balanceData.length > 0) {
@@ -109,7 +114,7 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
             const { data: approvedRequests } = await supabase
               .from('leave_requests')
               .select('leave_type_id, days_requested')
-              .eq('user_id', user.id)
+              .eq('user_id', effectiveUserId)
               .eq('status', 'approved')
               .gte('created_at', `${new Date().getFullYear()}-01-01`);
 
@@ -157,8 +162,8 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
           .from('profile_change_requests')
           .select('status', { count: 'exact' });
 
-        if (userRole === 'employee') {
-          profileChangeQuery = profileChangeQuery.eq('user_id', user.id);
+        if (userRole === 'employee' || impersonatedUserId) {
+          profileChangeQuery = profileChangeQuery.eq('user_id', effectiveUserId);
         }
 
         const { data: profileRequests } = await profileChangeQuery;
@@ -168,11 +173,11 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
           .from('profile_change_requests')
           .select('id', { count: 'exact' })
           .eq('status', 'pending')
-          .then(result => userRole === 'employee' 
+          .then(result => (userRole === 'employee' || impersonatedUserId)
             ? supabase.from('profile_change_requests')
                 .select('id', { count: 'exact' })
                 .eq('status', 'pending')
-                .eq('user_id', user.id)
+                .eq('user_id', effectiveUserId)
             : result
           );
 
@@ -180,11 +185,11 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
           .from('profile_change_requests')
           .select('id', { count: 'exact' })
           .eq('status', 'approved')
-          .then(result => userRole === 'employee'
+          .then(result => (userRole === 'employee' || impersonatedUserId)
             ? supabase.from('profile_change_requests')
                 .select('id', { count: 'exact' })
                 .eq('status', 'approved')
-                .eq('user_id', user.id)
+                .eq('user_id', effectiveUserId)
             : result
           );
 
@@ -208,7 +213,7 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
     };
 
     fetchStats();
-  }, [user, userRole]);
+  }, [effectiveUserId, userRole, impersonatedUserId]);
 
   return stats;
 }

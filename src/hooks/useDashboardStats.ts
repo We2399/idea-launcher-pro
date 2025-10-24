@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardStats {
@@ -12,6 +13,7 @@ interface DashboardStats {
 
 export function useDashboardStats(): DashboardStats {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId } = useImpersonation();
   const [stats, setStats] = useState<DashboardStats>({
     pendingRequests: 0,
     totalRequests: 0,
@@ -20,8 +22,11 @@ export function useDashboardStats(): DashboardStats {
     loading: true,
   });
 
+  // Use impersonated user ID if active, otherwise use logged-in user
+  const effectiveUserId = impersonatedUserId || user?.id;
+
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
 
     const fetchStats = async () => {
       try {
@@ -37,10 +42,10 @@ export function useDashboardStats(): DashboardStats {
           .select('id', { count: 'exact' })
           .gte('created_at', `${new Date().getFullYear()}-01-01`);
 
-        // For employees, filter by their own requests
-        if (userRole === 'employee') {
-          pendingQuery = pendingQuery.eq('user_id', user.id);
-          totalQuery = totalQuery.eq('user_id', user.id);
+        // For employees or when impersonating, filter by their own requests
+        if (userRole === 'employee' || impersonatedUserId) {
+          pendingQuery = pendingQuery.eq('user_id', effectiveUserId);
+          totalQuery = totalQuery.eq('user_id', effectiveUserId);
         }
 
         const [pendingResult, totalResult] = await Promise.all([
@@ -52,11 +57,11 @@ export function useDashboardStats(): DashboardStats {
         let remainingDays = 0;
         let usedDays = 0;
         
-        if (userRole === 'employee') {
+        if (userRole === 'employee' || impersonatedUserId) {
           const { data: balanceData } = await supabase
             .from('leave_balances')
             .select('remaining_days, used_days')
-            .eq('user_id', user.id)
+            .eq('user_id', effectiveUserId)
             .eq('year', new Date().getFullYear());
 
           if (balanceData && balanceData.length > 0) {
@@ -67,7 +72,7 @@ export function useDashboardStats(): DashboardStats {
             const { data: approvedRequests } = await supabase
               .from('leave_requests')
               .select('days_requested')
-              .eq('user_id', user.id)
+              .eq('user_id', effectiveUserId)
               .eq('status', 'approved')
               .gte('created_at', `${new Date().getFullYear()}-01-01`);
 
@@ -102,7 +107,7 @@ export function useDashboardStats(): DashboardStats {
     };
 
     fetchStats();
-  }, [user, userRole]);
+  }, [effectiveUserId, userRole, impersonatedUserId]);
 
   return stats;
 }

@@ -35,7 +35,7 @@ export default function Reports() {
   const [timeRange, setTimeRange] = useState('12');
 
   useEffect(() => {
-    if (userRole === 'hr_admin') {
+    if (userRole === 'hr_admin' || userRole === 'administrator') {
       fetchReportData();
     }
   }, [userRole, timeRange]);
@@ -190,7 +190,7 @@ export default function Reports() {
     }
   };
 
-  if (userRole !== 'hr_admin') {
+  if (userRole !== 'hr_admin' && userRole !== 'administrator') {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">

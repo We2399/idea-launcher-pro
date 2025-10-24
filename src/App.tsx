@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { ImpersonationProvider } from '@/contexts/ImpersonationContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
@@ -33,54 +34,56 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <LanguageProvider>
-          <TooltipProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/*" element={
-                  <ProtectedRoute>
-                    <SidebarProvider defaultOpen={false}>
-                      <div className="min-h-screen flex w-full">
-                        <AppSidebar />
-                        <div className="flex-1 flex flex-col">
-                          <Header />
-                          <main className="flex-1 p-4 md:p-6 lg:p-8">
-                            <Routes>
-                              <Route path="/" element={<Index />} />
-                              <Route path="/requests" element={<Requests />} />
-                              <Route path="/calendar" element={<Calendar />} />
-                              <Route path="/tasks" element={<Tasks />} />
-                              <Route path="/cash-control" element={<CashControl />} />
-                              <Route path="/profile" element={<ProfileWithApproval />} />
-                              <Route path="/employees" element={
-                                <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
-                                  <Employees />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/reports" element={
-                                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
-                                  <Reports />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/settings" element={
-                                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
-                                  <Settings />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="*" element={<NotFound />} />
-                            </Routes>
-                          </main>
+        <ImpersonationProvider>
+          <LanguageProvider>
+            <TooltipProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/*" element={
+                    <ProtectedRoute>
+                      <SidebarProvider defaultOpen={false}>
+                        <div className="min-h-screen flex w-full">
+                          <AppSidebar />
+                          <div className="flex-1 flex flex-col">
+                            <Header />
+                            <main className="flex-1 p-4 md:p-6 lg:p-8">
+                              <Routes>
+                                <Route path="/" element={<Index />} />
+                                <Route path="/requests" element={<Requests />} />
+                                <Route path="/calendar" element={<Calendar />} />
+                                <Route path="/tasks" element={<Tasks />} />
+                                <Route path="/cash-control" element={<CashControl />} />
+                                <Route path="/profile" element={<ProfileWithApproval />} />
+                                <Route path="/employees" element={
+                                  <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
+                                    <Employees />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/reports" element={
+                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                                    <Reports />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/settings" element={
+                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                                    <Settings />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="*" element={<NotFound />} />
+                              </Routes>
+                            </main>
+                          </div>
                         </div>
-                      </div>
-                    </SidebarProvider>
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </LanguageProvider>
+                      </SidebarProvider>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </LanguageProvider>
+        </ImpersonationProvider>
       </AuthProvider>
       <Toaster />
       <Sonner />
