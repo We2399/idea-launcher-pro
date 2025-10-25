@@ -24,7 +24,7 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     }
   }, [userRole]);
 
-  const startImpersonation = (userId: string) => {
+  const startImpersonation = async (userId: string) => {
     if (userRole !== 'administrator') {
       console.error('Only administrators can impersonate users');
       return;
@@ -34,15 +34,46 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem('impersonated_user_id', userId);
     
     // Log impersonation start to audit logs
-    // TODO: Implement audit logging
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await supabase.from('audit_logs').insert({
+        user_id: user?.id,
+        action: 'IMPERSONATION_START',
+        table_name: 'profiles',
+        record_id: userId,
+        new_values: { impersonated_user_id: userId },
+        user_agent: navigator.userAgent
+      });
+    } catch (error) {
+      console.error('Failed to log impersonation start:', error);
+    }
   };
 
-  const endImpersonation = () => {
+  const endImpersonation = async () => {
+    const previousUserId = impersonatedUserId;
     setImpersonatedUserId(null);
     sessionStorage.removeItem('impersonated_user_id');
     
     // Log impersonation end to audit logs
-    // TODO: Implement audit logging
+    if (previousUserId) {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        await supabase.from('audit_logs').insert({
+          user_id: user?.id,
+          action: 'IMPERSONATION_END',
+          table_name: 'profiles',
+          record_id: previousUserId,
+          old_values: { impersonated_user_id: previousUserId },
+          user_agent: navigator.userAgent
+        });
+      } catch (error) {
+        console.error('Failed to log impersonation end:', error);
+      }
+    }
   };
 
   const value = {

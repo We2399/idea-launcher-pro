@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield } from 'lucide-react';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, UserCog } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTranslationHelpers } from '@/lib/translations';
 import { format } from 'date-fns';
@@ -57,8 +59,13 @@ const getDepartments = (t: (key: string) => string) => [
 
 export default function Profile() {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId, isImpersonating } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType } = useTranslationHelpers();
+  
+  // Use impersonated user ID if active, otherwise use logged-in user
+  const effectiveUserId = impersonatedUserId || user?.id;
+  
   const [profile, setProfile] = useState<Profile | null>(null);
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,18 +79,18 @@ export default function Profile() {
   const [position, setPosition] = useState('');
 
   useEffect(() => {
-    if (user) {
+    if (effectiveUserId) {
       fetchProfile();
       fetchLeaveBalances();
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', effectiveUserId)
         .maybeSingle();
 
       if (error) throw error;
@@ -109,7 +116,7 @@ export default function Profile() {
       const { data: balanceData, error: balanceError } = await supabase
         .from('leave_balances')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', effectiveUserId)
         .eq('year', new Date().getFullYear());
 
       if (balanceError) throw balanceError;
@@ -148,6 +155,7 @@ export default function Profile() {
 
     setSaving(true);
     try {
+      // Update the profile (use effectiveUserId)
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -157,13 +165,39 @@ export default function Profile() {
           position: position,
           updated_at: new Date().toISOString()
         })
-        .eq('id', profile.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
 
+      // Log to audit_logs if impersonating
+      if (isImpersonating && impersonatedUserId) {
+        await supabase.from('audit_logs').insert({
+          user_id: user?.id, // Administrator's ID
+          action: 'UPDATE',
+          table_name: 'profiles',
+          record_id: profile.id,
+          old_values: {
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            department: profile.department,
+            position: profile.position
+          },
+          new_values: {
+            first_name: firstName,
+            last_name: lastName,
+            department: department,
+            position: position
+          },
+          ip_address: null,
+          user_agent: `Impersonating user: ${impersonatedUserId}`
+        });
+      }
+
       toast({
         title: t('success'),
-        description: t('profileUpdateSuccess')
+        description: isImpersonating 
+          ? `Profile updated by Administrator (viewing ${profile.first_name} ${profile.last_name})`
+          : t('profileUpdateSuccess')
       });
 
       setEditMode(false);
@@ -229,6 +263,16 @@ export default function Profile() {
           </Badge>
         </div>
       </div>
+
+      {/* Impersonation indicator */}
+      {isImpersonating && profile && (
+        <Alert className="bg-orange-100 border-orange-400">
+          <UserCog className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-900">
+            You are editing <strong>{profile.first_name} {profile.last_name}'s</strong> profile as Administrator
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Information */}

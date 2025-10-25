@@ -31,6 +31,7 @@ interface LeaveRequest {
   created_at: string;
   leave_type_id: string;
   user_id: string;
+  rejection_reason?: string;
   profiles?: {
     first_name: string;
     last_name: string;
@@ -49,7 +50,7 @@ interface LeaveType {
 
 export default function Requests() {
   const { user, userRole } = useAuth();
-  const { impersonatedUserId } = useImpersonation();
+  const { impersonatedUserId, isImpersonating } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
   
@@ -388,22 +389,33 @@ export default function Requests() {
         }
       }
 
+      const updateData: any = {
+        status,
+        approved_by: user?.id,
+        approved_at: new Date().toISOString(),
+        administrator_approved_by: user?.id,
+        administrator_approved_at: new Date().toISOString()
+      };
+
+      // If impersonating, track it in rejection_reason metadata
+      if (isImpersonating && impersonatedUserId && status === 'rejected') {
+        const request = requests.find(r => r.id === requestId);
+        const existingReason = request?.rejection_reason || '';
+        updateData.rejection_reason = existingReason ? 
+          `${existingReason} | Approved by Administrator while viewing user ${impersonatedUserId}` :
+          `Approved by Administrator while viewing user ${impersonatedUserId}`;
+      }
+
       const { error } = await supabase
         .from('leave_requests')
-        .update({ 
-          status,
-          approved_by: user?.id,
-          approved_at: new Date().toISOString(),
-          administrator_approved_by: user?.id,
-          administrator_approved_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', requestId);
 
       if (error) throw error;
 
       toast({
         title: t('success'),
-        description: `${t('requestStatus')} ${status} by Administrator`
+        description: `${t('requestStatus')} ${status}${isImpersonating ? ' (while impersonating)' : ''}`
       });
       
       fetchRequests();
@@ -816,8 +828,8 @@ export default function Requests() {
                     </div>
                   )}
 
-                  {/* Manager/HR Admin actions */}
-                  {(userRole === 'manager' || userRole === 'hr_admin') && (
+                  {/* Manager/HR Admin/Administrator actions */}
+                  {(userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator') && (
                     <>
                       {/* Senior Management Approval (for pending requests) */}
                       {userRole === 'manager' && request.status === 'pending' && (
@@ -833,16 +845,16 @@ export default function Requests() {
                         </div>
                       )}
 
-                      {/* Administrator Final Approval */}
+                      {/* HR Admin Final Approval */}
                       {userRole === 'hr_admin' && (
                         <div className="flex gap-2">
                           {request.status === 'pending' && (
                             <>
-                              <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                              <Button size="sm" onClick={() => handleFinalApproval(request.id, 'approved')} className="flex items-center gap-1">
                                 <Crown className="h-3 w-3" />
                                 {t('adminApprove')}
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                              <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
                                  {t('reject')}
                               </Button>
@@ -857,6 +869,33 @@ export default function Requests() {
                               <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                 <X className="h-3 w-3" />
                                  {t('reject')}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Administrator can override at any stage */}
+                      {userRole === 'administrator' && (
+                        <div className="flex gap-2">
+                          {(request.status === 'pending' || request.status === 'senior_approved') && (
+                            <>
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleFinalApproval(request.id, 'approved')}
+                                className="bg-green-600 hover:bg-green-700 flex items-center gap-1"
+                              >
+                                <Check className="h-3 w-3" />
+                                Admin Approve
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive" 
+                                onClick={() => handleFinalApproval(request.id, 'rejected')}
+                                className="flex items-center gap-1"
+                              >
+                                <X className="h-3 w-3" />
+                                Reject
                               </Button>
                             </>
                           )}
@@ -946,8 +985,8 @@ export default function Requests() {
                         </div>
                       )}
 
-                      {/* Manager/HR Admin actions */}
-                      {(userRole === 'manager' || userRole === 'hr_admin') && (
+                      {/* Manager/HR Admin/Administrator actions */}
+                      {(userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator') && (
                         <>
                           {/* Senior Management Approval (for pending requests) */}
                           {userRole === 'manager' && request.status === 'pending' && (
@@ -963,16 +1002,16 @@ export default function Requests() {
                             </div>
                           )}
 
-                          {/* Administrator Final Approval */}
+                          {/* HR Admin Final Approval */}
                           {userRole === 'hr_admin' && (
                             <div className="flex gap-2">
                               {request.status === 'pending' && (
                                 <>
-                                  <Button size="sm" onClick={() => handleSeniorApproval(request.id, 'approved')} className="flex items-center gap-1">
+                                  <Button size="sm" onClick={() => handleFinalApproval(request.id, 'approved')} className="flex items-center gap-1">
                                     <Crown className="h-3 w-3" />
                                     Admin Approve
                                   </Button>
-                                  <Button size="sm" variant="destructive" onClick={() => handleSeniorApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                  <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
                                     <X className="h-3 w-3" />
                                     Reject
                                   </Button>
@@ -985,6 +1024,33 @@ export default function Requests() {
                                     Final Approve
                                   </Button>
                                   <Button size="sm" variant="destructive" onClick={() => handleFinalApproval(request.id, 'rejected')} className="flex items-center gap-1">
+                                    <X className="h-3 w-3" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Administrator can override at any stage */}
+                          {userRole === 'administrator' && (
+                            <div className="flex gap-2">
+                              {(request.status === 'pending' || request.status === 'senior_approved') && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => handleFinalApproval(request.id, 'approved')}
+                                    className="bg-green-600 hover:bg-green-700 flex items-center gap-1"
+                                  >
+                                    <Check className="h-3 w-3" />
+                                    Admin Approve
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive" 
+                                    onClick={() => handleFinalApproval(request.id, 'rejected')}
+                                    className="flex items-center gap-1"
+                                  >
                                     <X className="h-3 w-3" />
                                     Reject
                                   </Button>

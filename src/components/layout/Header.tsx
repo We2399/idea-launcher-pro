@@ -148,7 +148,9 @@ export function Header() {
                   <RoleIcon className="h-3 w-3" />
                   <span className="hidden md:inline">
                     {getRoleLabel(userRole)}
-                    {isImpersonating && ' (Impersonating)'}
+                    {isImpersonating && impersonatedProfile && (
+                      <span className="text-xs"> (viewing {impersonatedProfile.first_name})</span>
+                    )}
                   </span>
                 </Badge>
                 <span className="text-sm text-muted-foreground hidden lg:inline truncate max-w-[150px]">{displayName}</span>
