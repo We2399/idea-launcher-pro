@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +12,12 @@ import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard'
 
 const Index = () => {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId } = useImpersonation();
   const { t } = useLanguage();
   const stats = useEnhancedDashboardStats();
+  
+  // Show impersonation indicator for administrators
+  const isImpersonating = userRole === 'administrator' && impersonatedUserId;
 
   if (!user) {
     return (
@@ -86,10 +91,16 @@ const Index = () => {
     <div className="space-y-6 md:space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          {userRole === 'administrator' ? 'Administrator Dashboard' : t('welcomeBack')}
+          {userRole === 'administrator' 
+            ? (isImpersonating ? `Dashboard - Viewing Employee Data` : 'Administrator Dashboard')
+            : t('welcomeBack')}
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          {userRole === 'administrator' ? 'System-wide management and settings' : t('dashboardSubtitle')}
+          {userRole === 'administrator' 
+            ? (isImpersonating 
+                ? 'Managing selected employee\'s information and requests' 
+                : 'System-wide management and settings')
+            : t('dashboardSubtitle')}
         </p>
       </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationHelpers } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
@@ -80,6 +81,7 @@ const departments = [
 
 export default function ProfileWithApproval() {
   const { user, userRole } = useAuth();
+  const { impersonatedUserId, isImpersonating } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType } = useTranslationHelpers();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -104,8 +106,15 @@ export default function ProfileWithApproval() {
 
   const isManager = userRole === 'manager' || userRole === 'hr_admin';
   const isHrAdmin = userRole === 'hr_admin';
-  const currentProfile = isManager && selectedStaffProfile ? selectedStaffProfile : profile;
-  const viewingUserId = isManager && selectedStaffId ? selectedStaffId : user?.id;
+  const isAdministrator = userRole === 'administrator';
+  
+  // Use impersonated user ID for administrators, otherwise use manager's staff selection
+  const effectiveUserId = isAdministrator && impersonatedUserId 
+    ? impersonatedUserId 
+    : (isManager && selectedStaffId ? selectedStaffId : user?.id);
+  
+  const currentProfile = effectiveUserId !== user?.id ? selectedStaffProfile : profile;
+  const viewingUserId = effectiveUserId;
 
   // Define all profile fields for initial setup and change requests
   const allProfileFields = [
@@ -114,10 +123,12 @@ export default function ProfileWithApproval() {
     'emergency_contact_phone', 'id_number', 'passport_number', 'visa_number', 'date_of_birth'
   ];
 
-  const isProfileIncomplete = currentProfile && !currentProfile.profile_completed;
-  // HR Admins can always directly edit, users can only edit during initial setup
-  const canUserEditDirectly = !isManager && isProfileIncomplete;
-  const canHrAdminEdit = isHrAdmin;
+  // Don't show incomplete banner for HR Admin or Administrator roles
+  const isProfileIncomplete = currentProfile && !currentProfile.profile_completed && 
+    userRole !== 'hr_admin' && userRole !== 'administrator';
+  // HR Admins and Administrators can always directly edit, users can only edit during initial setup
+  const canUserEditDirectly = (!isManager && !isAdministrator && isProfileIncomplete);
+  const canHrAdminEdit = isHrAdmin || isAdministrator;
 
   useEffect(() => {
     if (user) {
@@ -128,6 +139,13 @@ export default function ProfileWithApproval() {
       }
     }
   }, [user, userRole]);
+
+  // Fetch selected profile when impersonating or selecting staff
+  useEffect(() => {
+    if (effectiveUserId && effectiveUserId !== user?.id) {
+      fetchSelectedProfile(effectiveUserId);
+    }
+  }, [effectiveUserId]);
 
   useEffect(() => {
     if (viewingUserId) {
@@ -188,6 +206,26 @@ export default function ProfileWithApproval() {
       toast({
         title: "Error",
         description: "Failed to fetch staff profile",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Generic function to fetch any profile by user_id
+  const fetchSelectedProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setSelectedStaffProfile(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch profile",
         variant: "destructive"
       });
     }
