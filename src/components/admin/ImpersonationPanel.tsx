@@ -23,9 +23,10 @@ interface Employee {
 interface ImpersonationPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  redirectTo?: string;
 }
 
-export function ImpersonationPanel({ open, onOpenChange }: ImpersonationPanelProps) {
+export function ImpersonationPanel({ open, onOpenChange, redirectTo = '/' }: ImpersonationPanelProps) {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,7 +80,7 @@ export function ImpersonationPanel({ open, onOpenChange }: ImpersonationPanelPro
       description: `Now viewing as ${employee.first_name} ${employee.last_name}`
     });
     onOpenChange(false);
-    navigate('/'); // Redirect to dashboard
+    navigate(redirectTo); // Redirect to chosen path
   };
 
   const getInitials = (firstName: string, lastName: string) => {

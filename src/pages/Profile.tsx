@@ -11,11 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, UserCog } from 'lucide-react';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, UserCog, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTranslationHelpers } from '@/lib/translations';
 import { format } from 'date-fns';
 import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
+import { ImpersonationPanel } from '@/components/admin/ImpersonationPanel';
 
 interface Profile {
   id: string;
@@ -40,6 +41,19 @@ interface LeaveBalance {
   leave_types: {
     name: string;
   };
+}
+
+interface ChangeRequest {
+  id: string;
+  user_id: string;
+  field_name: string;
+  current_value: string | null;
+  new_value: string;
+  status: string;
+  requested_by: string;
+  approved_by?: string | null;
+  created_at: string;
+  approved_at?: string | null;
 }
 
 // Department mapping for translations
@@ -71,6 +85,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [impersonationOpen, setImpersonationOpen] = useState(false);
+  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -82,6 +98,7 @@ export default function Profile() {
     if (effectiveUserId) {
       fetchProfile();
       fetchLeaveBalances();
+      fetchProfileChangeRequests();
     }
   }, [effectiveUserId]);
 
@@ -147,6 +164,54 @@ export default function Profile() {
         description: error.message || t('profileUpdateError'), 
         variant: "destructive"
       });
+    }
+  };
+
+  const fetchProfileChangeRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profile_change_requests')
+        .select('*')
+        .eq('user_id', effectiveUserId)
+        .in('status', ['pending', 'senior_approved'])
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setChangeRequests(data || []);
+    } catch (error: any) {
+      toast({ title: t('error'), description: error.message || t('operationFailed'), variant: 'destructive' });
+    }
+  };
+
+  const handleApproveChange = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('profile_change_requests')
+        .update({
+          status: 'approved',
+          approved_by: user?.id,
+          approved_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      if (error) throw error;
+      toast({ title: t('success'), description: 'Profile change approved' });
+      await fetchProfileChangeRequests();
+      await fetchProfile();
+    } catch (error: any) {
+      toast({ title: t('error'), description: error.message || t('operationFailed'), variant: 'destructive' });
+    }
+  };
+
+  const handleRejectChange = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('profile_change_requests')
+        .update({ status: 'rejected', approved_by: user?.id, approved_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+      toast({ title: t('success'), description: 'Profile change rejected' });
+      await fetchProfileChangeRequests();
+    } catch (error: any) {
+      toast({ title: t('error'), description: error.message || t('operationFailed'), variant: 'destructive' });
     }
   };
 
@@ -279,12 +344,19 @@ export default function Profile() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('personalInformation')}</CardTitle>
-            <Button
-              variant={editMode ? "outline" : "default"}
-              onClick={() => setEditMode(!editMode)}
-            >
-              {editMode ? t('cancel') : t('editProfile')}
-            </Button>
+            <div className="flex items-center gap-2">
+              {userRole === 'administrator' && (
+                <Button variant="outline" onClick={() => setImpersonationOpen(true)}>
+                  {t('switchUser') || 'Switch User'}
+                </Button>
+              )}
+              <Button
+                variant={editMode ? "outline" : "default"}
+                onClick={() => setEditMode(!editMode)}
+              >
+                {editMode ? t('cancel') : t('editProfile')}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -443,7 +515,46 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Profile Change Requests (Management) */}
+        {(userRole === 'administrator' || userRole === 'hr_admin' || userRole === 'manager') && (
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>{t('profileChangeRequests') || 'Profile Change Requests'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {changeRequests.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground text-sm">
+                  {t('noPendingRequests') || 'No pending requests'}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {changeRequests.map((req) => (
+                    <div key={req.id} className="p-3 border rounded-md">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium">
+                          {req.field_name}: <span className="text-muted-foreground">{req.current_value ?? t('unknown')}</span> → <span>{req.new_value}</span>
+                        </div>
+                        <Badge variant="outline">{req.status}</Badge>
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <Button size="sm" onClick={() => handleApproveChange(req.id)} className="flex items-center gap-1">
+                          <Check className="h-3 w-3" /> {t('approve')}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRejectChange(req.id)} className="flex items-center gap-1">
+                          <X className="h-3 w-3" /> {t('reject')}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
+      {/* Impersonation Panel for quick switching on Profile page */}
+      <ImpersonationPanel open={impersonationOpen} onOpenChange={setImpersonationOpen} redirectTo="/profile" />
     </div>
   );
 }
