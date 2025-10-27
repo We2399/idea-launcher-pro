@@ -60,12 +60,15 @@ const Tasks = () => {
     due_date: ''
   });
 
-  const canCreateTasks = userRole === 'manager' || userRole === 'hr_admin';
+  // All users can create tasks
+  const canCreateTasks = true;
+  // Management and administrators can assign to anyone, employees can only assign to themselves
+  const canAssignToOthers = userRole === 'hr_admin' || userRole === 'administrator' || userRole === 'manager';
 
   useEffect(() => {
     if (user) {
       fetchTasks();
-      if (canCreateTasks) {
+      if (canAssignToOthers) {
         fetchProfiles();
       }
     }
@@ -141,12 +144,15 @@ const Tasks = () => {
     if (!user) return;
 
     try {
+      // For employees, assign to themselves
+      const assignedTo = canAssignToOthers ? formData.assigned_to : user.id;
+      
       const { error } = await supabase
         .from('tasks')
         .insert({
           title: formData.title,
           description: formData.description || null,
-          assigned_to: formData.assigned_to,
+          assigned_to: assignedTo,
           assigned_by: user.id,
           priority: formData.priority,
           due_date: formData.due_date || null
@@ -286,18 +292,26 @@ const Tasks = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="assigned_to">{t('assignTo')}</Label>
-                  <Select onValueChange={(value) => setFormData({ ...formData, assigned_to: value })} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectTeamMember')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {profiles.map((profile) => (
-                        <SelectItem key={profile.user_id} value={profile.user_id}>
-                          {profile.first_name} {profile.last_name} ({profile.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {canAssignToOthers ? (
+                    <Select onValueChange={(value) => setFormData({ ...formData, assigned_to: value })} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectTeamMember')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profiles.map((profile) => (
+                          <SelectItem key={profile.user_id} value={profile.user_id}>
+                            {profile.first_name} {profile.last_name} ({profile.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input 
+                      value={t('myself')} 
+                      disabled 
+                      className="bg-muted"
+                    />
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -379,7 +393,7 @@ const Tasks = () => {
                       </div>
                     )}
                   </div>
-                  {(task.assigned_to === user?.id || canCreateTasks) && task.status !== 'completed' && (
+                  {(task.assigned_to === user?.id || canAssignToOthers) && task.status !== 'completed' && (
                     <div className="flex gap-2">
                       {task.status === 'pending' && (
                         <Button
