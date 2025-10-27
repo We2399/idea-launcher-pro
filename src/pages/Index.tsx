@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp } from 'lucide-react';
+import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckSquare, DollarSign } from 'lucide-react';
 import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
 import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
@@ -67,6 +67,24 @@ const Index = () => {
       color: 'from-purple-500/10 to-purple-600/10 border-purple-500/20'
     }
   ];
+
+  // Add Tasks card for all users
+  dashboardCards.push({
+    title: t('tasks'),
+    description: 'View and manage your tasks',
+    icon: CheckSquare,
+    href: '/tasks',
+    color: 'from-cyan-500/10 to-cyan-600/10 border-cyan-500/20'
+  });
+
+  // Add Cash Control card for all users
+  dashboardCards.push({
+    title: 'Cash Control',
+    description: 'Manage cash transactions',
+    icon: DollarSign,
+    href: '/cash-control',
+    color: 'from-amber-500/10 to-amber-600/10 border-amber-500/20'
+  });
 
   // Add management-specific cards for hr_admin and administrator
   if (userRole === 'hr_admin' || userRole === 'administrator') {
