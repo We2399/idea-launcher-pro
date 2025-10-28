@@ -98,39 +98,39 @@ npm install
 
 2. **Add Android platform (first time only):**
 ```sh
-npm run android:add
-# Or manually: npx cap add android
+npx cap add android
 ```
 
 3. **Add iOS platform (first time only, Mac only):**
 ```sh
-npm run ios:add
-# Or manually: npx cap add ios
+npx cap add ios
 ```
 
 ### Running the App
 
 **On Android:**
 ```sh
-npm run android:run
-# This builds the web app, syncs to Android, and runs on emulator/device
+npm run build
+npx cap sync android
+npx cap run android
 ```
 
 Or open in Android Studio:
 ```sh
-npm run android:open
+npx cap open android
 # Then click Run in Android Studio
 ```
 
 **On iOS (Mac only):**
 ```sh
-npm run ios:run
-# This builds the web app, syncs to iOS, and runs on simulator/device
+npm run build
+npx cap sync ios
+npx cap run ios
 ```
 
 Or open in Xcode:
 ```sh
-npm run ios:open
+npx cap open ios
 # Set your Signing Team in Xcode, then click Run
 ```
 
@@ -146,16 +146,16 @@ The app is configured to load from the Lovable sandbox URL during development. T
 To build the app for store distribution:
 
 1. Comment out the `server` section in `capacitor.config.ts`
-2. Build and sync: `npm run build && npm run cap:sync`
+2. Build and sync: `npm run build && npx cap sync`
 3. Open in native IDE and create a release build:
    - **Android:** Use Android Studio to generate a signed APK/AAB
    - **iOS:** Use Xcode to archive and submit to App Store
 
 ### Useful Commands
 
-- `npm run cap:sync` - Sync web assets to native platforms
-- `npm run android:open` - Open project in Android Studio
-- `npm run ios:open` - Open project in Xcode
+- `npx cap sync` - Sync web assets to native platforms
+- `npx cap open android` - Open project in Android Studio
+- `npx cap open ios` - Open project in Xcode
 - `npx cap update` - Update Capacitor dependencies
 
 ### Troubleshooting
