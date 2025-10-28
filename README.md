@@ -71,3 +71,99 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Running on Android and iOS
+
+This project is set up with Capacitor for native mobile development.
+
+### Prerequisites
+
+**For Android:**
+- Install [Android Studio](https://developer.android.com/studio)
+- Install Android SDK (API 33 or higher)
+- Install Java JDK 17 (set in Android Studio > Preferences > Build Tools > Gradle)
+
+**For iOS (Mac only):**
+- Install [Xcode](https://developer.apple.com/xcode/) from the Mac App Store
+- Install Xcode Command Line Tools: `xcode-select --install`
+
+### First Time Setup
+
+1. **Clone and install dependencies:**
+```sh
+git clone <YOUR_GIT_URL>
+cd <YOUR_PROJECT_NAME>
+npm install
+```
+
+2. **Add Android platform (first time only):**
+```sh
+npm run android:add
+# Or manually: npx cap add android
+```
+
+3. **Add iOS platform (first time only, Mac only):**
+```sh
+npm run ios:add
+# Or manually: npx cap add ios
+```
+
+### Running the App
+
+**On Android:**
+```sh
+npm run android:run
+# This builds the web app, syncs to Android, and runs on emulator/device
+```
+
+Or open in Android Studio:
+```sh
+npm run android:open
+# Then click Run in Android Studio
+```
+
+**On iOS (Mac only):**
+```sh
+npm run ios:run
+# This builds the web app, syncs to iOS, and runs on simulator/device
+```
+
+Or open in Xcode:
+```sh
+npm run ios:open
+# Set your Signing Team in Xcode, then click Run
+```
+
+### Live Reload (Development Mode)
+
+The app is configured to load from the Lovable sandbox URL during development. This means:
+- Changes you make in Lovable appear instantly in the mobile app
+- No need to rebuild or sync after code changes
+- Perfect for rapid prototyping
+
+### Building for Production
+
+To build the app for store distribution:
+
+1. Comment out the `server` section in `capacitor.config.ts`
+2. Build and sync: `npm run build && npm run cap:sync`
+3. Open in native IDE and create a release build:
+   - **Android:** Use Android Studio to generate a signed APK/AAB
+   - **iOS:** Use Xcode to archive and submit to App Store
+
+### Useful Commands
+
+- `npm run cap:sync` - Sync web assets to native platforms
+- `npm run android:open` - Open project in Android Studio
+- `npm run ios:open` - Open project in Xcode
+- `npx cap update` - Update Capacitor dependencies
+
+### Troubleshooting
+
+**"Cannot find package.json"**: Make sure you're in the project directory before running commands.
+
+**Gradle/JDK errors**: Use JDK 17 in Android Studio settings.
+
+**iOS signing errors**: Set your Apple Developer Team in Xcode under Signing & Capabilities.
+
+For more help, see the [Capacitor Documentation](https://capacitorjs.com/docs).
