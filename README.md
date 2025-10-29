@@ -106,10 +106,29 @@ npx cap add android
 npx cap add ios
 ```
 
+### Capacitor Modes
+
+The app can run in two modes:
+
+#### **Local Mode (Default)** - For testing and production
+- Uses bundled assets from your `dist` folder
+- Works offline, no network dependency
+- Fast and reliable for emulator/device testing
+- **Current config:** Server block is commented out in `capacitor.config.ts`
+
+#### **Development Mode** - For live reload from Lovable
+- Loads app directly from Lovable sandbox URL
+- Changes in Lovable appear instantly on your device/emulator
+- Requires internet connection
+- **To enable:** Uncomment the `server` block in `capacitor.config.ts`
+
 ### Running the App
 
 **On Android:**
+
+Quick start from terminal:
 ```sh
+cd ~/Projects/idea-launcher-pro
 npm run build
 npx cap sync android
 npx cap run android
@@ -118,10 +137,12 @@ npx cap run android
 Or open in Android Studio:
 ```sh
 npx cap open android
-# Then click Run in Android Studio
+# Then click the green Play ▶️ button
 ```
 
 **On iOS (Mac only):**
+
+Quick start from terminal:
 ```sh
 npm run build
 npx cap sync ios
@@ -131,15 +152,16 @@ npx cap run ios
 Or open in Xcode:
 ```sh
 npx cap open ios
-# Set your Signing Team in Xcode, then click Run
+# Set your Signing Team, then click Run
 ```
 
-### Live Reload (Development Mode)
+### Switching to Development Mode (Live Reload)
 
-The app is configured to load from the Lovable sandbox URL during development. This means:
-- Changes you make in Lovable appear instantly in the mobile app
-- No need to rebuild or sync after code changes
-- Perfect for rapid prototyping
+To enable instant reload from Lovable:
+1. Open `capacitor.config.ts`
+2. Uncomment the `server` block
+3. Run: `npx cap sync android` (or `ios`)
+4. Run the app - changes in Lovable will appear instantly
 
 ### Building for Production
 
