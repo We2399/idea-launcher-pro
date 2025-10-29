@@ -383,7 +383,9 @@ export function LeaveAllocationManager() {
                     )}
                     
                     {/* Administrator Final Approval */}
-                    {(userRole === 'hr_admin' || userRole === 'administrator') && allocation.status === 'senior_approved' && (
+                    {(userRole === 'hr_admin' || userRole === 'administrator') && 
+                     allocation.status === 'senior_approved' && 
+                     allocation.user_id !== user?.id && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -406,7 +408,9 @@ export function LeaveAllocationManager() {
                     )}
 
                     {/* Administrator can also approve directly */}
-                    {(userRole === 'hr_admin' || userRole === 'administrator') && allocation.status === 'pending' && (
+                    {(userRole === 'hr_admin' || userRole === 'administrator') && 
+                     allocation.status === 'pending' && 
+                     allocation.user_id !== user?.id && (
                       <div className="flex gap-2">
                         <Button
                           size="sm" 
