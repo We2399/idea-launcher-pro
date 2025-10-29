@@ -63,7 +63,7 @@ export function LeaveAllocationManager() {
   const [year, setYear] = useState(new Date().getFullYear().toString());
 
   useEffect(() => {
-    if (user && (userRole === 'manager' || userRole === 'hr_admin')) {
+    if (user && (userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator')) {
       fetchData();
     }
   }, [user, userRole]);
@@ -252,7 +252,7 @@ export function LeaveAllocationManager() {
           <h1 className="text-3xl font-bold text-foreground">{t('leaveAllocationManagement')}</h1>
           <p className="text-muted-foreground">{t('leaveAllocationDescription')}</p>
         </div>
-        {(userRole === 'manager' || userRole === 'hr_admin') && (
+        {(userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator') && (
           <Dialog open={showNewAllocation} onOpenChange={setShowNewAllocation}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
@@ -383,7 +383,7 @@ export function LeaveAllocationManager() {
                     )}
                     
                     {/* Administrator Final Approval */}
-                    {userRole === 'hr_admin' && allocation.status === 'senior_approved' && (
+                    {(userRole === 'hr_admin' || userRole === 'administrator') && allocation.status === 'senior_approved' && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -406,7 +406,7 @@ export function LeaveAllocationManager() {
                     )}
 
                     {/* Administrator can also approve directly */}
-                    {userRole === 'hr_admin' && allocation.status === 'pending' && (
+                    {(userRole === 'hr_admin' || userRole === 'administrator') && allocation.status === 'pending' && (
                       <div className="flex gap-2">
                         <Button
                           size="sm" 
