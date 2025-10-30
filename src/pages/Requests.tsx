@@ -62,6 +62,7 @@ export default function Requests() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserProfile, setCurrentUserProfile] = useState<{ first_name: string; last_name: string } | null>(null);
   
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,7 +80,21 @@ export default function Requests() {
       fetchRequests();
       fetchLeaveTypes();
     }
-  }, [effectiveUserId, userRole, impersonatedUserId]);
+}, [effectiveUserId, userRole, impersonatedUserId]);
+
+  // Fetch current user's profile for self-approval checks
+  useEffect(() => {
+    const fetchCurrentUserProfile = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user.id)
+        .single();
+      if (!error) setCurrentUserProfile(data);
+    };
+    fetchCurrentUserProfile();
+  }, [user?.id]);
 
   const fetchRequests = async () => {
     try {
@@ -365,10 +380,10 @@ export default function Requests() {
       });
       
       fetchRequests();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('operationFailed'),
+        description: error?.message || t('operationFailed'),
         variant: "destructive"
       });
     }
@@ -419,10 +434,10 @@ export default function Requests() {
       });
       
       fetchRequests();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: t('error'),
-        description: t('operationFailed'),
+        description: error?.message || t('operationFailed'),
         variant: "destructive"
       });
     }
@@ -451,6 +466,14 @@ export default function Requests() {
         <Icon className="h-3 w-3" />
         {statusLabels[status as keyof typeof statusLabels] || status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
+    );
+  };
+
+  const isSelfByName = (request: LeaveRequest) => {
+    if (!currentUserProfile || !request.profiles) return false;
+    return (
+      currentUserProfile.first_name?.toLowerCase() === request.profiles.first_name?.toLowerCase() &&
+      currentUserProfile.last_name?.toLowerCase() === request.profiles.last_name?.toLowerCase()
     );
   };
 
@@ -846,7 +869,7 @@ export default function Requests() {
                       )}
 
                       {/* HR Admin Final Approval */}
-                      {userRole === 'hr_admin' && (
+                      {userRole === 'hr_admin' && request.user_id !== user?.id && !isSelfByName(request) && (
                         <div className="flex gap-2">
                           {request.status === 'pending' && (
                             <>
@@ -1003,7 +1026,7 @@ export default function Requests() {
                           )}
 
                           {/* HR Admin Final Approval */}
-                          {userRole === 'hr_admin' && (
+                          {userRole === 'hr_admin' && request.user_id !== user?.id && !isSelfByName(request) && (
                             <div className="flex gap-2">
                               {request.status === 'pending' && (
                                 <>
