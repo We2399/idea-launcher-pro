@@ -55,6 +55,7 @@ export function LeaveAllocationManager() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewAllocation, setShowNewAllocation] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState<{ first_name: string; last_name: string } | null>(null);
   
   // Form state
   const [selectedEmployee, setSelectedEmployee] = useState('');
@@ -65,8 +66,26 @@ export function LeaveAllocationManager() {
   useEffect(() => {
     if (user && (userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator')) {
       fetchData();
+      fetchCurrentUserProfile();
     }
   }, [user, userRole]);
+
+  const fetchCurrentUserProfile = async () => {
+    try {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      setCurrentUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching current user profile:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -183,7 +202,10 @@ export function LeaveAllocationManager() {
         .update(updateData)
         .eq('id', allocationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Approval error:', error);
+        throw new Error(error.message || `Failed to ${action} allocation`);
+      }
 
       toast({
         title: "Success",
@@ -192,9 +214,10 @@ export function LeaveAllocationManager() {
 
       fetchData();
     } catch (error: any) {
+      console.error('Error in handleApproval:', error);
       toast({
         title: "Error",
-        description: `Failed to ${action} allocation`,
+        description: error.message || `Failed to ${action} allocation`,
         variant: "destructive"
       });
     }
@@ -359,78 +382,102 @@ export function LeaveAllocationManager() {
                   <TableCell>{allocation.year}</TableCell>
                   <TableCell>{getStatusBadge(allocation.status)}</TableCell>
                   <TableCell>
-                    {/* Senior Management Approval */}
-                    {userRole === 'manager' && allocation.status === 'pending' && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproval(allocation.id, 'approve', 'senior')}
-                          className="flex items-center gap-1"
-                        >
-                          <Shield className="h-3 w-3" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleApproval(allocation.id, 'reject', 'senior')}
-                          className="flex items-center gap-1"
-                        >
-                          <X className="h-3 w-3" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {/* Administrator Final Approval */}
-                    {(userRole === 'hr_admin' || userRole === 'administrator') && 
-                     allocation.status === 'senior_approved' && 
-                     allocation.user_id !== user?.id && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproval(allocation.id, 'approve', 'final')}
-                          className="flex items-center gap-1"
-                        >
-                          <Crown className="h-3 w-3" />
-                          Final Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleApproval(allocation.id, 'reject', 'final')}
-                          className="flex items-center gap-1"
-                        >
-                          <X className="h-3 w-3" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
+                    {(() => {
+                      const isSamePersonByName = currentUserProfile && allocation.profiles && 
+                        currentUserProfile.first_name?.toLowerCase() === allocation.profiles.first_name?.toLowerCase() &&
+                        currentUserProfile.last_name?.toLowerCase() === allocation.profiles.last_name?.toLowerCase();
+                      
+                      const isZeroDays = allocation.allocated_days <= 0;
 
-                    {/* Administrator can also approve directly */}
-                    {(userRole === 'hr_admin' || userRole === 'administrator') && 
-                     allocation.status === 'pending' && 
-                     allocation.user_id !== user?.id && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm" 
-                          onClick={() => handleApproval(allocation.id, 'approve', 'final')}
-                          className="flex items-center gap-1"
-                        >
-                          <Crown className="h-3 w-3" />
-                          Admin Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleApproval(allocation.id, 'reject', 'final')}
-                          className="flex items-center gap-1"
-                        >
-                          <X className="h-3 w-3" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
+                      // Senior Management Approval (Manager role only)
+                      if (userRole === 'manager' && allocation.status === 'pending') {
+                        return (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproval(allocation.id, 'approve', 'senior')}
+                              className="flex items-center gap-1"
+                              disabled={isZeroDays}
+                              title={isZeroDays ? 'Cannot approve 0-day allocation' : ''}
+                            >
+                              <Shield className="h-3 w-3" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleApproval(allocation.id, 'reject', 'senior')}
+                              className="flex items-center gap-1"
+                            >
+                              <X className="h-3 w-3" />
+                              Reject
+                            </Button>
+                          </div>
+                        );
+                      }
+                      
+                      // Administrator Final Approval (for senior_approved status)
+                      if ((userRole === 'hr_admin' || userRole === 'administrator') && 
+                          allocation.status === 'senior_approved' && 
+                          allocation.user_id !== user?.id &&
+                          !isSamePersonByName) {
+                        return (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproval(allocation.id, 'approve', 'final')}
+                              className="flex items-center gap-1"
+                              disabled={isZeroDays}
+                              title={isZeroDays ? 'Cannot approve 0-day allocation' : ''}
+                            >
+                              <Crown className="h-3 w-3" />
+                              Final Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleApproval(allocation.id, 'reject', 'final')}
+                              className="flex items-center gap-1"
+                            >
+                              <X className="h-3 w-3" />
+                              Reject
+                            </Button>
+                          </div>
+                        );
+                      }
+
+                      // Administrator can also approve directly from pending
+                      if ((userRole === 'hr_admin' || userRole === 'administrator') && 
+                          allocation.status === 'pending' && 
+                          allocation.user_id !== user?.id &&
+                          !isSamePersonByName) {
+                        return (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm" 
+                              onClick={() => handleApproval(allocation.id, 'approve', 'final')}
+                              className="flex items-center gap-1"
+                              disabled={isZeroDays}
+                              title={isZeroDays ? 'Cannot approve 0-day allocation' : ''}
+                            >
+                              <Crown className="h-3 w-3" />
+                              Admin Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleApproval(allocation.id, 'reject', 'final')}
+                              className="flex items-center gap-1"
+                            >
+                              <X className="h-3 w-3" />
+                              Reject
+                            </Button>
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}
