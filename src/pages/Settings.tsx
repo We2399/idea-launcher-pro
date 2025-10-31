@@ -5,7 +5,8 @@ import { LeaveAllocationManager } from '@/components/admin/LeaveAllocationManage
 import { WorkScheduleManager } from '@/components/admin/WorkScheduleManager';
 import { PublicHolidaysManager } from '@/components/admin/PublicHolidaysManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Users, Shield, Clock, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database } from 'lucide-react';
+import StorageCentre from '@/pages/StorageCentre';
 
 export default function Settings() {
   const { userRole } = useAuth();
@@ -29,7 +30,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="delegation" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="delegation" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             Delegation
@@ -45,6 +46,10 @@ export default function Settings() {
           <TabsTrigger value="holidays" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             Public Holidays
+          </TabsTrigger>
+          <TabsTrigger value="storage" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Storage Centre
           </TabsTrigger>
         </TabsList>
         
@@ -62,6 +67,10 @@ export default function Settings() {
         
         <TabsContent value="holidays">
           <PublicHolidaysManager />
+        </TabsContent>
+        
+        <TabsContent value="storage">
+          <StorageCentre />
         </TabsContent>
       </Tabs>
     </div>

@@ -107,6 +107,131 @@ export type Database = {
         }
         Relationships: []
       }
+      document_comments: {
+        Row: {
+          comment: string
+          comment_type: string
+          created_at: string | null
+          document_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          comment_type: string
+          created_at?: string | null
+          document_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          comment_type?: string
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_comments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_storage"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_storage: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          cash_transaction_id: string | null
+          created_at: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size: number
+          id: string
+          is_latest_version: boolean | null
+          mime_type: string | null
+          rejection_reason: string | null
+          replacement_reason: string | null
+          replacement_status: string | null
+          replaces_document_id: string | null
+          source: string
+          updated_at: string | null
+          uploaded_by: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          cash_transaction_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          document_name: string
+          document_type: string
+          file_path: string
+          file_size: number
+          id?: string
+          is_latest_version?: boolean | null
+          mime_type?: string | null
+          rejection_reason?: string | null
+          replacement_reason?: string | null
+          replacement_status?: string | null
+          replaces_document_id?: string | null
+          source: string
+          updated_at?: string | null
+          uploaded_by: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          cash_transaction_id?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          document_name?: string
+          document_type?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          is_latest_version?: boolean | null
+          mime_type?: string | null
+          rejection_reason?: string | null
+          replacement_reason?: string | null
+          replacement_status?: string | null
+          replaces_document_id?: string | null
+          source?: string
+          updated_at?: string | null
+          uploaded_by?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_storage_cash_transaction_id_fkey"
+            columns: ["cash_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "cash_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_storage_replaces_document_id_fkey"
+            columns: ["replaces_document_id"]
+            isOneToOne: false
+            referencedRelation: "document_storage"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_work_schedules: {
         Row: {
           created_at: string
@@ -682,6 +807,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_replacement: {
+        Args: { approval_note?: string; doc_id: string }
+        Returns: undefined
+      }
+      get_document_versions: {
+        Args: { original_doc_id: string }
+        Returns: {
+          approved_at: string
+          approved_by: string
+          created_at: string
+          document_name: string
+          file_path: string
+          id: string
+          rejection_reason: string
+          replacement_reason: string
+          replacement_status: string
+          uploaded_by: string
+          version: number
+        }[]
+      }
       get_user_role: { Args: { user_id: string }; Returns: string }
       has_delegation_rights: { Args: { user_id: string }; Returns: boolean }
       is_administrator: { Args: { user_id: string }; Returns: boolean }
@@ -689,6 +834,14 @@ export type Database = {
       is_management: { Args: { user_id: string }; Returns: boolean }
       is_senior_management: { Args: { user_id: string }; Returns: boolean }
       is_senior_position: { Args: { user_id: string }; Returns: boolean }
+      reject_replacement: {
+        Args: { doc_id: string; reason: string }
+        Returns: undefined
+      }
+      soft_delete_document: {
+        Args: { deletion_reason?: string; doc_id: string }
+        Returns: undefined
+      }
       sync_all_profiles: { Args: never; Returns: string }
       sync_profile_from_auth: {
         Args: { target_user_id: string }
