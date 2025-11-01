@@ -4,11 +4,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { DocumentStorage, useDocumentComments, useAddDocumentComment } from '@/hooks/useStorageCentre';
+import { DocumentStorage, useDocumentComments, useAddDocumentComment, useUploadReplacement } from '@/hooks/useStorageCentre';
 import { format } from 'date-fns';
-import { useState } from 'react';
-import { Loader2, Send } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Loader2, Send, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DocumentDetailsModalProps {
   document: DocumentStorage | null;
@@ -18,9 +20,11 @@ interface DocumentDetailsModalProps {
 
 export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentDetailsModalProps) {
   const [comment, setComment] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { userRole } = useAuth();
   const { data: comments, isLoading: commentsLoading } = useDocumentComments(document?.id || '');
   const addCommentMutation = useAddDocumentComment();
+  const uploadReplacementMutation = useUploadReplacement();
 
   const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
 
@@ -41,6 +45,22 @@ export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentD
         }
       }
     );
+  };
+
+  const handleUploadReplacement = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !document) return;
+
+    uploadReplacementMutation.mutate({
+      file,
+      documentType: document.document_type,
+      replacesDocumentId: document.id,
+      replacementReason: 'Uploaded from discussion'
+    }, {
+      onSuccess: () => {
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    });
   };
 
   if (!document) return null;
@@ -128,26 +148,60 @@ export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentD
           />
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          <Button 
-            onClick={handleAddComment}
-            disabled={!comment.trim() || addCommentMutation.isPending}
-          >
-            {addCommentMutation.isPending ? (
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="flex-1 flex gap-2">
+            {!isAdmin && (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Posting...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Post Comment
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleUploadReplacement}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadReplacementMutation.isPending}
+                  className="flex-1 sm:flex-none"
+                >
+                  {uploadReplacementMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Replacement
+                    </>
+                  )}
+                </Button>
               </>
             )}
-          </Button>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none">
+              Close
+            </Button>
+            <Button 
+              onClick={handleAddComment}
+              disabled={!comment.trim() || addCommentMutation.isPending}
+              className="flex-1 sm:flex-none"
+            >
+              {addCommentMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Post Comment
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

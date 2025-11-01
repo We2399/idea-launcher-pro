@@ -260,6 +260,40 @@ export const useSoftDeleteDocument = () => {
   });
 };
 
+// Restore a soft-deleted document (Administrator only)
+export const useRestoreDocument = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (docId: string) => {
+      const { error } = await supabase
+        .from('document_storage')
+        .update({ 
+          deleted_at: null, 
+          deleted_by: null,
+          is_latest_version: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', docId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['storage-centre'] });
+      toast({
+        title: 'Document restored',
+        description: 'The document has been successfully restored.'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Restore failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+};
+
 // Add comment/reply
 export const useAddDocumentComment = () => {
   const queryClient = useQueryClient();
@@ -287,6 +321,7 @@ export const useAddDocumentComment = () => {
       queryClient.invalidateQueries({ queryKey: ['document-comments'] });
       queryClient.invalidateQueries({ queryKey: ['employee-pending-discussions'] });
       queryClient.invalidateQueries({ queryKey: ['admin-pending-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-needs-reply-discussions'] });
       queryClient.invalidateQueries({ queryKey: ['my-document-issues'] });
       toast({
         title: 'Comment added',

@@ -11,6 +11,7 @@ import {
   useApproveReplacement, 
   useRejectReplacement,
   useSoftDeleteDocument,
+  useRestoreDocument,
   DocumentFilters as Filters 
 } from '@/hooks/useStorageCentre';
 import { Download, Loader2, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function StorageCentre() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [deletionReason, setDeletionReason] = useState('');
 
@@ -35,6 +37,7 @@ export default function StorageCentre() {
   const approveMutation = useApproveReplacement();
   const rejectMutation = useRejectReplacement();
   const deleteMutation = useSoftDeleteDocument();
+  const restoreMutation = useRestoreDocument();
 
   const isAdmin = userRole === 'administrator';
   const isHrAdmin = userRole === 'hr_admin';
@@ -81,8 +84,15 @@ export default function StorageCentre() {
     }
   };
 
+  const handleRestore = (docId: string) => {
+    restoreMutation.mutate(docId);
+  };
+
+  // Filter documents based on showDeleted toggle
+  const filteredDocs = documents?.filter(doc => showDeleted ? doc.deleted_at !== null : doc.deleted_at === null) || [];
+
   // Group documents by employee
-  const documentsByEmployee = documents?.reduce((acc, doc) => {
+  const documentsByEmployee = filteredDocs?.reduce((acc, doc) => {
     const employeeName = doc.user 
       ? `${doc.user.first_name} ${doc.user.last_name} (${doc.user.employee_id})`
       : 'Unknown Employee';
@@ -95,10 +105,11 @@ export default function StorageCentre() {
 
   // Statistics
   const stats = {
-    total: documents?.length || 0,
-    pendingApproval: documents?.filter(d => d.replacement_status === 'pending_approval').length || 0,
-    rejected: documents?.filter(d => d.replacement_status === 'rejected').length || 0,
-    active: documents?.filter(d => d.replacement_status === 'active').length || 0
+    total: documents?.filter(d => !d.deleted_at).length || 0,
+    pendingApproval: documents?.filter(d => d.replacement_status === 'pending_approval' && !d.deleted_at).length || 0,
+    rejected: documents?.filter(d => d.replacement_status === 'rejected' && !d.deleted_at).length || 0,
+    active: documents?.filter(d => d.replacement_status === 'active' && !d.deleted_at).length || 0,
+    deleted: documents?.filter(d => d.deleted_at !== null).length || 0
   };
 
   if (!canApprove) {
@@ -122,10 +133,20 @@ export default function StorageCentre() {
             Centralized document management and approval system
           </p>
         </div>
-        <Button onClick={handleExport} disabled={!documents?.length}>
-          <Download className="h-4 w-4 mr-2" />
-          Export to CSV
-        </Button>
+        <div className="flex gap-2">
+          {canDelete && (
+            <Button
+              variant={showDeleted ? "default" : "outline"}
+              onClick={() => setShowDeleted(!showDeleted)}
+            >
+              {showDeleted ? 'Show Active' : `Show Deleted (${stats.deleted})`}
+            </Button>
+          )}
+          <Button onClick={handleExport} disabled={!filteredDocs?.length}>
+            <Download className="h-4 w-4 mr-2" />
+            Export to CSV
+          </Button>
+        </div>
       </div>
 
       {/* Statistics */}
@@ -209,26 +230,39 @@ export default function StorageCentre() {
               <AccordionContent className="px-4 pb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                   {docs.map((doc: any) => (
-                    <DocumentCard
-                      key={doc.id}
-                      document={doc}
-                      onView={() => window.open(doc.file_path, '_blank')}
-                      onApprove={() => handleApprove(doc.id)}
-                      onReject={() => {
-                        setSelectedDoc(doc.id);
-                        setShowRejectDialog(true);
-                      }}
-                      onDelete={() => {
-                        setSelectedDoc(doc.id);
-                        setShowDeleteDialog(true);
-                      }}
-                      onViewDetails={() => {
-                        setSelectedDocForDetails(doc);
-                        setShowDetailsModal(true);
-                      }}
-                      canApprove={canApprove}
-                      canDelete={canDelete}
-                    />
+                    <div key={doc.id} className="relative">
+                      <DocumentCard
+                        document={doc}
+                        onView={() => window.open(doc.file_path, '_blank')}
+                        onApprove={() => handleApprove(doc.id)}
+                        onReject={() => {
+                          setSelectedDoc(doc.id);
+                          setShowRejectDialog(true);
+                        }}
+                        onDelete={() => {
+                          setSelectedDoc(doc.id);
+                          setShowDeleteDialog(true);
+                        }}
+                        onViewDetails={() => {
+                          setSelectedDocForDetails(doc);
+                          setShowDetailsModal(true);
+                        }}
+                        canApprove={canApprove}
+                        canDelete={canDelete}
+                      />
+                      {doc.deleted_at && canDelete && (
+                        <div className="absolute top-2 right-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleRestore(doc.id)}
+                            disabled={restoreMutation.isPending}
+                          >
+                            Restore
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </AccordionContent>
