@@ -66,9 +66,9 @@ export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentD
                 {comments.map((commentItem: any) => {
                   const isAdminComment = commentItem.comment_type === 'admin_note' || commentItem.comment_type === 'system';
                   const userName = commentItem.user 
-                    ? `${commentItem.user.first_name} ${commentItem.user.last_name}`
-                    : 'Unknown User';
-                  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+                    ? `${commentItem.user.first_name || ''} ${commentItem.user.last_name || ''}`.trim()
+                    : (isAdminComment ? 'Admin' : 'Employee');
+                  const initials = userName.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase() || '?';
 
                   return (
                     <div 

@@ -40,6 +40,7 @@ function computePendingByDoc(docs: Pick<DocumentStorage, 'id' | 'user_id' | 'doc
 export const useEmployeePendingDiscussions = () => {
   return useQuery({
     queryKey: ['employee-pending-discussions'],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [] as any[];
@@ -71,6 +72,7 @@ export const useEmployeePendingDiscussions = () => {
 export const useAdminPendingDiscussions = () => {
   return useQuery({
     queryKey: ['admin-pending-discussions'],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [] as any[];
@@ -84,11 +86,10 @@ export const useAdminPendingDiscussions = () => {
       const role = roles?.role as string | undefined;
       if (!(role === 'hr_admin' || role === 'administrator')) return [] as any[];
 
-      // Scope to documents likely needing back-and-forth to optimize
+      // Fetch all non-deleted documents (including active ones with discussions)
       const { data: docs, error: docsErr } = await supabase
         .from('document_storage')
         .select('id, user_id, document_name, file_path, version, replacement_status')
-        .in('replacement_status', ['rejected', 'pending_approval'])
         .is('deleted_at', null)
         .order('updated_at', { ascending: false })
         .limit(200);

@@ -142,18 +142,32 @@ export const useDocumentComments = (documentId: string) => {
   return useQuery({
     queryKey: ['document-comments', documentId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: comments, error } = await supabase
         .from('document_comments')
-        .select(`
-          *,
-          user:profiles!user_id(first_name, last_name, employee_id)
-        `)
+        .select('id, document_id, user_id, comment, comment_type, created_at')
         .eq('document_id', documentId)
         .order('created_at', { ascending: true });
+      
       if (error) throw error;
-      return data;
+      if (!comments || comments.length === 0) return [];
+
+      // Fetch profiles for all commenters
+      const userIds = [...new Set(comments.map(c => c.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, employee_id')
+        .in('user_id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+      // Enrich comments with user data
+      return comments.map(comment => ({
+        ...comment,
+        user: profileMap.get(comment.user_id)
+      }));
     },
-    enabled: !!documentId
+    enabled: !!documentId,
+    refetchInterval: 10000 // Refresh every 10 seconds for active discussions
   });
 };
 
@@ -271,6 +285,9 @@ export const useAddDocumentComment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['document-comments'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-pending-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['my-document-issues'] });
       toast({
         title: 'Comment added',
         description: 'Your comment has been posted'
