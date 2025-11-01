@@ -9,6 +9,8 @@ import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckSqu
 import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
 import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
+import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
+import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -214,6 +216,18 @@ const Index = () => {
           loading={stats.loading}
         />
       </div>
+
+      {/* Role-specific alerts */}
+      {(userRole === 'administrator' || userRole === 'hr_admin') && (
+        <div className="mt-4">
+          <StorageCentreAlert />
+        </div>
+      )}
+      {userRole === 'employee' && (
+        <div className="mt-4">
+          <DocumentIssuesCard />
+        </div>
+      )}
       
       {/* Detailed Leave Breakdown */}
       <LeaveTypeBreakdown 

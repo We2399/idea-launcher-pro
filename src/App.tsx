@@ -22,6 +22,7 @@ import Tasks from './pages/Tasks';
 import CashControl from './pages/CashControl';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
+import StorageCentre from './pages/StorageCentre';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
@@ -64,6 +65,11 @@ const App = () => {
                                 <Route path="/reports" element={
                                   <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
                                     <Reports />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/storage-centre" element={
+                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                                    <StorageCentre />
                                   </ProtectedRoute>
                                 } />
                                 <Route path="/settings" element={

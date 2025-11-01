@@ -39,6 +39,7 @@ const getPersonalItems = (t: (key: string) => string) => [
 
 const getManagementItems = (t: (key: string) => string) => [
   { title: t('employees'), url: '/employees', icon: Users },
+  { title: 'Storage Centre', url: '/storage-centre', icon: FileText },
   { title: t('reports'), url: '/reports', icon: BarChart3 },
   { title: t('settings'), url: '/settings', icon: Settings },
 ];
@@ -109,8 +110,8 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1 px-2">
               {navigationItems.map((item) => {
-                const isSettingsPage = item.url === '/settings';
-                const showBadge = isSettingsPage && pendingCount && pendingCount > 0 && (userRole === 'administrator' || userRole === 'hr_admin');
+                const isStorageCentre = item.url === '/storage-centre';
+                const showBadge = isStorageCentre && pendingCount && pendingCount > 0 && (userRole === 'administrator' || userRole === 'hr_admin');
                 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -120,7 +121,7 @@ export function AppSidebar() {
                         end 
                         onClick={handleMobileNavClick}
                         className={({ isActive }) => 
-                          `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
+                          `relative flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
                             isActive 
                               ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm" 
                               : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
@@ -132,9 +133,15 @@ export function AppSidebar() {
                           <div className="flex items-center justify-between flex-1">
                             <span className="text-sm">{item.title}</span>
                             {showBadge && (
-                              <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
-                                {pendingCount}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <span className="relative inline-flex h-2.5 w-2.5">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive/60"></span>
+                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+                                </span>
+                                <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                                  {pendingCount}
+                                </Badge>
+                              </div>
                             )}
                           </div>
                         )}

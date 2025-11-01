@@ -34,14 +34,26 @@ export function DocumentCard({
 }: DocumentCardProps) {
   const getSignedUrl = async (filePath: string) => {
     try {
-      // Extract the path from the full URL if needed
-      const urlPath = filePath.includes('profile-documents/') 
-        ? filePath.split('profile-documents/')[1] 
-        : filePath;
+      // Determine bucket and extract relative path
+      let bucket = 'profile-documents';
+      let path = filePath;
+
+      if (filePath.includes('/receipts/') || filePath.startsWith('receipts/')) {
+        bucket = 'receipts';
+      }
+
+      // If full URL, trim to path after bucket name
+      if (filePath.includes('storage')) {
+        const marker = `${bucket}/`;
+        const idx = filePath.indexOf(marker);
+        path = idx >= 0 ? filePath.substring(idx + marker.length) : filePath;
+      } else if (filePath.includes(`${bucket}/`)) {
+        path = filePath.split(`${bucket}/`)[1];
+      }
       
       const { data, error } = await supabase.storage
-        .from('profile-documents')
-        .createSignedUrl(urlPath, 3600); // 1 hour expiry
+        .from(bucket)
+        .createSignedUrl(path, 3600); // 1 hour expiry
       
       if (error) throw error;
       return data.signedUrl;

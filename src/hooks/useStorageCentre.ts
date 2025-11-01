@@ -325,10 +325,8 @@ export const useUploadReplacement = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-documents')
-        .getPublicUrl(fileName);
+      // Store relative path (works with private bucket and signed URLs)
+      const storagePath = fileName;
 
       // Insert new document record
       const { error: insertError } = await supabase
@@ -337,7 +335,7 @@ export const useUploadReplacement = () => {
           user_id: user.id,
           document_type: documentType,
           document_name: file.name,
-          file_path: publicUrl,
+          file_path: storagePath,
           file_size: file.size,
           mime_type: file.type,
           source: oldDoc.source,
