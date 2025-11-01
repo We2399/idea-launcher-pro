@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePendingDocumentsCount } from '@/hooks/usePendingDocumentsCount';
+import { Badge } from '@/components/ui/badge';
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +49,7 @@ export function AppSidebar() {
   const { t } = useLanguage();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { data: pendingCount } = usePendingDocumentsCount();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -105,27 +108,46 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1 px-2">
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={collapsed ? item.title : undefined}>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      onClick={handleMobileNavClick}
-                      className={({ isActive }) => 
-                        `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
-                          isActive 
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm" 
-                            : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems.map((item) => {
+                const isSettingsPage = item.url === '/settings';
+                const showBadge = isSettingsPage && pendingCount && pendingCount > 0 && (userRole === 'administrator' || userRole === 'hr_admin');
+                
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={collapsed ? item.title : undefined}>
+                      <NavLink 
+                        to={item.url} 
+                        end 
+                        onClick={handleMobileNavClick}
+                        className={({ isActive }) => 
+                          `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
+                            isActive 
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm" 
+                              : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                          }`
+                        }
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        {!collapsed && (
+                          <div className="flex items-center justify-between flex-1">
+                            <span className="text-sm">{item.title}</span>
+                            {showBadge && (
+                              <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                                {pendingCount}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        {collapsed && showBadge && (
+                          <Badge variant="destructive" className="h-4 w-4 p-0 text-[10px] flex items-center justify-center absolute -top-1 -right-1">
+                            {pendingCount > 9 ? '9+' : pendingCount}
+                          </Badge>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

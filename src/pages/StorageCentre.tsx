@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { DocumentFilters } from '@/components/storage/DocumentFilters';
 import { DocumentCard } from '@/components/storage/DocumentCard';
+import { DocumentDetailsModal } from '@/components/storage/DocumentDetailsModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -23,6 +24,8 @@ export default function StorageCentre() {
   const { userRole } = useAuth();
   const [filters, setFilters] = useState<Filters>({});
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
+  const [selectedDocForDetails, setSelectedDocForDetails] = useState<any>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -219,6 +222,10 @@ export default function StorageCentre() {
                         setSelectedDoc(doc.id);
                         setShowDeleteDialog(true);
                       }}
+                      onViewDetails={() => {
+                        setSelectedDocForDetails(doc);
+                        setShowDetailsModal(true);
+                      }}
                       canApprove={canApprove}
                       canDelete={canDelete}
                     />
@@ -272,6 +279,13 @@ export default function StorageCentre() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Document Details Modal with Comments */}
+      <DocumentDetailsModal
+        document={selectedDocForDetails}
+        open={showDetailsModal}
+        onOpenChange={setShowDetailsModal}
+      />
 
       {/* Delete Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

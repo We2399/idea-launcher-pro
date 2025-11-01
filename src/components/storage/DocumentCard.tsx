@@ -2,10 +2,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DocumentStatusBadge } from './DocumentStatusBadge';
 import { DocumentStorage } from '@/hooks/useStorageCentre';
-import { Eye, Download, History, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Eye, Download, History, CheckCircle, XCircle, Trash2, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatFileSize } from '@/lib/exportStorageCentre';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DocumentCardProps {
   document: DocumentStorage;
@@ -14,6 +16,7 @@ interface DocumentCardProps {
   onReject?: () => void;
   onDelete?: () => void;
   onViewVersions?: () => void;
+  onViewDetails?: () => void;
   canApprove: boolean;
   canDelete: boolean;
 }
@@ -25,11 +28,46 @@ export function DocumentCard({
   onReject,
   onDelete,
   onViewVersions,
+  onViewDetails,
   canApprove,
   canDelete
 }: DocumentCardProps) {
-  const downloadDocument = () => {
-    window.open(document.file_path, '_blank');
+  const getSignedUrl = async (filePath: string) => {
+    try {
+      // Extract the path from the full URL if needed
+      const urlPath = filePath.includes('profile-documents/') 
+        ? filePath.split('profile-documents/')[1] 
+        : filePath;
+      
+      const { data, error } = await supabase.storage
+        .from('profile-documents')
+        .createSignedUrl(urlPath, 3600); // 1 hour expiry
+      
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error getting signed URL:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to access document',
+        variant: 'destructive'
+      });
+      return null;
+    }
+  };
+
+  const handleView = async () => {
+    const signedUrl = await getSignedUrl(document.file_path);
+    if (signedUrl) {
+      window.open(signedUrl, '_blank');
+    }
+  };
+
+  const downloadDocument = async () => {
+    const signedUrl = await getSignedUrl(document.file_path);
+    if (signedUrl) {
+      window.open(signedUrl, '_blank');
+    }
   };
 
   return (
@@ -83,7 +121,7 @@ export function DocumentCard({
         )}
 
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={onView}>
+          <Button variant="outline" size="sm" onClick={handleView}>
             <Eye className="h-3 w-3 mr-1" />
             View
           </Button>
@@ -91,6 +129,12 @@ export function DocumentCard({
             <Download className="h-3 w-3 mr-1" />
             Download
           </Button>
+          {onViewDetails && (
+            <Button variant="outline" size="sm" onClick={onViewDetails}>
+              <MessageSquare className="h-3 w-3 mr-1" />
+              Discussion
+            </Button>
+          )}
           {onViewVersions && (
             <Button variant="outline" size="sm" onClick={onViewVersions}>
               <History className="h-3 w-3 mr-1" />
