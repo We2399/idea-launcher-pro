@@ -11,6 +11,8 @@ import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
 import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
 import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
+import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDiscussionAlertsCard';
+import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -217,17 +219,19 @@ const Index = () => {
         />
       </div>
 
-      {/* Role-specific alerts */}
-      {(userRole === 'administrator' || userRole === 'hr_admin') && (
-        <div className="mt-4">
-          <StorageCentreAlert />
-        </div>
-      )}
-      {userRole === 'employee' && (
-        <div className="mt-4">
-          <DocumentIssuesCard />
-        </div>
-      )}
+       {/* Role-specific alerts */}
+       {(userRole === 'administrator' || userRole === 'hr_admin') && (
+         <div className="mt-4 space-y-4">
+           <StorageCentreAlert />
+           <AdminPendingDiscussionsCard />
+         </div>
+       )}
+       {userRole === 'employee' && (
+         <div className="mt-4 space-y-4">
+           <DocumentIssuesCard />
+           <EmployeeDiscussionAlertsCard />
+         </div>
+       )}
       
       {/* Detailed Leave Breakdown */}
       <LeaveTypeBreakdown 
