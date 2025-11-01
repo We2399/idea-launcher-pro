@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Upload, File, Eye, Trash2 } from 'lucide-react';
+import { Upload, File, Eye, Trash2, MessageSquare, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { DocumentDetailsModal } from '@/components/storage/DocumentDetailsModal';
 
 interface Document {
   id: string;
@@ -44,6 +45,10 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState('');
+  const [discussDoc, setDiscussDoc] = useState<any | null>(null);
+  const [showDiscussModal, setShowDiscussModal] = useState(false);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [replaceDocType, setReplaceDocType] = useState('');
 
   useEffect(() => {
     fetchDocuments();
@@ -198,6 +203,73 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleDiscuss = async (document: Document) => {
+    // Find the corresponding document_storage record
+    const { data: storageDoc } = await supabase
+      .from('document_storage')
+      .select('*')
+      .eq('file_path', document.file_path)
+      .eq('user_id', userId)
+      .single();
+    
+    setDiscussDoc(storageDoc || { ...document, id: document.id });
+    setShowDiscussModal(true);
+  };
+
+  const handleReplace = async () => {
+    if (!selectedFile || !replaceDocType || !user) return;
+
+    try {
+      setUploading(true);
+
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${userId}/${replaceDocType}_${Date.now()}.${fileExt}`;
+
+      // Upload new file to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('profile-documents')
+        .upload(fileName, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Insert as replacement (trigger will handle versioning)
+      const { error: dbError } = await supabase
+        .from('profile_documents')
+        .insert({
+          user_id: userId,
+          document_type: replaceDocType,
+          document_name: selectedFile.name,
+          file_path: uploadData.path,
+          file_size: selectedFile.size,
+          mime_type: selectedFile.type,
+          uploaded_by: user.id
+        });
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Success",
+        description: "Replacement uploaded and awaiting approval"
+      });
+
+      setShowReplaceDialog(false);
+      setSelectedFile(null);
+      setReplaceDocType('');
+      fetchDocuments();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload replacement",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -294,34 +366,55 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleDiscuss(document)}
+                    title="Discuss"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleViewDocument(document)}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
                   {canManage && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{t('deleteDocument')}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t('deleteDocumentConfirm')}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteDocument(document.id, document.file_path)}
-                          >
-                            {t('delete')}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setReplaceDocType(document.document_type);
+                          setShowReplaceDialog(true);
+                        }}
+                        title="Replace"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t('deleteDocument')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t('deleteDocumentConfirm')}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteDocument(document.id, document.file_path)}
+                            >
+                              {t('delete')}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
                   )}
                 </div>
               </div>
@@ -333,6 +426,56 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
           </div>
         )}
       </CardContent>
+
+      <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Replace Document</DialogTitle>
+            <DialogDescription>
+              Upload a new version of this document for admin approval
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Document Type</Label>
+              <Input value={t(documentTypes.find(t => t.value === replaceDocType)?.label || '')} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label>New File</Label>
+              <Input
+                type="file"
+                onChange={handleFileSelect}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              />
+              {selectedFile && (
+                <p className="text-sm text-muted-foreground">
+                  {t('selected')}: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleReplace} 
+                disabled={!selectedFile || uploading}
+              >
+                {uploading ? 'Uploading...' : 'Upload Replacement'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowReplaceDialog(false)}
+              >
+                {t('cancel')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <DocumentDetailsModal 
+        document={discussDoc} 
+        open={showDiscussModal} 
+        onOpenChange={setShowDiscussModal} 
+      />
     </Card>
   );
 }

@@ -13,6 +13,7 @@ import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
 import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
 import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDiscussionAlertsCard';
 import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
+import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -224,6 +225,7 @@ const Index = () => {
          <div className="mt-4 space-y-4">
            <StorageCentreAlert />
            <AdminPendingDiscussionsCard />
+           <AdminNeedsReplyCard />
          </div>
        )}
        {userRole === 'employee' && (

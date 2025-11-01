@@ -23,10 +23,15 @@ export function EmployeeDiscussionAlertsCard() {
             <div key={d.id} className="flex items-center justify-between border rounded-md p-3">
               <div className="space-y-1">
                 <div className="font-medium text-sm">{d.document_name}</div>
+                {d.lastAdminComment && (
+                  <div className="text-xs text-muted-foreground line-clamp-2">
+                    "{d.lastAdminComment.substring(0, 100)}{d.lastAdminComment.length > 100 ? '...' : ''}"
+                  </div>
+                )}
                 <div className="text-xs text-muted-foreground">Waiting {d.daysWaiting} day{d.daysWaiting === 1 ? '' : 's'}</div>
               </div>
               <Button size="sm" variant="outline" onClick={() => { setSelected(d); setOpen(true); }}>
-                <MessageSquare className="h-4 w-4 mr-1" /> Discuss
+                <MessageSquare className="h-4 w-4 mr-1" /> Reply
               </Button>
             </div>
           ))}
