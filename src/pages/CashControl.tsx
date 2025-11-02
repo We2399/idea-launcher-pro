@@ -56,7 +56,9 @@ const CashControl = () => {
   const [transactions, setTransactions] = useState<CashTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
+  const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>(
+    (userRole === 'hr_admin' || userRole === 'administrator') ? 'all' : 'my'
+  );
   const [formData, setFormData] = useState({
     amount: '',
     currency: 'HKD',

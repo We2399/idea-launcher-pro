@@ -99,34 +99,25 @@ export const exportDocumentsWithFiles = async (
 
     if (onProgress) onProgress(0, documents.length);
 
-    // Call edge function
-    const { data, error } = await supabase.functions.invoke('export-storage-centre', {
-      body: { documents: enrichedDocs }
+    // Call edge function - get binary response
+    const response = await fetch(`https://cavrkwzwlgrstddykpsu.supabase.co/functions/v1/export-storage-centre`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+      },
+      body: JSON.stringify({ documents: enrichedDocs })
     });
 
-    if (error) throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Export failed: ${errorText}`);
+    }
 
     if (onProgress) onProgress(documents.length, documents.length);
 
-    // The edge function returns binary data directly
-    // Convert the response to a blob
-    let blob: Blob;
-    if (data instanceof Blob) {
-      blob = data;
-    } else if (data instanceof ArrayBuffer) {
-      blob = new Blob([data], { type: 'application/zip' });
-    } else if (typeof data === 'string') {
-      // If it's a string, it might be base64 encoded
-      const binaryString = atob(data);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      blob = new Blob([bytes], { type: 'application/zip' });
-    } else {
-      // Last resort: try to convert to blob
-      blob = new Blob([JSON.stringify(data)], { type: 'application/zip' });
-    }
+    // Get the binary data directly from the response
+    const blob = await response.blob();
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
