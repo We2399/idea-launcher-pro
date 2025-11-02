@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { DelegationSettings } from '@/components/admin/DelegationSettings';
 import { LeaveAllocationManager } from '@/components/admin/LeaveAllocationManager';
 import { WorkScheduleManager } from '@/components/admin/WorkScheduleManager';
@@ -10,13 +11,14 @@ import StorageCentre from '@/pages/StorageCentre';
 
 export default function Settings() {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
 
   if (userRole !== 'hr_admin' && userRole !== 'administrator') {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-destructive mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">You don't have permission to view this page.</p>
+          <h2 className="text-xl font-semibold text-destructive mb-2">{t('accessDenied')}</h2>
+          <p className="text-muted-foreground">{t('noPermissionToView')}</p>
         </div>
       </div>
     );
@@ -25,31 +27,31 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Administrator Settings</h1>
-        <p className="text-muted-foreground">Manage system settings and role delegation</p>
+        <h1 className="text-3xl font-bold text-foreground">{t('administratorSettings')}</h1>
+        <p className="text-muted-foreground">{t('manageSystemSettings')}</p>
       </div>
 
       <Tabs defaultValue="delegation" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="delegation" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            Delegation
+            {t('delegation')}
           </TabsTrigger>
           <TabsTrigger value="allocations" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Leave Management
+            {t('leaveManagement')}
           </TabsTrigger>
           <TabsTrigger value="schedules" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            Work Schedules
+            {t('workSchedules')}
           </TabsTrigger>
           <TabsTrigger value="holidays" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
-            Public Holidays
+            {t('publicHolidays')}
           </TabsTrigger>
           <TabsTrigger value="storage" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
-            Storage Centre
+            {t('storageCentre')}
           </TabsTrigger>
         </TabsList>
         

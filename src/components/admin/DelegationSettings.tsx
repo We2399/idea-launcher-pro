@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 export function DelegationSettings() {
   const { user, userRole } = useAuth();
+  const { t } = useLanguage();
   const [delegationActive, setDelegationActive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -45,8 +47,8 @@ export function DelegationSettings() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch delegation settings",
+        title: t('error'),
+        description: error.message || t('failedToFetchDelegationSettings'),
         variant: "destructive"
       });
     } finally {
@@ -75,8 +77,8 @@ export function DelegationSettings() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch HR admins",
+        title: t('error'),
+        description: error.message || t('failedToFetchHRAdmins'),
         variant: "destructive"
       });
     }
@@ -103,8 +105,8 @@ export function DelegationSettings() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch employees",
+        title: t('error'),
+        description: error.message || t('failedToFetchEmployees'),
         variant: "destructive"
       });
     }
@@ -130,13 +132,13 @@ export function DelegationSettings() {
       setDelegationActive(newValue);
       
       toast({
-        title: "Success",
-        description: `Delegation ${newValue ? 'enabled' : 'disabled'} successfully`
+        title: t('success'),
+        description: newValue ? t('delegationEnabledSuccess') : t('delegationDisabledSuccess')
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update delegation settings",
+        title: t('error'),
+        description: error.message || t('failedToUpdateDelegationSettings'),
         variant: "destructive"
       });
     } finally {
@@ -156,8 +158,8 @@ export function DelegationSettings() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Employee promoted to HR Admin successfully"
+        title: t('success'),
+        description: t('employeePromotedSuccess')
       });
 
       setSelectedEmployeeId('');
@@ -165,8 +167,8 @@ export function DelegationSettings() {
       fetchEmployees();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to promote employee",
+        title: t('error'),
+        description: error.message || t('failedToPromoteEmployee'),
         variant: "destructive"
       });
     }
@@ -182,16 +184,16 @@ export function DelegationSettings() {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "HR Admin demoted to Employee successfully"
+        title: t('success'),
+        description: t('hrAdminDemotedSuccess')
       });
 
       fetchHRAdmins();
       fetchEmployees();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to demote HR admin",
+        title: t('error'),
+        description: error.message || t('failedToDemoteHRAdmin'),
         variant: "destructive"
       });
     }
@@ -208,8 +210,8 @@ export function DelegationSettings() {
   if (userRole !== 'hr_admin' && userRole !== 'administrator') {
     return (
       <div className="text-center py-8">
-        <h3 className="text-lg font-semibold text-destructive mb-2">Access Denied</h3>
-        <p className="text-muted-foreground">Only HR Admins and Administrators can manage delegation settings.</p>
+        <h3 className="text-lg font-semibold text-destructive mb-2">{t('accessDenied')}</h3>
+        <p className="text-muted-foreground">{t('onlyHRAdminsCanManage')}</p>
       </div>
     );
   }
@@ -220,21 +222,20 @@ export function DelegationSettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Delegation Management
+          {t('delegationManagement')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium">Senior Management Delegation</h3>
+              <h3 className="font-medium">{t('seniorManagementDelegation')}</h3>
               <Badge variant={delegationActive ? "default" : "outline"}>
-                {delegationActive ? "Active" : "Inactive"}
+                {delegationActive ? t('active') : t('inactive')}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              When enabled, Senior Management can execute final approvals for leave requests and allocations 
-              without requiring Administrator confirmation.
+              {t('delegationDescription')}
             </p>
           </div>
           <Switch
@@ -245,14 +246,14 @@ export function DelegationSettings() {
         </div>
 
         <div className="border-t pt-6">
-          <h4 className="font-medium mb-4">Role Hierarchy & Permissions</h4>
+          <h4 className="font-medium mb-4">{t('roleHierarchyPermissions')}</h4>
           <div className="space-y-3">
             <div className="flex items-center gap-3 p-3 border border-border rounded-lg">
               <Crown className="h-5 w-5 text-destructive" />
               <div>
-                <div className="font-medium">Administrator / Company Owner</div>
+                <div className="font-medium">{t('administratorCompanyOwner')}</div>
                 <div className="text-sm text-muted-foreground">
-                  Highest authority with unrestricted access to all system modules and data
+                  {t('highestAuthority')}
                 </div>
               </div>
             </div>
@@ -260,9 +261,9 @@ export function DelegationSettings() {
             <div className="flex items-center gap-3 p-3 border border-border rounded-lg">
               <Shield className="h-5 w-5 text-secondary-foreground" />
               <div>
-                <div className="font-medium">Senior Management (HR/GM)</div>
+                <div className="font-medium">{t('seniorManagementHRGM')}</div>
                 <div className="text-sm text-muted-foreground">
-                  First-line executor for employee processes, manages onboarding and approval workflows
+                  {t('firstLineExecutor')}
                 </div>
               </div>
             </div>
@@ -270,12 +271,12 @@ export function DelegationSettings() {
         </div>
 
         <div className="bg-muted p-4 rounded-lg">
-          <h5 className="font-medium mb-2">Two-Tier Approval System</h5>
+          <h5 className="font-medium mb-2">{t('twoTierApprovalSystem')}</h5>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Leave allocations require Senior Management approval first, then Administrator confirmation</li>
-            <li>• Leave requests follow the same dual approval workflow</li>
-            <li>• Administrator can delegate final approval rights to Senior Management</li>
-            <li>• Administrator retains the right to review and override any decision</li>
+            <li>• {t('leaveAllocationsRequire')}</li>
+            <li>• {t('leaveRequestsFollow')}</li>
+            <li>• {t('administratorCanDelegate')}</li>
+            <li>• {t('administratorRetains')}</li>
           </ul>
         </div>
       </CardContent>
@@ -287,15 +288,15 @@ export function DelegationSettings() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            HR Admin Role Management
+            {t('hrAdminRoleManagement')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Current HR Admins */}
           <div>
-            <h4 className="text-sm font-semibold mb-3">Current HR Administrators</h4>
+            <h4 className="text-sm font-semibold mb-3">{t('currentHRAdministrators')}</h4>
             {hrAdmins.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No HR Admins assigned</p>
+              <p className="text-sm text-muted-foreground">{t('noHRAdminsAssigned')}</p>
             ) : (
               <div className="space-y-2">
                 {hrAdmins.map(admin => (
@@ -309,7 +310,7 @@ export function DelegationSettings() {
                       size="sm"
                       onClick={() => demoteToEmployee(admin.user_id)}
                     >
-                      Demote to Employee
+                      {t('demoteToEmployee')}
                     </Button>
                   </div>
                 ))}
@@ -318,11 +319,11 @@ export function DelegationSettings() {
           </div>
 
           <div className="border-t pt-6">
-            <h4 className="text-sm font-semibold mb-3">Promote Employee to HR Admin</h4>
+            <h4 className="text-sm font-semibold mb-3">{t('promoteEmployeeToHRAdmin')}</h4>
             <div className="flex gap-3">
               <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select an employee..." />
+                  <SelectValue placeholder={t('selectAnEmployee')} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map(emp => (
@@ -336,7 +337,7 @@ export function DelegationSettings() {
                 onClick={promoteToHRAdmin}
                 disabled={!selectedEmployeeId}
               >
-                Promote to HR Admin
+                {t('promoteToHRAdmin')}
               </Button>
             </div>
           </div>
