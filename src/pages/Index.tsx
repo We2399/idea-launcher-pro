@@ -162,7 +162,7 @@ const Index = () => {
               <Card className="card-professional h-full transition-all duration-300 hover:scale-105 animate-fade-in relative">
                 {pendingCount > 0 && (
                   <Badge 
-                    className="absolute -top-2 -right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse"
+                    className="absolute top-2 right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse"
                   >
                     {pendingCount > 99 ? '99+' : pendingCount}
                   </Badge>

@@ -1252,7 +1252,7 @@ export default function ProfileWithApproval() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>{t('leaveBalances')} ({new Date().getFullYear()})</CardTitle>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast({ title: t('comingSoon'), description: t('reportFeatureComingSoon') })}>
                 {t('report')}
               </Button>
             </div>

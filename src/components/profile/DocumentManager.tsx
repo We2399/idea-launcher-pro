@@ -374,8 +374,8 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
-                    {discussionStatuses?.find(d => d.documentId === document.id)?.hasUnreadAdminMessage && (
-                      <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-background" />
+                    {discussionStatuses?.find(d => (d as any).filePath === document.file_path)?.hasUnreadAdminMessage && (
+                      <span className="absolute top-0 right-0 h-3 w-3 bg-primary rounded-full border-2 border-background" />
                     )}
                   </div>
                   <Button

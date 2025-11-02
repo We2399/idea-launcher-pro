@@ -135,8 +135,8 @@ const CashControl = () => {
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to fetch transactions',
+        title: t('error'),
+        description: error.message || t('failedToFetch'),
         variant: 'destructive',
       });
     } finally {
@@ -171,15 +171,15 @@ const CashControl = () => {
       setFormData({ ...formData, receipt_url: publicUrl });
 
       toast({
-        title: 'Success',
-        description: 'Receipt uploaded successfully',
+        title: t('success'),
+        description: t('receiptUploadSuccess'),
       });
 
       return publicUrl;
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to upload receipt',
+        title: t('error'),
+        description: error.message || t('receiptUploadError'),
         variant: 'destructive',
       });
       return null;
@@ -221,8 +221,8 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Transaction request created successfully',
+        title: t('success'),
+        description: formData.type === 'request' ? t('cashRequestSuccess') : t('expenseReportSuccess'),
       });
 
       setShowCreateDialog(false);
@@ -237,8 +237,8 @@ const CashControl = () => {
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create transaction',
+        title: t('error'),
+        description: error.message || t('failedToCreate'),
         variant: 'destructive',
       });
     }
@@ -260,15 +260,15 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Transaction approved',
+        title: t('success'),
+        description: t('transactionApproved'),
       });
 
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to approve transaction',
+        title: t('error'),
+        description: error.message || t('failedToApprove'),
         variant: 'destructive',
       });
     }
@@ -291,15 +291,15 @@ const CashControl = () => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Transaction rejected',
+        title: t('success'),
+        description: t('transactionRejected'),
       });
 
       fetchTransactions();
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to reject transaction',
+        title: t('error'),
+        description: error.message || t('failedToReject'),
         variant: 'destructive',
       });
     }
@@ -459,15 +459,15 @@ const CashControl = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="HKD" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="HKD">HKD - Hong Kong Dollar</SelectItem>
-                      <SelectItem value="USD">USD - US Dollar</SelectItem>
-                      <SelectItem value="EUR">EUR - Euro</SelectItem>
-                      <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                      <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
-                      <SelectItem value="IDR">IDR - Indonesian Rupiah</SelectItem>
-                      <SelectItem value="Others">Others</SelectItem>
-                    </SelectContent>
+                      <SelectContent>
+                        <SelectItem value="HKD">HKD</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="CNY">CNY</SelectItem>
+                        <SelectItem value="IDR">IDR</SelectItem>
+                        <SelectItem value="Others">{t('others')}</SelectItem>
+                      </SelectContent>
                   </Select>
                 </div>
               </div>
