@@ -11,6 +11,7 @@ interface DashboardCounts {
   pendingCashRequests: number;
   pendingProfileChanges: number;
   documentsNeedingReply: number;
+  pendingTasks: number;
   
   // Admin counts
   pendingLeaveApprovals: number;
@@ -18,6 +19,7 @@ interface DashboardCounts {
   pendingProfileApprovals: number;
   pendingDocumentApprovals: number;
   discussionsNeedingReply: number;
+  allPendingTasks: number;
   
   loading: boolean;
 }
@@ -40,7 +42,7 @@ export const useDashboardCounts = (): DashboardCounts => {
     queryFn: async () => {
       if (!user?.id || !isEmployee) return null;
 
-      const [leaveResult, cashResult, profileResult] = await Promise.all([
+      const [leaveResult, cashResult, profileResult, tasksResult] = await Promise.all([
         // Pending leave requests
         supabase
           .from('leave_requests')
@@ -60,13 +62,21 @@ export const useDashboardCounts = (): DashboardCounts => {
           .from('profile_change_requests')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('status', 'pending')
+          .eq('status', 'pending'),
+        
+        // Pending tasks assigned to user
+        supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('assigned_to', user.id)
+          .in('status', ['pending', 'in_progress'])
       ]);
 
       return {
         pendingLeaveRequests: leaveResult.count || 0,
         pendingCashRequests: cashResult.count || 0,
         pendingProfileChanges: profileResult.count || 0,
+        pendingTasks: tasksResult.count || 0,
       };
     },
     enabled: isEmployee && !!user?.id,
@@ -79,7 +89,7 @@ export const useDashboardCounts = (): DashboardCounts => {
     queryFn: async () => {
       if (!isAdmin) return null;
 
-      const [leaveResult, cashResult, profileResult] = await Promise.all([
+      const [leaveResult, cashResult, profileResult, tasksResult] = await Promise.all([
         // Pending leave approvals (pending + senior_approved)
         supabase
           .from('leave_requests')
@@ -96,13 +106,20 @@ export const useDashboardCounts = (): DashboardCounts => {
         supabase
           .from('profile_change_requests')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending')
+          .eq('status', 'pending'),
+        
+        // All pending/in-progress tasks
+        supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .in('status', ['pending', 'in_progress'])
       ]);
 
       return {
         pendingLeaveApprovals: leaveResult.count || 0,
         pendingCashApprovals: cashResult.count || 0,
         pendingProfileApprovals: profileResult.count || 0,
+        allPendingTasks: tasksResult.count || 0,
       };
     },
     enabled: isAdmin,
@@ -115,6 +132,7 @@ export const useDashboardCounts = (): DashboardCounts => {
     pendingCashRequests: employeeCounts?.pendingCashRequests || 0,
     pendingProfileChanges: employeeCounts?.pendingProfileChanges || 0,
     documentsNeedingReply: employeeDiscussions?.length || 0,
+    pendingTasks: employeeCounts?.pendingTasks || 0,
     
     // Admin counts
     pendingLeaveApprovals: adminCounts?.pendingLeaveApprovals || 0,
@@ -122,6 +140,7 @@ export const useDashboardCounts = (): DashboardCounts => {
     pendingProfileApprovals: adminCounts?.pendingProfileApprovals || 0,
     pendingDocumentApprovals: pendingDocCount || 0,
     discussionsNeedingReply: adminDiscussions?.length || 0,
+    allPendingTasks: adminCounts?.allPendingTasks || 0,
     
     loading: employeeLoading || adminLoading,
   };

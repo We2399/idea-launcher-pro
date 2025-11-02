@@ -42,6 +42,8 @@ const Index = () => {
           : counts.pendingProfileApprovals;
       case '/employees': 
         return counts.pendingDocumentApprovals + counts.discussionsNeedingReply;
+      case '/tasks':
+        return isEmployee ? counts.pendingTasks : counts.allPendingTasks;
       default: 
         return 0;
     }

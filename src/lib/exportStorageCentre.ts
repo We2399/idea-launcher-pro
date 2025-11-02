@@ -108,8 +108,26 @@ export const exportDocumentsWithFiles = async (
 
     if (onProgress) onProgress(documents.length, documents.length);
 
-    // The response should be a blob
-    const blob = new Blob([data], { type: 'application/zip' });
+    // The edge function returns binary data directly
+    // Convert the response to a blob
+    let blob: Blob;
+    if (data instanceof Blob) {
+      blob = data;
+    } else if (data instanceof ArrayBuffer) {
+      blob = new Blob([data], { type: 'application/zip' });
+    } else if (typeof data === 'string') {
+      // If it's a string, it might be base64 encoded
+      const binaryString = atob(data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      blob = new Blob([bytes], { type: 'application/zip' });
+    } else {
+      // Last resort: try to convert to blob
+      blob = new Blob([JSON.stringify(data)], { type: 'application/zip' });
+    }
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     
