@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Upload, File, Eye, Trash2, MessageSquare, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { DocumentDetailsModal } from '@/components/storage/DocumentDetailsModal';
+import { useDocumentDiscussionStatus } from '@/hooks/useDocumentDiscussionStatus';
 
 interface Document {
   id: string;
@@ -41,6 +42,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
   const { t } = useLanguage();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: discussionStatuses } = useDocumentDiscussionStatus(userId);
   const [uploading, setUploading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -363,14 +365,19 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDiscuss(document)}
-                    title="Discuss"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDiscuss(document)}
+                      title="Discuss"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                    {discussionStatuses?.find(d => d.documentId === document.id)?.hasUnreadAdminMessage && (
+                      <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-background" />
+                    )}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"

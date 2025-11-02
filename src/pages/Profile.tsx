@@ -474,7 +474,16 @@ export default function Profile() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>{t('leaveBalances')} ({new Date().getFullYear()})</CardTitle>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  toast({
+                    title: t('comingSoon') || 'Coming Soon',
+                    description: t('reportFeatureComingSoon') || 'The report generation feature will be available soon. It will allow you to download a detailed PDF report of your leave balances.'
+                  });
+                }}
+              >
                 {t('report')}
               </Button>
             </div>
