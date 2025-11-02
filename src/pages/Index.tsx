@@ -3,10 +3,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckSquare, DollarSign } from 'lucide-react';
 import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
+import { useDashboardCounts } from '@/hooks/useDashboardCounts';
 import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
 import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
@@ -20,9 +22,30 @@ const Index = () => {
   const { impersonatedUserId } = useImpersonation();
   const { t } = useLanguage();
   const stats = useEnhancedDashboardStats();
+  const counts = useDashboardCounts();
   
   // Show impersonation indicator for administrators
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
+
+  // Helper function to get pending count for each card
+  const getPendingCountForCard = (href: string): number => {
+    const isEmployee = userRole === 'employee';
+    
+    switch(href) {
+      case '/requests': 
+        return isEmployee ? counts.pendingLeaveRequests : counts.pendingLeaveApprovals;
+      case '/cash-control': 
+        return isEmployee ? counts.pendingCashRequests : counts.pendingCashApprovals;
+      case '/profile': 
+        return isEmployee 
+          ? counts.pendingProfileChanges + counts.documentsNeedingReply
+          : counts.pendingProfileApprovals;
+      case '/employees': 
+        return counts.pendingDocumentApprovals + counts.discussionsNeedingReply;
+      default: 
+        return 0;
+    }
+  };
 
   if (!user) {
     return (
@@ -130,9 +153,18 @@ const Index = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {dashboardCards.map((card) => {
           const Icon = card.icon;
+          const pendingCount = getPendingCountForCard(card.href);
+          
           return (
             <Link key={card.title} to={card.href}>
-              <Card className="card-professional h-full transition-all duration-300 hover:scale-105 animate-fade-in">
+              <Card className="card-professional h-full transition-all duration-300 hover:scale-105 animate-fade-in relative">
+                {pendingCount > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse"
+                  >
+                    {pendingCount > 99 ? '99+' : pendingCount}
+                  </Badge>
+                )}
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <div className="p-3 rounded-xl bg-gradient-primary shadow-sm">

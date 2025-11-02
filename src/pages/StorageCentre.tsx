@@ -14,8 +14,8 @@ import {
   useRestoreDocument,
   DocumentFilters as Filters 
 } from '@/hooks/useStorageCentre';
-import { Download, Loader2, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { exportDocumentList } from '@/lib/exportStorageCentre';
+import { Download, Loader2, FileText, Clock, CheckCircle, XCircle, Package } from 'lucide-react';
+import { exportDocumentList, exportDocumentsWithFiles } from '@/lib/exportStorageCentre';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,7 @@ export default function StorageCentre() {
   const [showDeleted, setShowDeleted] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [deletionReason, setDeletionReason] = useState('');
+  const [exportProgress, setExportProgress] = useState<{ current: number; total: number } | null>(null);
 
   const { data: documents, isLoading } = useStorageCentreDocuments(filters);
   const approveMutation = useApproveReplacement();
@@ -47,6 +48,16 @@ export default function StorageCentre() {
   const handleExport = () => {
     if (documents) {
       exportDocumentList(documents);
+    }
+  };
+
+  const handleExportWithFiles = async () => {
+    if (documents) {
+      setExportProgress({ current: 0, total: documents.length });
+      await exportDocumentsWithFiles(documents, (current, total) => {
+        setExportProgress({ current, total });
+      });
+      setExportProgress(null);
     }
   };
 
@@ -142,9 +153,29 @@ export default function StorageCentre() {
               {showDeleted ? 'Show Active' : `Show Deleted (${stats.deleted})`}
             </Button>
           )}
-          <Button onClick={handleExport} disabled={!filteredDocs?.length}>
+          <Button 
+            onClick={handleExport} 
+            disabled={!filteredDocs?.length}
+            variant="outline"
+          >
             <Download className="h-4 w-4 mr-2" />
-            Export to CSV
+            Export CSV
+          </Button>
+          <Button 
+            onClick={handleExportWithFiles} 
+            disabled={!filteredDocs?.length || !!exportProgress}
+          >
+            {exportProgress ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Exporting... ({exportProgress.current}/{exportProgress.total})
+              </>
+            ) : (
+              <>
+                <Package className="h-4 w-4 mr-2" />
+                Export with Files
+              </>
+            )}
           </Button>
         </div>
       </div>
