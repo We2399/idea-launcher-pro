@@ -424,17 +424,17 @@ const CashControl = () => {
                   <Label htmlFor="category">{t('category')}</Label>
                   <Select onValueChange={(value) => setFormData({ ...formData, category: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="General" />
+                      <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="travel">Travel</SelectItem>
-                      <SelectItem value="meals">Meals</SelectItem>
-                      <SelectItem value="supplies">Office Supplies</SelectItem>
-                      <SelectItem value="equipment">Equipment</SelectItem>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="groceries">Groceries</SelectItem>
-                      <SelectItem value="others">Others</SelectItem>
+                      <SelectItem value="general">{translateCategory('general')}</SelectItem>
+                      <SelectItem value="travel">{translateCategory('travel')}</SelectItem>
+                      <SelectItem value="meals">{translateCategory('meals')}</SelectItem>
+                      <SelectItem value="supplies">{translateCategory('supplies')}</SelectItem>
+                      <SelectItem value="equipment">{translateCategory('equipment')}</SelectItem>
+                      <SelectItem value="training">{translateCategory('training')}</SelectItem>
+                      <SelectItem value="groceries">{translateCategory('groceries')}</SelectItem>
+                      <SelectItem value="others">{translateCategory('others')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -442,9 +442,7 @@ const CashControl = () => {
               {/* Second Row: Amount and Currency */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">
-                    {t('amount')} {formData.type === 'expense' && '(Will be negative)'}
-                  </Label>
+                  <Label htmlFor="amount">{t('amount')}</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -452,7 +450,7 @@ const CashControl = () => {
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     required
-                    placeholder={formData.type === 'expense' ? 'Amount (auto-negative)' : 'Amount'}
+                    placeholder={t('amount')}
                   />
                 </div>
                 <div className="space-y-2">
@@ -661,7 +659,7 @@ const CashControl = () => {
                 {transaction.rejection_reason && (
                   <div className="mt-2 p-2 bg-destructive/10 rounded-md">
                     <p className="text-sm text-destructive">
-                      <strong>Rejection reason:</strong> {transaction.rejection_reason}
+                      <strong>{t('reasonForRejection')}</strong> {transaction.rejection_reason}
                     </p>
                   </div>
                 )}

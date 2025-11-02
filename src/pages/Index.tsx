@@ -101,7 +101,7 @@ const Index = () => {
   // Add Tasks card for all users
   dashboardCards.push({
     title: t('tasks'),
-    description: 'View and manage your tasks',
+    description: t('manageTasks'),
     icon: CheckSquare,
     href: '/tasks',
     color: 'from-cyan-500/10 to-cyan-600/10 border-cyan-500/20'
@@ -109,8 +109,8 @@ const Index = () => {
 
   // Add Cash Control card for all users
   dashboardCards.push({
-    title: 'Cash Control',
-    description: 'Manage cash transactions',
+    title: t('cashControl'),
+    description: t('cashControlDescription'),
     icon: DollarSign,
     href: '/cash-control',
     color: 'from-amber-500/10 to-amber-600/10 border-amber-500/20'
@@ -120,7 +120,7 @@ const Index = () => {
   if (userRole === 'hr_admin' || userRole === 'administrator') {
     dashboardCards.push({
       title: t('employees'),
-      description: 'Manage your team\'s leave requests',
+      description: t('manageTeamRequestsDescription'),
       icon: Users,
       href: '/employees',
       color: 'from-orange-500/10 to-orange-600/10 border-orange-500/20'
