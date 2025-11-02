@@ -6,6 +6,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to normalize storage paths - handles both relative paths and public URLs
+function normalizePath(bucket: string, rawPath: string): string {
+  // If it's a full URL, extract the object key
+  if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
+    try {
+      const url = new URL(rawPath);
+      const pathname = url.pathname;
+      
+      // Remove common storage URL prefixes
+      const prefixes = [
+        `/storage/v1/object/public/${bucket}/`,
+        `/storage/v1/object/${bucket}/`,
+      ];
+      
+      for (const prefix of prefixes) {
+        if (pathname.startsWith(prefix)) {
+          return decodeURIComponent(pathname.substring(prefix.length));
+        }
+      }
+      
+      // If no prefix matched, try to extract after 'public/' or bucket name
+      const publicMatch = pathname.match(/\/public\/(.+)$/);
+      if (publicMatch) return decodeURIComponent(publicMatch[1]);
+      
+      const bucketMatch = pathname.match(new RegExp(`/${bucket}/(.+)$`));
+      if (bucketMatch) return decodeURIComponent(bucketMatch[1]);
+      
+      // Last resort: use the full pathname without leading slash
+      return decodeURIComponent(pathname.substring(1));
+    } catch (e) {
+      console.error('Failed to parse URL:', rawPath, e);
+      return rawPath;
+    }
+  }
+  
+  // It's already a relative path
+  return rawPath;
+}
+
 interface DocumentStorage {
   id: string;
   user_id: string;
@@ -63,60 +102,66 @@ Deno.serve(async (req) => {
 
     // Process each document
     for (const doc of documents) {
-      try {
-        const employeeName = doc.employee_name || 'Unknown';
-        const employeeId = doc.employee_id || 'Unknown';
-        const folderKey = `${employeeName}_${employeeId}`;
-        
-        if (!employeeFolders.has(folderKey)) {
-          employeeFolders.set(folderKey, folderKey);
-        }
+      const employeeName = doc.employee_name || 'Unknown';
+      const employeeId = doc.employee_id || 'Unknown';
+      const folderKey = `${employeeName}_${employeeId}`;
+      
+      if (!employeeFolders.has(folderKey)) {
+        employeeFolders.set(folderKey, folderKey);
+      }
 
-        // Determine bucket based on source
-        const bucket = doc.source === 'cash_control' ? 'receipts' : 'profile-documents';
+      // Determine bucket based on source
+      const bucket = doc.source === 'cash_control' ? 'receipts' : 'profile-documents';
+      
+      // Get file extension and prepare file name
+      const ext = doc.file_path.split('.').pop() || 'bin';
+      const sanitizedFileName = doc.document_name.replace(/[^a-z0-9_\-\.]/gi, '_');
+      const fileName = `${sanitizedFileName}_v${doc.version}.${ext}`;
+      let filePath = `files/${folderKey}/${fileName}`;
+      
+      try {
+        // Normalize the path (handles both relative paths and public URLs)
+        const normalizedPath = normalizePath(bucket, doc.file_path);
         
         // Download file from storage
-        console.log(`Downloading ${doc.document_name} from ${bucket}/${doc.file_path}`);
+        console.log(`Downloading ${doc.document_name} from ${bucket}/${normalizedPath}`);
         const { data: fileData, error: downloadError } = await supabase
           .storage
           .from(bucket)
-          .download(doc.file_path);
+          .download(normalizedPath);
 
         if (downloadError) {
           console.error(`Error downloading ${doc.document_name}:`, downloadError);
-          continue;
+          // Mark as error in CSV but still include the row
+          filePath = `download_error/${sanitizedFileName}_v${doc.version}.${ext}`;
+        } else {
+          // Add file to ZIP
+          const arrayBuffer = await fileData.arrayBuffer();
+          zip.file(filePath, arrayBuffer);
         }
-
-        // Get file extension from mime type or file path
-        const ext = doc.file_path.split('.').pop() || 'bin';
-        const sanitizedFileName = doc.document_name.replace(/[^a-z0-9_\-\.]/gi, '_');
-        const fileName = `${sanitizedFileName}_v${doc.version}.${ext}`;
-        const filePath = `files/${folderKey}/${fileName}`;
-
-        // Add file to ZIP
-        const arrayBuffer = await fileData.arrayBuffer();
-        zip.file(filePath, arrayBuffer);
-
-        // Add CSV row
-        const csvRow = [
-          `"${doc.document_name.replace(/"/g, '""')}"`,
-          doc.document_type,
-          doc.source,
-          doc.version,
-          doc.replacement_status || 'active',
-          `"${employeeName.replace(/"/g, '""')}"`,
-          employeeId,
-          (doc.file_size / 1024 / 1024).toFixed(2),
-          new Date(doc.created_at).toLocaleDateString(),
-          doc.approved_by || 'N/A',
-          doc.approved_at ? new Date(doc.approved_at).toLocaleDateString() : 'N/A',
-          filePath
-        ].join(',');
-        
-        csvRows.push(csvRow);
       } catch (error) {
         console.error(`Error processing document ${doc.id}:`, error);
+        // Mark as error in CSV but still include the row
+        filePath = `download_error/${sanitizedFileName}_v${doc.version}.${ext}`;
       }
+
+      // Always add CSV row (even if download failed)
+      const csvRow = [
+        `"${doc.document_name.replace(/"/g, '""')}"`,
+        doc.document_type,
+        doc.source,
+        doc.version,
+        doc.replacement_status || 'active',
+        `"${employeeName.replace(/"/g, '""')}"`,
+        employeeId,
+        (doc.file_size / 1024 / 1024).toFixed(2),
+        new Date(doc.created_at).toLocaleDateString(),
+        doc.approved_by || 'N/A',
+        doc.approved_at ? new Date(doc.approved_at).toLocaleDateString() : 'N/A',
+        filePath
+      ].join(',');
+      
+      csvRows.push(csvRow);
     }
 
     // Add CSV to ZIP

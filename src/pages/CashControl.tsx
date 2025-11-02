@@ -70,7 +70,7 @@ const CashControl = () => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [dialogType, setDialogType] = useState<'request' | 'expense'>('request');
 
-  const canApprove = userRole === 'manager' || userRole === 'hr_admin';
+  const canApprove = userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator';
 
   useEffect(() => {
     console.log('[CashControl] mounted');
@@ -340,7 +340,7 @@ const CashControl = () => {
       options.push({ value: 'team', label: t('teamRequests') });
     }
     
-    if (userRole === 'hr_admin') {
+    if (userRole === 'hr_admin' || userRole === 'administrator') {
       options.push(
         { value: 'team', label: t('teamRequests') },
         { value: 'all', label: t('allRequests') }
