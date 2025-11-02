@@ -382,9 +382,7 @@ const CashControl = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
-          <p className="text-muted-foreground">
-            {viewMode === 'my' ? 'My Cash Transactions' : viewMode === 'team' ? 'Team Transactions' : 'All Transactions'}
-          </p>
+          <p className="text-muted-foreground">{t('cashControlDescription')}</p>
         </div>
         <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
@@ -401,8 +399,8 @@ const CashControl = () => {
               </DialogTitle>
               <DialogDescription>
                 {dialogType === 'expense' 
-                  ? 'Submit an expense report for reimbursement'
-                  : 'Submit a new cash request'
+                  ? t('expenseReportDescription')
+                  : t('cashRequestDescription')
                 }
               </DialogDescription>
             </DialogHeader>
@@ -413,12 +411,12 @@ const CashControl = () => {
                   <Label htmlFor="type">{t('type')}</Label>
                   <Select onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder={dialogType === 'expense' ? 'Expense' : 'Request'} />
+                      <SelectValue placeholder={dialogType === 'expense' ? t('expenseReport') : t('cashRequest')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="request">Request</SelectItem>
-                      <SelectItem value="expense">Expense</SelectItem>
-                      <SelectItem value="reimbursement">Reimbursement</SelectItem>
+                      <SelectItem value="request">{translateTransactionType('request')}</SelectItem>
+                      <SelectItem value="expense">{translateTransactionType('expense')}</SelectItem>
+                      <SelectItem value="reimbursement">{translateTransactionType('reimbursement')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -504,7 +502,7 @@ const CashControl = () => {
                         className="w-full justify-start"
                       >
                         <Upload className="h-4 w-4 mr-2" />
-                        {uploadingFile ? 'Uploading...' : 'Upload Receipt'}
+                        {uploadingFile ? t('uploading') : t('uploadReceipt')}
                       </Button>
                     </div>
                     <Button
@@ -524,12 +522,12 @@ const CashControl = () => {
                   </div>
                   {formData.receipt_url && (
                     <div className="text-sm text-muted-foreground">
-                      ✓ Receipt uploaded successfully
+                      ✓ {t('receiptUploaded')}
                     </div>
                   )}
                   <Input
                     type="url"
-                    placeholder="Or enter receipt URL manually"
+                    placeholder={t('enterReceiptUrl')}
                     value={formData.receipt_url}
                     onChange={(e) => setFormData({ ...formData, receipt_url: e.target.value })}
                   />
@@ -555,7 +553,7 @@ const CashControl = () => {
             <div className="text-2xl font-bold text-success">
               ${credit.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">Money received</p>
+            <p className="text-xs text-muted-foreground">{t('moneyReceived')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -566,7 +564,7 @@ const CashControl = () => {
             <div className="text-2xl font-bold text-destructive">
               ${debit.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">Money spent</p>
+            <p className="text-xs text-muted-foreground">{t('moneySpent')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -577,7 +575,7 @@ const CashControl = () => {
             <div className={`text-2xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
               ${balance.toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">Net position</p>
+            <p className="text-xs text-muted-foreground">{t('netPosition')}</p>
           </CardContent>
         </Card>
       </div>
@@ -586,7 +584,7 @@ const CashControl = () => {
         {transactions.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
-              <p className="text-muted-foreground">No transactions found</p>
+              <p className="text-muted-foreground">{t('noTransactionsFound')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -599,13 +597,13 @@ const CashControl = () => {
                       <DollarSign className="h-5 w-5" />
                       {transaction.currency} {transaction.amount.toFixed(2)}
                       <Badge variant={getTypeColor(transaction.type)}>
-                        {transaction.type}
+                        {translateTransactionType(transaction.type)}
                       </Badge>
                     </CardTitle>
                     <CardDescription>{transaction.description}</CardDescription>
                   </div>
                   <Badge variant={getStatusColor(transaction.status)}>
-                    {transaction.status}
+                    {translateStatus(transaction.status)}
                   </Badge>
                 </div>
               </CardHeader>
@@ -617,7 +615,7 @@ const CashControl = () => {
                       <span>
                         {transaction.employee ? 
                           `${transaction.employee.first_name} ${transaction.employee.last_name}` : 
-                          'Unknown'
+                          t('unknown')
                         }
                       </span>
                     </div>
@@ -625,7 +623,7 @@ const CashControl = () => {
                       <Calendar className="h-4 w-4" />
                       <span>{new Date(transaction.created_at).toLocaleDateString()}</span>
                     </div>
-                    <Badge variant="outline">{transaction.category}</Badge>
+                    <Badge variant="outline">{translateCategory(transaction.category)}</Badge>
                     {transaction.receipt_url && (
                       <a 
                         href={transaction.receipt_url} 
@@ -633,7 +631,7 @@ const CashControl = () => {
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                       >
-                        Receipt
+                        {t('receipt')}
                       </a>
                     )}
                   </div>
@@ -646,7 +644,7 @@ const CashControl = () => {
                         className="text-success border-success hover:bg-success hover:text-success-foreground"
                       >
                         <Check className="h-4 w-4 mr-1" />
-                        Approve
+                        {t('approve')}
                       </Button>
                       <Button
                         size="sm"
@@ -655,7 +653,7 @@ const CashControl = () => {
                         className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
                       >
                         <X className="h-4 w-4 mr-1" />
-                        Reject
+                        {t('reject')}
                       </Button>
                     </div>
                   )}
