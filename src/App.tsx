@@ -23,6 +23,7 @@ import CashControl from './pages/CashControl';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import StorageCentre from './pages/StorageCentre';
+import Payroll from './pages/Payroll';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
@@ -56,6 +57,7 @@ const App = () => {
                                 <Route path="/calendar" element={<Calendar />} />
                                 <Route path="/tasks" element={<Tasks />} />
                                 <Route path="/cash-control" element={<CashControl />} />
+                                <Route path="/payroll" element={<Payroll />} />
                                 <Route path="/profile" element={<ProfileWithApproval />} />
                                 <Route path="/employees" element={
                                   <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
