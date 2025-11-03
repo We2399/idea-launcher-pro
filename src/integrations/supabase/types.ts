@@ -232,6 +232,53 @@ export type Database = {
           },
         ]
       }
+      employee_recurring_allowances: {
+        Row: {
+          allowance_type: string
+          amount: number
+          created_at: string
+          created_by: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowance_type: string
+          amount: number
+          created_at?: string
+          created_by: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowance_type?: string
+          amount?: number
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_recurring_allowances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       employee_work_schedules: {
         Row: {
           created_at: string
@@ -499,6 +546,183 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll_line_items: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string
+          id: string
+          item_type: string
+          payroll_record_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          item_type: string
+          payroll_record_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          item_type?: string
+          payroll_record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_line_items_payroll_record_id_fkey"
+            columns: ["payroll_record_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_notifications: {
+        Row: {
+          id: string
+          message: string | null
+          notification_type: string
+          payroll_record_id: string
+          read_at: string | null
+          sent_at: string
+          sent_to: string
+        }
+        Insert: {
+          id?: string
+          message?: string | null
+          notification_type: string
+          payroll_record_id: string
+          read_at?: string | null
+          sent_at?: string
+          sent_to: string
+        }
+        Update: {
+          id?: string
+          message?: string | null
+          notification_type?: string
+          payroll_record_id?: string
+          read_at?: string | null
+          sent_at?: string
+          sent_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_notifications_payroll_record_id_fkey"
+            columns: ["payroll_record_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_records: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          base_salary: number
+          confirmed_by_employee: boolean | null
+          created_at: string
+          created_by: string
+          currency: string
+          dispute_reason: string | null
+          dispute_resolution_notes: string | null
+          dispute_resolved_at: string | null
+          disputed_at: string | null
+          disputed_by_employee: boolean | null
+          employee_confirmed_at: string | null
+          employee_notes: string | null
+          gross_total: number
+          id: string
+          month: number
+          net_total: number
+          sent_to_employee_at: string | null
+          status: string
+          submitted_for_approval_at: string | null
+          total_allowances: number
+          total_bonuses: number
+          total_deductions: number
+          total_others: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          base_salary?: number
+          confirmed_by_employee?: boolean | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          dispute_reason?: string | null
+          dispute_resolution_notes?: string | null
+          dispute_resolved_at?: string | null
+          disputed_at?: string | null
+          disputed_by_employee?: boolean | null
+          employee_confirmed_at?: string | null
+          employee_notes?: string | null
+          gross_total?: number
+          id?: string
+          month: number
+          net_total?: number
+          sent_to_employee_at?: string | null
+          status?: string
+          submitted_for_approval_at?: string | null
+          total_allowances?: number
+          total_bonuses?: number
+          total_deductions?: number
+          total_others?: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          base_salary?: number
+          confirmed_by_employee?: boolean | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          dispute_reason?: string | null
+          dispute_resolution_notes?: string | null
+          dispute_resolved_at?: string | null
+          disputed_at?: string | null
+          disputed_by_employee?: boolean | null
+          employee_confirmed_at?: string | null
+          employee_notes?: string | null
+          gross_total?: number
+          id?: string
+          month?: number
+          net_total?: number
+          sent_to_employee_at?: string | null
+          status?: string
+          submitted_for_approval_at?: string | null
+          total_allowances?: number
+          total_bonuses?: number
+          total_deductions?: number
+          total_others?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profile_change_requests: {
         Row: {
           approved_at: string | null
@@ -585,6 +809,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          base_monthly_salary: number | null
           cash_balance: number | null
           created_at: string
           date_of_birth: string | null
@@ -605,11 +830,13 @@ export type Database = {
           phone_number: string | null
           position: string | null
           profile_completed: boolean | null
+          salary_currency: string | null
           updated_at: string
           user_id: string
           visa_number: string | null
         }
         Insert: {
+          base_monthly_salary?: number | null
           cash_balance?: number | null
           created_at?: string
           date_of_birth?: string | null
@@ -630,11 +857,13 @@ export type Database = {
           phone_number?: string | null
           position?: string | null
           profile_completed?: boolean | null
+          salary_currency?: string | null
           updated_at?: string
           user_id: string
           visa_number?: string | null
         }
         Update: {
+          base_monthly_salary?: number | null
           cash_balance?: number | null
           created_at?: string
           date_of_birth?: string | null
@@ -655,6 +884,7 @@ export type Database = {
           phone_number?: string | null
           position?: string | null
           profile_completed?: boolean | null
+          salary_currency?: string | null
           updated_at?: string
           user_id?: string
           visa_number?: string | null
@@ -825,6 +1055,17 @@ export type Database = {
           replacement_status: string
           uploaded_by: string
           version: number
+        }[]
+      }
+      get_overdue_payroll_confirmations: {
+        Args: never
+        Returns: {
+          days_overdue: number
+          employee_id: string
+          employee_name: string
+          month: number
+          payroll_id: string
+          year: number
         }[]
       }
       get_user_role: { Args: { user_id: string }; Returns: string }

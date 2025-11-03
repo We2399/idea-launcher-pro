@@ -1,1 +1,16 @@
 project_id = "cavrkwzwlgrstddykpsu"
+
+[functions.export-storage-centre]
+verify_jwt = true
+
+[functions.create-payroll-record]
+verify_jwt = true
+
+[functions.approve-payroll-record]
+verify_jwt = true
+
+[functions.employee-confirm-payroll]
+verify_jwt = true
+
+[functions.employee-dispute-payroll]
+verify_jwt = true

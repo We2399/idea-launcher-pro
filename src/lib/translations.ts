@@ -63,10 +63,25 @@ export const useTranslationHelpers = () => {
     return categoryMap[category] || category;
   };
 
+  // Translate payroll status
+  const translatePayrollStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'draft': t('draft'),
+      'pending_admin_approval': t('pendingAdminApproval'),
+      'sent_to_employee': t('sentToEmployee'),
+      'confirmed': t('confirmed'),
+      'disputed': t('disputed'),
+      'rejected': t('rejected'),
+    };
+    
+    return statusMap[status] || status;
+  };
+
   return {
     translateLeaveType,
     translateStatus,
     translateTransactionType,
     translateCategory,
+    translatePayrollStatus,
   };
 };
