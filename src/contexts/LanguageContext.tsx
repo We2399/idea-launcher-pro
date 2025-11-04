@@ -485,7 +485,6 @@ const translations = {
     month: 'Month',
     year: 'Year',
     period: 'Period',
-    employeeId: 'Employee ID',
     created: 'Created',
     viewPayroll: 'View Payroll',
     payrollApprovals: 'Payroll Approvals',
