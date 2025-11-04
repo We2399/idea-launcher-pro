@@ -35,7 +35,6 @@ const getPersonalItems = (t: (key: string) => string) => [
   { title: t('calendar'), url: '/calendar', icon: Calendar },
   { title: t('tasks'), url: '/tasks', icon: CheckSquare },
   { title: t('cashControl'), url: '/cash-control', icon: DollarSign },
-  { title: t('payroll'), url: '/payroll', icon: Wallet },
   { title: t('profile'), url: '/profile', icon: User },
 ];
 

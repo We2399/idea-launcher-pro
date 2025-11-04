@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CreatePayrollDialog } from './CreatePayrollDialog';
@@ -104,7 +105,7 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
                 <div className="mb-2">
                   <div className="text-sm text-muted-foreground">{t('netTotal')}</div>
                   <div className="text-2xl font-bold text-primary">
-                    {record.currency} {Number(record.net_total).toLocaleString()}
+                    {formatCurrency(Number(record.net_total), record.currency)}
                   </div>
                 </div>
                 <Button 

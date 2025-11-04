@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -150,7 +151,7 @@ export function AdminPayrollView() {
                   <div className="mb-3">
                     <div className="text-sm text-muted-foreground">{t('netTotal')}</div>
                     <div className="text-2xl font-bold text-primary">
-                      {record.currency} {Number(record.net_total).toLocaleString()}
+                      {formatCurrency(Number(record.net_total), record.currency)}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -203,7 +204,7 @@ export function AdminPayrollView() {
                       <p className="text-sm text-red-800">{record.dispute_reason}</p>
                     </div>
                     <div className="text-sm text-red-800">
-                      {t('netTotal')}: {record.currency} {Number(record.net_total).toLocaleString()}
+                      {t('netTotal')}: {formatCurrency(Number(record.net_total), record.currency)}
                     </div>
                   </div>
                 </div>

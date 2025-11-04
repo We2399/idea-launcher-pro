@@ -484,7 +484,7 @@ const translations = {
     draft: 'Draft',
     month: 'Month',
     year: 'Year',
-    period: 'Period',
+    defaultFromProfile: 'Default from profile',
     created: 'Created',
     viewPayroll: 'View Payroll',
     payrollApprovals: 'Payroll Approvals',

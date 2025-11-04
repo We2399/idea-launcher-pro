@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -51,12 +52,24 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
   const { data: employees } = useQuery({
     queryKey: ['employees-for-payroll'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get admin/HR user IDs
+      const { data: adminUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['administrator', 'hr_admin']);
+
+      const adminIds = adminUsers?.map(u => u.user_id) || [];
+
+      // Then get all profiles excluding those IDs
+      let query = supabase
         .from('profiles')
-        .select('user_id, first_name, last_name, employee_id, base_monthly_salary, salary_currency')
-        .not('user_id', 'in', 
-          `(SELECT user_id FROM user_roles WHERE role IN ('administrator', 'hr_admin'))`
-        );
+        .select('user_id, first_name, last_name, employee_id, base_monthly_salary, salary_currency');
+
+      if (adminIds.length > 0) {
+        query = query.not('user_id', 'in', `(${adminIds.join(',')})`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data;
@@ -236,9 +249,18 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
           {/* Base Salary */}
           {selectedEmployee && (
             <Card className="p-4 bg-primary/5">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{t('baseSalary')}</span>
-                <span className="text-xl font-bold">{currency} {baseSalary.toLocaleString()}</span>
+              <div className="space-y-2">
+                <Label htmlFor="baseSalary">{t('baseSalary')}</Label>
+                <Input
+                  id="baseSalary"
+                  type="number"
+                  value={baseSalary}
+                  onChange={(e) => setBaseSalary(Number(e.target.value))}
+                  placeholder="0"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('defaultFromProfile')}: {formatCurrency(Number(employees?.find(e => e.user_id === selectedEmployee)?.base_monthly_salary || 0), currency)}
+                </p>
               </div>
             </Card>
           )}
@@ -254,7 +276,7 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
                       <div className="font-medium">{ra.description || ra.allowance_type}</div>
                       <div className="text-sm text-muted-foreground">{ra.allowance_type}</div>
                     </div>
-                    <span className="font-medium">{ra.currency} {Number(ra.amount).toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(Number(ra.amount), ra.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -337,41 +359,41 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>{t('baseSalary')}</span>
-                <span className="font-medium">{currency} {baseSalary.toLocaleString()}</span>
+                <span className="font-medium">{formatCurrency(baseSalary, currency)}</span>
               </div>
               {totals.bonuses > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>{t('bonuses')}</span>
-                  <span className="font-medium">{currency} {totals.bonuses.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(totals.bonuses, currency)}</span>
                 </div>
               )}
               {totals.allowances > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>{t('allowances')}</span>
-                  <span className="font-medium">{currency} {totals.allowances.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(totals.allowances, currency)}</span>
                 </div>
               )}
               {totals.others > 0 && (
                 <div className="flex justify-between text-sm">
                   <span>{t('others')}</span>
-                  <span className="font-medium">{currency} {totals.others.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(totals.others, currency)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>{t('grossTotal')}</span>
-                <span>{currency} {totals.gross.toLocaleString()}</span>
+                <span>{formatCurrency(totals.gross, currency)}</span>
               </div>
               {totals.deductions > 0 && (
                 <div className="flex justify-between text-red-600">
                   <span>{t('deductions')}</span>
-                  <span>-{currency} {totals.deductions.toLocaleString()}</span>
+                  <span>-{formatCurrency(totals.deductions, currency)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-lg font-bold text-primary">
                 <span>{t('netTotal')}</span>
-                <span>{currency} {totals.net.toLocaleString()}</span>
+                <span>{formatCurrency(totals.net, currency)}</span>
               </div>
             </div>
           </Card>

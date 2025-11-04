@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -75,15 +76,15 @@ export function EmployeePayrollView() {
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">{t('grossTotal')}</span>
-                <span className="font-medium">{record.currency} {Number(record.gross_total).toLocaleString()}</span>
+                <span className="font-medium">{formatCurrency(Number(record.gross_total), record.currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">{t('deductions')}</span>
-                <span className="font-medium text-red-600">-{record.currency} {Number(record.total_deductions).toLocaleString()}</span>
+                <span className="font-medium text-red-600">-{formatCurrency(Number(record.total_deductions), record.currency)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t">
                 <span className="font-semibold">{t('netTotal')}</span>
-                <span className="font-bold text-primary">{record.currency} {Number(record.net_total).toLocaleString()}</span>
+                <span className="font-bold text-primary">{formatCurrency(Number(record.net_total), record.currency)}</span>
               </div>
             </div>
 

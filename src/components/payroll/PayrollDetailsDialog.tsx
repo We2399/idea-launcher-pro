@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { formatCurrency } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -121,7 +122,7 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
             <h3 className="font-semibold mb-2">{t('baseSalary')}</h3>
             <div className="flex justify-between p-3 bg-muted rounded">
               <span>{t('monthlySalary')}</span>
-              <span className="font-medium">{payroll.currency} {Number(payroll.base_salary).toLocaleString()}</span>
+              <span className="font-medium">{formatCurrency(Number(payroll.base_salary), payroll.currency)}</span>
             </div>
           </div>
 
@@ -136,7 +137,7 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
                       <div className="font-medium">{item.description}</div>
                       <div className="text-sm text-muted-foreground">{item.category}</div>
                     </div>
-                    <span className="font-medium">{payroll.currency} {Number(item.amount).toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(Number(item.amount), payroll.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -154,7 +155,7 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
                       <div className="font-medium">{item.description}</div>
                       <div className="text-sm text-muted-foreground">{item.category}</div>
                     </div>
-                    <span className="font-medium">{payroll.currency} {Number(item.amount).toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(Number(item.amount), payroll.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -172,7 +173,7 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
                       <div className="font-medium">{item.description}</div>
                       <div className="text-sm text-muted-foreground">{item.category}</div>
                     </div>
-                    <span className="font-medium">{payroll.currency} {Number(item.amount).toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(Number(item.amount), payroll.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -192,7 +193,7 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
                       <div className="font-medium">{item.description}</div>
                       <div className="text-sm text-muted-foreground">{item.category}</div>
                     </div>
-                    <span className="font-medium text-red-600">-{payroll.currency} {Number(item.amount).toLocaleString()}</span>
+                    <span className="font-medium text-red-600">-{formatCurrency(Number(item.amount), payroll.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -205,16 +206,16 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
           <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
             <div className="flex justify-between text-lg">
               <span className="font-semibold">{t('grossTotal')}</span>
-              <span className="font-bold">{payroll.currency} {Number(payroll.gross_total).toLocaleString()}</span>
+              <span className="font-bold">{formatCurrency(Number(payroll.gross_total), payroll.currency)}</span>
             </div>
             <div className="flex justify-between">
               <span>{t('totalDeductions')}</span>
-              <span className="text-red-600">-{payroll.currency} {Number(payroll.total_deductions).toLocaleString()}</span>
+              <span className="text-red-600">-{formatCurrency(Number(payroll.total_deductions), payroll.currency)}</span>
             </div>
             <Separator />
             <div className="flex justify-between text-xl">
               <span className="font-bold">{t('netTotal')}</span>
-              <span className="font-bold text-primary">{payroll.currency} {Number(payroll.net_total).toLocaleString()}</span>
+              <span className="font-bold text-primary">{formatCurrency(Number(payroll.net_total), payroll.currency)}</span>
             </div>
           </div>
 
