@@ -66,7 +66,11 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
         .select('user_id, first_name, last_name, employee_id, base_monthly_salary, salary_currency');
 
       if (adminIds.length > 0) {
-        query = query.not('user_id', 'in', `(${adminIds.join(',')})`);
+        // Use PostgREST 'in' operator with array form via supabase-js
+        // .not(column, 'in', valuesArray)
+        // This avoids string quoting issues for UUIDs
+        // @ts-ignore - supabase types allow any[] for 'in'
+        query = query.not('user_id', 'in', adminIds as any);
       }
 
       const { data, error } = await query;

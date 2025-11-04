@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatCurrency } from '@/lib/utils';
@@ -7,9 +7,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CreatePayrollDialog } from './CreatePayrollDialog';
 import { PayrollDetailsDialog } from './PayrollDetailsDialog';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
 
 interface Props {
   showHistoryOnly?: boolean;
@@ -17,6 +18,7 @@ interface Props {
 
 export function HRPayrollView({ showHistoryOnly = false }: Props) {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
 
@@ -36,6 +38,34 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (payrollId: string) => {
+      const { error } = await supabase
+        .from('payroll_records')
+        .delete()
+        .eq('id', payrollId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: t('success') });
+      queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: t('error'), 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  const handleDeletePayroll = (payrollId: string) => {
+    if (window.confirm(t('confirmDeletePayroll'))) {
+      deleteMutation.mutate(payrollId);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusColors: Record<string, string> = {
       draft: 'bg-gray-500',
@@ -46,9 +76,18 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
       rejected: 'bg-red-700',
     };
 
+    const keyMap: Record<string, string> = {
+      draft: 'draft',
+      pending_admin_approval: 'pendingAdminApproval',
+      sent_to_employee: 'sentToEmployee',
+      confirmed: 'confirmed',
+      disputed: 'disputed',
+      rejected: 'rejected',
+    };
+
     return (
       <Badge className={statusColors[status] || 'bg-gray-500'}>
-        {t(status.replace(/_/g, ''))}
+        {t(keyMap[status] || status)}
       </Badge>
     );
   };
@@ -102,19 +141,30 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
               </div>
 
               <div className="text-right">
-                <div className="mb-2">
+                <div className="mb-3">
                   <div className="text-sm text-muted-foreground">{t('netTotal')}</div>
                   <div className="text-2xl font-bold text-primary">
                     {formatCurrency(Number(record.net_total), record.currency)}
                   </div>
                 </div>
-                <Button 
-                  onClick={() => setSelectedPayroll(record)} 
-                  variant="outline"
-                  size="sm"
-                >
-                  {t('viewDetails')}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => setSelectedPayroll(record)} 
+                    variant="outline"
+                    size="sm"
+                  >
+                    {t('viewDetails')}
+                  </Button>
+                  {!showHistoryOnly && (record.status === 'draft' || record.status === 'pending_admin_approval') && (
+                    <Button 
+                      onClick={() => handleDeletePayroll(record.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      {t('delete')}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </Card>

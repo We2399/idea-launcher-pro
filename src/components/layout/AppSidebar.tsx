@@ -35,6 +35,7 @@ const getPersonalItems = (t: (key: string) => string) => [
   { title: t('calendar'), url: '/calendar', icon: Calendar },
   { title: t('tasks'), url: '/tasks', icon: CheckSquare },
   { title: t('cashControl'), url: '/cash-control', icon: DollarSign },
+  { title: t('payroll'), url: '/payroll', icon: Wallet },
   { title: t('profile'), url: '/profile', icon: User },
 ];
 
@@ -65,8 +66,9 @@ export function AppSidebar() {
     // Administrator: Only management pages
     navigationItems = getManagementItems(t);
   } else if (userRole === 'hr_admin') {
-    // HR Admin: Personal + management pages
-    navigationItems = [...getPersonalItems(t), ...getManagementItems(t)];
+    // HR Admin: Personal + management pages, remove duplicate payroll
+    const personalItems = getPersonalItems(t).filter(item => item.url !== '/payroll');
+    navigationItems = [...personalItems, ...getManagementItems(t)];
   } else {
     // Employee: Only personal pages
     navigationItems = getPersonalItems(t);
