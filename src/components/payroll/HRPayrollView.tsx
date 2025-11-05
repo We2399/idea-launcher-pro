@@ -29,6 +29,10 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
   const queryClient = useQueryClient();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
+  const [showReviseDialog, setShowReviseDialog] = useState(false);
+  const [showRejectDisputeDialog, setShowRejectDisputeDialog] = useState(false);
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [disputedPayroll, setDisputedPayroll] = useState<any>(null);
 
   const { data: payrollRecords, isLoading } = useQuery({
     queryKey: ['all-payroll-records'],
@@ -61,6 +65,40 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
         description: t('payrollDeleted') 
       });
       queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: t('error'), 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  const resolveDisputeMutation = useMutation({
+    mutationFn: async ({ action, payroll }: { action: 'revise' | 'reject_dispute', payroll: any }) => {
+      const { data, error } = await supabase.functions.invoke('resolve-payroll-dispute', {
+        body: {
+          payroll_record_id: payroll.id,
+          action,
+          resolution_notes: resolutionNotes,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      const message = variables.action === 'revise' 
+        ? t('payrollRevised') 
+        : t('disputeRejectedSuccess');
+      toast({ title: t('success'), description: message });
+      queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
+      setShowReviseDialog(false);
+      setShowRejectDisputeDialog(false);
+      setDisputedPayroll(null);
+      setResolutionNotes('');
     },
     onError: (error: any) => {
       toast({ 
@@ -109,45 +147,6 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
 
   const disputedPayrolls = payrollRecords?.filter(r => r.status === 'disputed') || [];
   const nonDisputedPayrolls = payrollRecords?.filter(r => r.status !== 'disputed') || [];
-
-  const [showReviseDialog, setShowReviseDialog] = useState(false);
-  const [showRejectDisputeDialog, setShowRejectDisputeDialog] = useState(false);
-  const [resolutionNotes, setResolutionNotes] = useState('');
-  const [disputedPayroll, setDisputedPayroll] = useState<any>(null);
-
-  const resolveDisputeMutation = useMutation({
-    mutationFn: async ({ action, payroll }: { action: 'revise' | 'reject_dispute', payroll: any }) => {
-      const { data, error } = await supabase.functions.invoke('resolve-payroll-dispute', {
-        body: {
-          payroll_record_id: payroll.id,
-          action,
-          resolution_notes: resolutionNotes,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return data;
-    },
-    onSuccess: (_, variables) => {
-      const message = variables.action === 'revise' 
-        ? t('payrollRevised') 
-        : t('disputeRejectedSuccess');
-      toast({ title: t('success'), description: message });
-      queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
-      setShowReviseDialog(false);
-      setShowRejectDisputeDialog(false);
-      setDisputedPayroll(null);
-      setResolutionNotes('');
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: t('error'), 
-        description: error.message, 
-        variant: 'destructive' 
-      });
-    },
-  });
 
   return (
     <div className="space-y-6">
@@ -292,11 +291,6 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
           ))}
         </div>
       </div>
-
-      <CreatePayrollDialog
-        open={showCreateDialog}
-        onClose={() => setShowCreateDialog(false)}
-      />
 
       <CreatePayrollDialog
         open={showCreateDialog}
