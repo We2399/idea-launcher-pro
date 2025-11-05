@@ -40,15 +40,18 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
 
   const deleteMutation = useMutation({
     mutationFn: async (payrollId: string) => {
-      const { error } = await supabase
-        .from('payroll_records')
-        .delete()
-        .eq('id', payrollId);
+      const { data, error } = await supabase.functions.invoke('delete-payroll-record', {
+        body: { payroll_id: payrollId },
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
-      toast({ title: t('success') });
+      toast({ 
+        title: t('success'), 
+        description: t('payrollDeleted') 
+      });
       queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
     },
     onError: (error: any) => {

@@ -16,6 +16,8 @@ interface CreatePayrollRequest {
   employee_id: string;
   month: number;
   year: number;
+  base_salary?: number;
+  currency?: string;
   line_items: LineItem[];
 }
 
@@ -67,8 +69,11 @@ Deno.serve(async (req) => {
       .eq('user_id', employee_id)
       .eq('is_active', true);
 
-    // Calculate totals
-    const base_salary = profile?.base_monthly_salary || 0;
+    // Use provided base_salary and currency or fall back to profile values
+    const base_salary = body.base_salary !== undefined 
+      ? Number(body.base_salary) 
+      : (Number(profile?.base_monthly_salary) || 0);
+    const currency = body.currency || profile?.salary_currency || 'USD';
     let total_bonuses = 0;
     let total_allowances = 0;
     let total_others = 0;
@@ -113,7 +118,7 @@ Deno.serve(async (req) => {
         total_allowances,
         total_others,
         total_deductions,
-        currency: profile?.salary_currency || 'USD',
+        currency,
         status,
         created_by: user.id,
         sent_to_employee_at,

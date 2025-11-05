@@ -58,25 +58,17 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
         .select('user_id')
         .in('role', ['administrator', 'hr_admin']);
 
-      const adminIds = adminUsers?.map(u => u.user_id) || [];
+      const adminIds = new Set(adminUsers?.map(u => u.user_id) || []);
 
-      // Then get all profiles excluding those IDs
-      let query = supabase
+      // Get ALL profiles
+      const { data: allProfiles, error } = await supabase
         .from('profiles')
         .select('user_id, first_name, last_name, employee_id, base_monthly_salary, salary_currency');
 
-      if (adminIds.length > 0) {
-        // Use PostgREST 'in' operator with array form via supabase-js
-        // .not(column, 'in', valuesArray)
-        // This avoids string quoting issues for UUIDs
-        // @ts-ignore - supabase types allow any[] for 'in'
-        query = query.not('user_id', 'in', adminIds as any);
-      }
-
-      const { data, error } = await query;
-
       if (error) throw error;
-      return data;
+
+      // Filter out admins and HR in JavaScript
+      return allProfiles?.filter(p => !adminIds.has(p.user_id)) || [];
     },
     enabled: open,
   });
@@ -164,6 +156,8 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
           employee_id: selectedEmployee,
           month,
           year,
+          base_salary: baseSalary,
+          currency: currency,
           line_items: lineItems,
         },
       });
