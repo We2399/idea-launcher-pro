@@ -186,25 +186,39 @@ export function AdminPayrollView() {
       {disputedPayrolls && disputedPayrolls.length > 0 && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">{t('disputedPayrolls')}</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            {t('disputedPayrollsNote')}
+          </p>
 
           <div className="grid gap-4">
             {disputedPayrolls.map((record: any) => (
               <Card key={record.id} className="p-6 border-red-200 bg-red-50">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 mt-1" />
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-red-900">
+                    <h3 className="font-semibold text-lg text-red-900 mb-1">
                       {record.profiles?.first_name} {record.profiles?.last_name}
                     </h3>
                     <p className="text-sm text-red-800 mb-2">
                       {t('period')}: {t('month')} {record.month}/{record.year}
                     </p>
+                    
+                    {/* Dispute Reason */}
                     <div className="bg-white p-3 rounded mb-2">
                       <div className="text-sm font-medium text-red-900 mb-1">{t('disputeReason')}:</div>
                       <p className="text-sm text-red-800">{record.dispute_reason}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('disputed')}: {format(new Date(record.disputed_at), 'MMM dd, yyyy HH:mm')}
+                      </p>
                     </div>
-                    <div className="text-sm text-red-800">
-                      {t('netTotal')}: {formatCurrency(Number(record.net_total), record.currency)}
+
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-red-800 border-red-300">
+                        {t('awaitingHRResponse')}
+                      </Badge>
+                      <span className="text-sm text-red-800">
+                        {t('netTotal')}: {formatCurrency(Number(record.net_total), record.currency)}
+                      </span>
                     </div>
                   </div>
                 </div>

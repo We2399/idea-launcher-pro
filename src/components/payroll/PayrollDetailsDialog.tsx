@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface Props {
   payroll: any;
@@ -219,8 +220,58 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
             </div>
           </div>
 
-          {/* Confirmed/Disputed Status */}
-          {payroll.confirmed_by_employee && (
+          {/* Dispute History Section */}
+          {payroll.disputed_by_employee && (
+            <div className="border-t pt-4 space-y-3">
+              <h3 className="font-semibold text-lg">{t('disputeHistory')}</h3>
+              
+              {/* Employee Dispute */}
+              <div className="bg-red-50 p-4 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-red-900 mb-1">{t('employeeDispute')}</div>
+                    <p className="text-sm text-red-800">{payroll.dispute_reason}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {format(new Date(payroll.disputed_at), 'MMM dd, yyyy HH:mm')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* HR/Admin Response */}
+              {payroll.dispute_resolution_notes && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-semibold text-blue-900 mb-1">{t('hrResponse')}</div>
+                      <p className="text-sm text-blue-800">{payroll.dispute_resolution_notes}</p>
+                      {payroll.dispute_resolved_at && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {format(new Date(payroll.dispute_resolved_at), 'MMM dd, yyyy HH:mm')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Current Status */}
+              {payroll.dispute_resolved_at && (
+                <div className="bg-green-50 p-3 rounded">
+                  <div className="text-sm font-medium text-green-900">
+                    {payroll.status === 'sent_to_employee' 
+                      ? t('disputeResolved') 
+                      : t('underReview')}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Confirmed Status (without dispute) */}
+          {payroll.confirmed_by_employee && !payroll.disputed_by_employee && (
             <div className="bg-green-50 p-4 rounded-lg flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
               <div>
@@ -228,16 +279,6 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
                 {payroll.employee_notes && (
                   <p className="text-sm text-green-800 mt-1">{payroll.employee_notes}</p>
                 )}
-              </div>
-            </div>
-          )}
-
-          {payroll.disputed_by_employee && (
-            <div className="bg-red-50 p-4 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-              <div>
-                <div className="font-semibold text-red-900">{t('disputed')}</div>
-                <p className="text-sm text-red-800 mt-1">{payroll.dispute_reason}</p>
               </div>
             </div>
           )}
