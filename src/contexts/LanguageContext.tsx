@@ -476,7 +476,10 @@ const translations = {
     editPayroll: 'Edit Payroll',
     underReview: 'Under Review',
     disputedPayrollsNote: 'These payrolls have been disputed by employees and are awaiting HR response.',
-    awaitingHRResponse: 'Awaiting HR Response',
+      awaitingHRResponse: 'Awaiting HR Response',
+      revisedFromDispute: 'Revised from Dispute',
+      originalEmployeeDispute: 'Original Employee Dispute',
+      hrRevisionNotes: 'HR Revision Notes',
     addAllowance: 'Add Allowance',
     addOther: 'Add Other',
     addDeduction: 'Add Deduction',
@@ -560,6 +563,12 @@ const translations = {
     profileChangeRequests: '資料變更申請',
     yourProfileChangeRequests: '您的資料變更申請',
     teamProfileChangeRequests: '團隊資料變更申請',
+    // Payroll
+    awaitingHRResponse: '等待人力資源回應',
+    revisedFromDispute: '從爭議修訂',
+    originalEmployeeDispute: '員工原始爭議',
+    hrRevisionNotes: '人力資源修訂說明',
+    
     // Landing
     leaveManagementSystem: '請假管理系統',
     landingSubtitle: '讓您的組織請假流程更順暢',

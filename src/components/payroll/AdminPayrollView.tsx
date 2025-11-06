@@ -15,8 +15,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, FileText, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, AlertCircle, FileWarning } from 'lucide-react';
 import { format } from 'date-fns';
+import { PayrollDetailsDialog } from './PayrollDetailsDialog';
 
 export function AdminPayrollView() {
   const { t } = useLanguage();
@@ -24,13 +25,14 @@ export function AdminPayrollView() {
   const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [viewDetailsPayroll, setViewDetailsPayroll] = useState<any>(null);
 
   const { data: pendingApprovals, isLoading } = useQuery({
     queryKey: ['pending-payroll-approvals'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payroll_records')
-        .select('*, profiles!payroll_records_user_id_fkey(first_name, last_name, employee_id)')
+        .select('*, profiles!payroll_records_user_id_fkey(first_name, last_name, employee_id), payroll_line_items(*)')
         .eq('status', 'pending_admin_approval')
         .order('created_at', { ascending: true });
 
@@ -129,56 +131,116 @@ export function AdminPayrollView() {
         )}
 
         <div className="grid gap-4">
-          {pendingApprovals?.map((record: any) => (
-            <Card key={record.id} className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-lg">
-                      {record.profiles?.first_name} {record.profiles?.last_name}
-                    </h3>
-                    <Badge variant="secondary">{t('pendingApproval')}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {t('period')}: {t('month')} {record.month}/{record.year}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t('created')}: {format(new Date(record.created_at), 'MMM dd, yyyy')}
-                  </p>
-                </div>
+          {pendingApprovals?.map((record: any) => {
+            const isRevisedDispute = record.disputed_by_employee && record.dispute_resolution_notes;
+            
+            return (
+              <Card 
+                key={record.id} 
+                className={`p-6 ${isRevisedDispute ? 'border-orange-300 bg-orange-50' : ''}`}
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      {isRevisedDispute && <FileWarning className="w-5 h-5 text-orange-600" />}
+                      <h3 className="font-semibold text-lg">
+                        {record.profiles?.first_name} {record.profiles?.last_name}
+                      </h3>
+                      <Badge variant="secondary">{t('pendingApproval')}</Badge>
+                      {isRevisedDispute && (
+                        <Badge className="bg-orange-500">{t('revisedFromDispute')}</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {t('period')}: {t('month')} {record.month}/{record.year}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {t('created')}: {format(new Date(record.created_at), 'MMM dd, yyyy')}
+                    </p>
 
-                <div className="text-right">
-                  <div className="mb-3">
-                    <div className="text-sm text-muted-foreground">{t('netTotal')}</div>
-                    <div className="text-2xl font-bold text-primary">
-                      {formatCurrency(Number(record.net_total), record.currency)}
+                    {/* Show Dispute Context for Revised Payrolls */}
+                    {isRevisedDispute && (
+                      <div className="space-y-2 mb-3">
+                        <div className="bg-red-100 p-3 rounded border border-red-200">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <div className="text-xs font-semibold text-red-900 mb-1">
+                                {t('originalEmployeeDispute')}:
+                              </div>
+                              <p className="text-sm text-red-800">{record.dispute_reason}</p>
+                              {record.disputed_at && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {format(new Date(record.disputed_at), 'MMM dd, yyyy HH:mm')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-100 p-3 rounded border border-blue-200">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <div className="text-xs font-semibold text-blue-900 mb-1">
+                                {t('hrRevisionNotes')}:
+                              </div>
+                              <p className="text-sm text-blue-800">{record.dispute_resolution_notes}</p>
+                              {record.dispute_resolved_at && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {format(new Date(record.dispute_resolved_at), 'MMM dd, yyyy HH:mm')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <div className="mb-3">
+                      <div className="text-sm text-muted-foreground">{t('netTotal')}</div>
+                      <div className="text-2xl font-bold text-primary">
+                        {formatCurrency(Number(record.net_total), record.currency)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        onClick={() => setViewDetailsPayroll(record)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <FileText className="w-4 h-4 mr-1" />
+                        {t('viewDetails')}
+                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => approveMutation.mutate(record.id)}
+                          disabled={approveMutation.isPending}
+                          size="sm"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          {t('approve')}
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            setSelectedPayroll(record);
+                            setShowRejectDialog(true);
+                          }}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          {t('reject')}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => approveMutation.mutate(record.id)}
-                      disabled={approveMutation.isPending}
-                      size="sm"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      {t('approve')}
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        setSelectedPayroll(record);
-                        setShowRejectDialog(true);
-                      }}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      {t('reject')}
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
 
@@ -267,6 +329,15 @@ export function AdminPayrollView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* View Details Dialog */}
+      {viewDetailsPayroll && (
+        <PayrollDetailsDialog
+          payroll={viewDetailsPayroll}
+          open={!!viewDetailsPayroll}
+          onClose={() => setViewDetailsPayroll(null)}
+        />
+      )}
     </div>
   );
 }
