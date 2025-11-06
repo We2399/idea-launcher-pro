@@ -27,6 +27,8 @@ import { Plus, Trash2 } from 'lucide-react';
 interface Props {
   open: boolean;
   onClose: () => void;
+  existingPayroll?: any; // For editing disputed payrolls
+  resolutionNotes?: string; // Resolution notes from dispute
 }
 
 interface LineItem {
@@ -36,10 +38,11 @@ interface LineItem {
   amount: number;
 }
 
-export function CreatePayrollDialog({ open, onClose }: Props) {
+export function CreatePayrollDialog({ open, onClose, existingPayroll, resolutionNotes }: Props) {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const currentDate = new Date();
+  const isEditMode = !!existingPayroll;
 
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
@@ -47,6 +50,26 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [baseSalary, setBaseSalary] = useState(0);
   const [currency, setCurrency] = useState('USD');
+
+  // Load existing payroll data when in edit mode
+  useEffect(() => {
+    if (existingPayroll && open) {
+      setSelectedEmployee(existingPayroll.user_id);
+      setMonth(existingPayroll.month);
+      setYear(existingPayroll.year);
+      setBaseSalary(Number(existingPayroll.base_salary) || 0);
+      setCurrency(existingPayroll.currency || 'USD');
+      // Load line items if available
+      if (existingPayroll.payroll_line_items) {
+        setLineItems(existingPayroll.payroll_line_items.map((item: any) => ({
+          item_type: item.item_type,
+          category: item.category,
+          description: item.description,
+          amount: Number(item.amount),
+        })));
+      }
+    }
+  }, [existingPayroll, open]);
 
   // Fetch employees (excluding admins and HR admins)
   const { data: employees } = useQuery({
@@ -151,21 +174,40 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
         throw new Error('Please fill in all line item details');
       }
 
-      const { error } = await supabase.functions.invoke('create-payroll-record', {
-        body: {
-          employee_id: selectedEmployee,
-          month,
-          year,
-          base_salary: baseSalary,
-          currency: currency,
-          line_items: lineItems,
-        },
-      });
+      if (isEditMode) {
+        // Use resolve-payroll-dispute for editing
+        const { data, error } = await supabase.functions.invoke('resolve-payroll-dispute', {
+          body: {
+            payroll_record_id: existingPayroll.id,
+            action: 'revise',
+            resolution_notes: resolutionNotes || '',
+            base_salary: baseSalary,
+            currency: currency,
+            line_items: lineItems,
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+      } else {
+        // Create new payroll
+        const { error } = await supabase.functions.invoke('create-payroll-record', {
+          body: {
+            employee_id: selectedEmployee,
+            month,
+            year,
+            base_salary: baseSalary,
+            currency: currency,
+            line_items: lineItems,
+          },
+        });
+
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
-      toast({ title: t('success'), description: t('payrollCreated') });
+      const message = isEditMode ? t('payrollRevised') : t('payrollCreated');
+      toast({ title: t('success'), description: message });
       queryClient.invalidateQueries({ queryKey: ['all-payroll-records'] });
       queryClient.invalidateQueries({ queryKey: ['pending-payroll-approvals'] });
       onClose();
@@ -195,7 +237,7 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t('createPayroll')}</DialogTitle>
+          <DialogTitle>{isEditMode ? t('editPayroll') : t('createPayroll')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -405,7 +447,7 @@ export function CreatePayrollDialog({ open, onClose }: Props) {
               onClick={() => createMutation.mutate()}
               disabled={createMutation.isPending || !selectedEmployee}
             >
-              {t('createPayroll')}
+              {isEditMode ? t('saveChanges') : t('createPayroll')}
             </Button>
           </div>
         </div>

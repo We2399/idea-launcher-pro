@@ -39,7 +39,11 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
     queryFn: async () => {
       let query = supabase
         .from('payroll_records')
-        .select('*, profiles!payroll_records_user_id_fkey(first_name, last_name, employee_id)')
+        .select(`
+          *, 
+          profiles!payroll_records_user_id_fkey(first_name, last_name, employee_id),
+          payroll_line_items(*)
+        `)
         .order('year', { ascending: false })
         .order('month', { ascending: false });
 
@@ -294,7 +298,13 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
 
       <CreatePayrollDialog
         open={showCreateDialog}
-        onClose={() => setShowCreateDialog(false)}
+        onClose={() => {
+          setShowCreateDialog(false);
+          setDisputedPayroll(null);
+          setResolutionNotes('');
+        }}
+        existingPayroll={disputedPayroll}
+        resolutionNotes={resolutionNotes}
       />
 
       {selectedPayroll && (
@@ -338,8 +348,8 @@ export function HRPayrollView({ showHistoryOnly = false }: Props) {
               </Button>
               <Button 
                 onClick={() => {
-                  setShowCreateDialog(true);
                   setShowReviseDialog(false);
+                  setShowCreateDialog(true);
                 }}
                 disabled={!resolutionNotes.trim()}
               >
