@@ -6,22 +6,17 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   
   // ============================================================
-  // CAPACITOR MODE CONFIGURATION
+  // CAPACITOR MODE: LOCAL/OFFLINE MODE (ACTIVE)
   // ============================================================
   
-  // LOCAL MODE (Default - For Testing & Production)
-  // - Uses bundled assets from 'dist' folder
-  // - Works offline, no network dependency
-  // - Fast and reliable for emulator/device testing
-  // - CURRENT MODE: The server block below is commented out
+  // ✅ CURRENT MODE: Local/Offline
+  // - App runs from bundled 'dist' folder assets
+  // - Works completely offline, no network required
+  // - No "Waiting to reconnect" messages
+  // - Fast and reliable for production & testing
   
-  // DEVELOPMENT MODE (For Live Reload from Lovable)
-  // - Loads app directly from Lovable sandbox URL
-  // - Changes in Lovable appear instantly on device/emulator
-  // - Requires internet connection
-  // - TO ENABLE: Uncomment the 'server' block below
-  
-  // Uncomment this block for live reload during development:
+  // To enable live reload from Lovable (for development only):
+  // Uncomment the server block below:
   /*
   server: {
     url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=3',
