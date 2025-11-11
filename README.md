@@ -142,18 +142,38 @@ npx cap open android
 
 **On iOS (Mac only):**
 
-Quick start from terminal:
+**One-command setup (recommended):**
+```sh
+bash scripts/ios/doctor.sh
+```
+This checks all prerequisites, builds the app, and opens Xcode ready to run.
+
+**If you encounter issues:**
+```sh
+bash scripts/ios/reset.sh
+```
+This does a complete clean reset of the iOS setup.
+
+**After pulling changes from Git:**
+```sh
+npm install
+npm run build
+npx cap sync ios
+cd ios/App && pod install && cd ../..
+open ios/App/App.xcworkspace
+```
+
+**Quick terminal run:**
 ```sh
 npm run build
 npx cap sync ios
 npx cap run ios
 ```
 
-Or open in Xcode:
-```sh
-npx cap open ios
-# Set your Signing Team, then click Run
-```
+**Common iOS Issues:**
+- **"pod: command not found"** → Install CocoaPods (the doctor script will show you how)
+- **Empty Xcode window** → Run `bash scripts/ios/doctor.sh` to generate the workspace
+- **Build errors** → Run `bash scripts/ios/reset.sh` for a clean setup
 
 ### Switching to Development Mode (Live Reload)
 
