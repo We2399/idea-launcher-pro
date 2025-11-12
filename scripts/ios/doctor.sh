@@ -4,12 +4,17 @@ set -e
 echo "🔍 iOS Setup Doctor - Checking your environment..."
 echo ""
 
+# Navigate to project root if in scripts directory
+if [ -f "../../package.json" ]; then
+    cd ../..
+fi
+
 # Check if we're in project root
 if [ ! -f "package.json" ]; then
     echo "❌ Error: Not in project root. Please run from project root directory."
     exit 1
 fi
-echo "✅ Project root confirmed"
+echo "✅ Project root: $(pwd)"
 
 # Check Node/npm
 if ! command -v node >/dev/null 2>&1; then
