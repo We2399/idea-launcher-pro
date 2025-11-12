@@ -4,11 +4,17 @@ set -e
 echo "🔄 iOS Setup Reset - Starting fresh..."
 echo ""
 
+# Navigate to project root if in scripts directory
+if [ -f "../../package.json" ]; then
+    cd ../..
+fi
+
 # Check if we're in project root
 if [ ! -f "package.json" ]; then
     echo "❌ Error: Not in project root. Please run from project root directory."
     exit 1
 fi
+echo "✅ Project root: $(pwd)"
 
 # Check if iOS platform exists
 if [ ! -d "ios/App" ]; then
