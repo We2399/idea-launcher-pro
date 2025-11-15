@@ -122,13 +122,16 @@ export function Header() {
         </Alert>
       )}
 
-      <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4 gap-2">
-        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+      <header className="h-16 border-b border-border bg-background flex items-center justify-between px-2 sm:px-4 gap-1 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
           <SidebarTrigger />
-          <h1 className="text-base md:text-xl font-semibold text-foreground truncate">SME EmpRecord Hub</h1>
+          <h1 className="text-sm sm:text-base md:text-xl font-semibold text-foreground truncate">
+            <span className="hidden sm:inline">SME EmpRecord Hub</span>
+            <span className="sm:hidden">SME</span>
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
           <LanguageSwitcher />
           {user && (
             <>
@@ -137,7 +140,7 @@ export function Header() {
                   variant="outline"
                   size="sm"
                   onClick={() => setImpersonationOpen(true)}
-                  className="flex items-center gap-2"
+                  className="hidden md:flex items-center gap-2"
                 >
                   <UserCog className="h-4 w-4" />
                   <span className="hidden md:inline">Switch User</span>
@@ -159,9 +162,9 @@ export function Header() {
                 variant="outline" 
                 size="sm" 
                 onClick={signOut}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">{t('signOut')}</span>
               </Button>
             </>
