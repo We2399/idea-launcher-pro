@@ -122,17 +122,19 @@ export function Header() {
         </Alert>
       )}
 
-      <header className="h-16 border-b border-border bg-background flex items-center justify-between px-2 sm:px-4 gap-1 sm:gap-2">
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-          <SidebarTrigger />
-          <h1 className="text-sm sm:text-base md:text-xl font-semibold text-foreground truncate">
+      <header className="h-14 border-b border-border bg-background flex items-center justify-between px-1 sm:px-4">
+        <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-shrink">
+          <SidebarTrigger className="h-8 w-8 p-1" />
+          <h1 className="text-xs sm:text-base md:text-xl font-semibold text-foreground truncate">
             <span className="hidden sm:inline">SME EmpRecord Hub</span>
             <span className="sm:hidden">SME</span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
-          <LanguageSwitcher />
+        <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
           {user && (
             <>
               {userRole === 'administrator' && (
@@ -147,7 +149,7 @@ export function Header() {
                 </Button>
               )}
               <div className="hidden sm:flex items-center gap-2">
-                <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1">
+                <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1 text-xs px-2">
                   <RoleIcon className="h-3 w-3" />
                   <span className="hidden md:inline">
                     {getRoleLabel(userRole)}
@@ -159,13 +161,14 @@ export function Header() {
                 <span className="text-sm text-muted-foreground hidden lg:inline truncate max-w-[150px]">{displayName}</span>
               </div>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
                 onClick={signOut}
-                className="flex items-center gap-1"
+                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2"
+                title={t('signOut')}
               >
-                <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">{t('signOut')}</span>
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline sm:ml-2">{t('signOut')}</span>
               </Button>
             </>
           )}
