@@ -124,7 +124,7 @@ export function Header() {
 
       <header
         className="border-b border-border bg-background flex items-center justify-between px-1 sm:px-4 min-h-14 sm:min-h-16"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 44px)' }}
       >
         <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
