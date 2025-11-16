@@ -195,10 +195,8 @@ All colors MUST be HSL.
 /* iOS safe area support to avoid notch/status bar overlap */
 /* Fallback for older iOS (constant) and modern (env) */
 body {
-  /* Add an extra offset so content never touches the notch even when env() returns 0 (e.g., some simulators) */
-  padding-top: calc(constant(safe-area-inset-top) + 24px);
+  padding-top: 0;
   padding-bottom: constant(safe-area-inset-bottom);
-  padding-top: calc(env(safe-area-inset-top) + 24px);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
