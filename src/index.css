@@ -195,9 +195,14 @@ All colors MUST be HSL.
 /* iOS safe area support to avoid notch/status bar overlap */
 /* Fallback for older iOS (constant) and modern (env) */
 body {
-  padding-top: 0;
   padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Apply safe-area padding globally at the app root so all top UI sits below the status bar */
+#root {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Optional utilities when you need granular control */
