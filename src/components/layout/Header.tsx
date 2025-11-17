@@ -100,7 +100,7 @@ export function Header() {
     : user?.email;
 
   return (
-    <div className="relative safe-area-top">
+    <div className="relative safe-area-top-extend">
       {/* Impersonation Banner */}
       {isImpersonating && impersonatedProfile && (
         <Alert className="rounded-none border-x-0 border-t-0 bg-orange-100 border-orange-400">
