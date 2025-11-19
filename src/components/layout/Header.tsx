@@ -124,21 +124,17 @@ export function Header() {
         </Alert>
       )}
 
-      <header
-        className="border-b border-border bg-background flex items-center justify-between px-1 sm:px-4 min-h-14 sm:min-h-16 pt-10 md:pt-4"
-       >
-        <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-shrink">
+      {/* Desktop Header - Horizontal Layout */}
+      <header className="hidden md:flex border-b border-border bg-background items-center justify-between px-4 min-h-16">
+        <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
-          <h1 className="text-xs sm:text-base md:text-xl font-semibold text-foreground truncate">
-            <span className="hidden sm:inline">SME EmpRecord Hub</span>
-            <span className="sm:hidden">SME</span>
+          <h1 className="text-xl font-semibold text-foreground truncate">
+            SME EmpRecord Hub
           </h1>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
-          <div className="hidden sm:block">
-            <LanguageSwitcher />
-          </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <LanguageSwitcher />
           {user && (
             <>
               {userRole === 'administrator' && (
@@ -146,37 +142,66 @@ export function Header() {
                   variant="outline"
                   size="sm"
                   onClick={() => setImpersonationOpen(true)}
-                  className="hidden md:flex items-center gap-2"
+                  className="flex items-center gap-2"
                 >
                   <UserCog className="h-4 w-4" />
-                  <span className="hidden md:inline">Switch User</span>
+                  <span>Switch User</span>
                 </Button>
               )}
-              <div className="hidden sm:flex items-center gap-2">
-                <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1 text-xs px-2">
-                  <RoleIcon className="h-3 w-3" />
-                  <span className="hidden md:inline">
-                    {getRoleLabel(userRole)}
-                    {isImpersonating && impersonatedProfile && (
-                      <span className="text-xs"> (viewing {impersonatedProfile.first_name})</span>
-                    )}
-                  </span>
-                </Badge>
-                <span className="text-sm text-muted-foreground hidden lg:inline truncate max-w-[150px]">{displayName}</span>
-              </div>
+              <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1 text-xs px-2">
+                <RoleIcon className="h-3 w-3" />
+                <span>
+                  {getRoleLabel(userRole)}
+                  {isImpersonating && impersonatedProfile && (
+                    <span className="text-xs"> (viewing {impersonatedProfile.first_name})</span>
+                  )}
+                </span>
+              </Badge>
+              <span className="text-sm text-muted-foreground hidden lg:inline truncate max-w-[150px]">{displayName}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={signOut}
-                className="h-8 w-8 sm:w-auto sm:px-3 p-0 sm:p-2"
                 title={t('signOut')}
               >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline sm:ml-2">{t('signOut')}</span>
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('signOut')}
               </Button>
             </>
           )}
         </div>
+      </header>
+
+      {/* Mobile Header - Vertical Stacked Layout */}
+      <header className="md:hidden border-b border-border bg-background">
+        {/* Top Row: Sidebar + Title */}
+        <div className="flex items-center gap-2 px-2 py-2">
+          <SidebarTrigger className="h-8 w-8 p-1 flex-shrink-0" />
+          <h1 className="text-sm font-semibold text-foreground truncate">
+            SME EmpRecord Hub
+          </h1>
+        </div>
+
+        {/* Bottom Row: Actions */}
+        {user && (
+          <div className="flex items-center justify-between gap-2 px-2 pb-2 border-t border-border/50 pt-2">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1 text-xs px-2">
+                <RoleIcon className="h-3 w-3" />
+              </Badge>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={signOut}
+              className="h-8 px-2"
+              title={t('signOut')}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </header>
 
       <ImpersonationPanel 
