@@ -123,8 +123,8 @@ export function Header() {
       )}
 
       <header
-        className="border-b border-border bg-background flex items-center justify-between px-1 sm:px-4 min-h-14 sm:min-h-16"
-      >
+        className="safe-area-top border-b border-border bg-background flex items-center justify-between px-1 sm:px-4 min-h-14 sm:min-h-16"
+       >
         <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
           <h1 className="text-xs sm:text-base md:text-xl font-semibold text-foreground truncate">
