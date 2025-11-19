@@ -101,6 +101,8 @@ export function Header() {
 
   return (
     <div className="relative">
+      {/* Mobile spacer to push header below iOS notch */}
+      <div className="block md:hidden h-10" />
       {/* Impersonation Banner */}
       {isImpersonating && impersonatedProfile && (
         <Alert className="rounded-none border-x-0 border-t-0 bg-orange-100 border-orange-400">
