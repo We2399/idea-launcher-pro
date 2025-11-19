@@ -51,7 +51,7 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20">
+      <div className="min-h-screen safe-area-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20">
         <div className="text-center space-y-6 max-w-md mx-auto p-8">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight">{t('leaveManagementSystem')}</h1>
@@ -136,7 +136,7 @@ const Index = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           {userRole === 'administrator' 
