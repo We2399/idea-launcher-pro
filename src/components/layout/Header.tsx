@@ -173,7 +173,7 @@ export function Header() {
       </header>
 
       {/* Mobile Header - Vertical Stacked Layout */}
-      <header className="md:hidden border-b border-border bg-background">
+      <header className="safe-area-top md:hidden border-b border-border bg-background">
         {/* Top Row: Sidebar + Title */}
         <div className="flex items-center gap-2 px-2 py-2">
           <SidebarTrigger className="h-8 w-8 p-1 flex-shrink-0" />
