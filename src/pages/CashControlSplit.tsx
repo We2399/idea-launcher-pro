@@ -367,7 +367,7 @@ const CashControl = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="safe-area-screen space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
