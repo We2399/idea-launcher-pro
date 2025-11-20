@@ -25,7 +25,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="safe-area-screen space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t('administratorSettings')}</h1>
         <p className="text-muted-foreground">{t('manageSystemSettings')}</p>
