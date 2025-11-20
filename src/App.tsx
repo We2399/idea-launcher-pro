@@ -46,11 +46,11 @@ const App = () => {
                   <Route path="/*" element={
                     <ProtectedRoute>
                       <SidebarProvider defaultOpen={false}>
-                        <div className="safe-area-top-extend min-h-screen flex w-full">
+                        <div className="min-h-screen flex w-full">
                           <AppSidebar />
                           <div className="flex-1 flex flex-col">
                             <Header />
-                            <main className="flex-1 p-4 md:p-6 lg:p-8">
+                            <main className="safe-area-main flex-1 p-4 md:p-6 lg:p-8">
                               <Routes>
                                 <Route path="/" element={<Index />} />
                                 <Route path="/requests" element={<Requests />} />
