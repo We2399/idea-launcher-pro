@@ -123,7 +123,7 @@ export function Header() {
       )}
 
       {/* Desktop Header - Horizontal Layout */}
-      <header className="safe-area-header hidden md:flex border-b border-border bg-background items-center justify-between px-4 min-h-16">
+      <header className="safe-area-header sticky top-0 z-40 hidden md:flex border-b border-border bg-background items-center justify-between px-4 min-h-16">
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
           <h1 className="text-xl font-semibold text-foreground truncate">
@@ -171,7 +171,7 @@ export function Header() {
       </header>
 
       {/* Mobile Header - Vertical Stacked Layout */}
-      <header className="safe-area-header md:hidden border-b border-border bg-background">
+      <header className="safe-area-header sticky top-0 z-40 md:hidden border-b border-border bg-background">
         {/* Top Row: Sidebar + Title */}
         <div className="flex items-center gap-2 px-2 py-2">
           <SidebarTrigger className="h-8 w-8 p-1 flex-shrink-0" />

@@ -192,27 +192,26 @@ All colors MUST be HSL.
   }
 }
 
-/* iOS PWA: fix 100vh / status bar issues */
+/* ===== iOS PWA SAFE-AREA + HEIGHT FIXES ===== */
+
+/* iOS PWA 100vh / status bar fix */
 html,
 body {
-  height: -webkit-fill-available;
+  height: 100%;
+  min-height: 100%;
 }
 
-/* Make Tailwind's min-h-screen behave on iOS */
-.min-h-screen {
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+/* Safe-area padding for header under the notch */
+.safe-area-header {
+  padding-top: env(safe-area-inset-top, 0);
 }
 
-/* Safe-area helpers for iOS devices with notch */
-@supports (padding: env(safe-area-inset-top)) {
-  /* For the fixed header bar */
-  .safe-area-header {
-    padding-top: env(safe-area-inset-top);
-  }
+/* Safe-area padding for main content under header */
+.safe-area-main {
+  padding-top: calc(env(safe-area-inset-top, 0) + 56px); /* 56px = header height */
+}
 
-  /* For the main content under the fixed header */
-  .safe-area-main {
-    padding-top: calc(env(safe-area-inset-top) + 64px); /* 64px = header height */
-  }
+/* Smooth scrolling on iOS */
+* {
+  -webkit-overflow-scrolling: touch;
 }
