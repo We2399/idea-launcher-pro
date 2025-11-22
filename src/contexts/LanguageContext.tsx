@@ -527,6 +527,7 @@ const translations = {
     reports: '報告',
     tasks: '任務',
     cashControl: '現金管理',
+    payroll: '薪資管理',
     settings: '設定',
     staffProfile: '員工資料',
     
@@ -953,6 +954,7 @@ const translations = {
     reports: '报告',
     tasks: '任务',
     cashControl: '现金管理',
+    payroll: '薪资管理',
     settings: '设置',
     staffProfile: '员工资料',
     
@@ -1373,6 +1375,7 @@ const translations = {
     reports: 'Laporan',
     tasks: 'Tugas',
     cashControl: 'Kontrol Kas',
+    payroll: 'Gaji',
     settings: 'Pengaturan',
     staffProfile: 'Profil Staf',
     
