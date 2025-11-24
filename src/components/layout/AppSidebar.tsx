@@ -35,7 +35,7 @@ const getPersonalItems = (t: (key: string) => string) => [
   { title: t('calendar'), url: '/calendar', icon: Calendar },
   { title: t('tasks'), url: '/tasks', icon: CheckSquare },
   { title: t('cashControl'), url: '/cash-control', icon: DollarSign },
-  { title: t('payroll'), url: '/payroll', icon: Wallet },
+  { title: t('payrollManagement'), url: '/payroll', icon: Wallet },
   { title: t('profile'), url: '/profile', icon: User },
 ];
 
@@ -43,7 +43,7 @@ const getManagementItems = (t: (key: string) => string) => [
   { title: t('employees'), url: '/employees', icon: Users },
   { title: 'Storage Centre', url: '/storage-centre', icon: FileText },
   { title: t('reports'), url: '/reports', icon: BarChart3 },
-  { title: t('payroll'), url: '/payroll', icon: Wallet },
+  { title: t('payrollManagement'), url: '/payroll', icon: Wallet },
   { title: t('settings'), url: '/settings', icon: Settings },
 ];
 
