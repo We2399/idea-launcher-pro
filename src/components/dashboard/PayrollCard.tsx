@@ -21,7 +21,7 @@ export function PayrollCard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            {t('payroll')}
+            {t('payrollManagement')}
           </CardTitle>
           <CardDescription>{t('confirmPaymentReceipt')}</CardDescription>
         </CardHeader>
