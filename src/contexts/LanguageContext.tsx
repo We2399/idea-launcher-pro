@@ -1025,6 +1025,7 @@ const translations = {
     tasks: '任务',
     cashControl: '现金管理',
     payroll: '薪资管理',
+    payrollManagement: '薪资管理',
     settings: '设置',
     staffProfile: '员工资料',
     
@@ -1446,6 +1447,7 @@ const translations = {
     tasks: 'Tugas',
     cashControl: 'Kontrol Kas',
     payroll: 'Gaji',
+    payrollManagement: 'Manajemen Gaji',
     settings: 'Pengaturan',
     staffProfile: 'Profil Staf',
     
