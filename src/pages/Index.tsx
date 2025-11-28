@@ -16,6 +16,7 @@ import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
 import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDiscussionAlertsCard';
 import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
 import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
+import { QuickActions } from '@/components/dashboard/QuickActions';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -152,6 +153,9 @@ const Index = () => {
         </p>
       </div>
 
+      {/* Quick Actions */}
+      <QuickActions />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {dashboardCards.map((card) => {
           const Icon = card.icon;
@@ -159,7 +163,7 @@ const Index = () => {
           
           return (
             <Link key={card.title} to={card.href}>
-              <Card className="card-professional h-full transition-all duration-300 hover:scale-105 animate-fade-in relative">
+              <Card variant="glass" className="card-glow h-full transition-all duration-300 hover:scale-105 animate-fade-in relative border-border/50">
                 {pendingCount > 0 && (
                   <Badge 
                     className="absolute top-2 right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse"
