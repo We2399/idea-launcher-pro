@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { Calendar, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -70,40 +70,49 @@ export function LeaveTypeBreakdown({ leaveBalances, loading }: LeaveTypeBreakdow
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {leaveBalances.map((balance) => {
-            const usagePercentage = balance.totalDays > 0 
-              ? (balance.usedDays / balance.totalDays) * 100 
+            const remainingPercentage = balance.totalDays > 0 
+              ? (balance.remainingDays / balance.totalDays) * 100 
               : 0;
             
             return (
-              <div key={balance.leaveTypeId} className="space-y-2">
+              <Card key={balance.leaveTypeId} variant="glass" className="card-glow p-6 space-y-4 hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div 
-                      className="w-3 h-3 rounded-full" 
+                      className="w-3 h-3 rounded-full shadow-sm" 
                       style={{ backgroundColor: balance.color }}
                     />
-                    <span className="font-medium text-sm">{translateLeaveType(balance.leaveTypeName)}</span>
+                    <span className="font-semibold text-sm">{translateLeaveType(balance.leaveTypeName)}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {balance.remainingDays}/{balance.totalDays}
-                  </span>
                 </div>
-                <div className="space-y-1">
-                  <Progress 
-                    value={100 - usagePercentage} 
-                    className="h-2"
-                    style={{
-                      '--progress-foreground': balance.color
-                    } as React.CSSProperties}
+                
+                <div className="flex flex-col items-center justify-center space-y-3">
+                  <CircularProgress 
+                    value={remainingPercentage}
+                    size={100}
+                    strokeWidth={10}
+                    color={balance.color}
+                    showPercentage={true}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{t('used')}: {balance.usedDays}</span>
-                    <span>{t('remaining')}: {balance.remainingDays}</span>
+                  
+                  <div className="text-center space-y-1">
+                    <div className="text-2xl font-bold text-foreground">
+                      {balance.remainingDays}
+                      <span className="text-sm text-muted-foreground font-normal">/{balance.totalDays}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t('daysRemaining')}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between w-full text-xs text-muted-foreground pt-2 border-t border-border/50">
+                    <span>{t('used')}: <span className="font-semibold text-foreground">{balance.usedDays}</span></span>
+                    <span>{t('remaining')}: <span className="font-semibold text-foreground">{balance.remainingDays}</span></span>
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
