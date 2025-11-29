@@ -31,6 +31,7 @@ const translations = {
     cashControl: 'Cash Control',
     settings: 'Settings',
     staffProfile: 'Staff Profile',
+    navigation: 'Navigation',
     
     // Dashboard
     welcomeBack: 'Welcome Back!',
@@ -536,6 +537,7 @@ const translations = {
     payroll: '薪資管理',
     settings: '設定',
     staffProfile: '員工資料',
+    navigation: '導覽選單',
     
     // Dashboard
     welcomeBack: '歡迎回來！',
@@ -1040,6 +1042,7 @@ const translations = {
     payrollManagement: '薪资管理',
     settings: '设置',
     staffProfile: '员工资料',
+    navigation: '导航选单',
     
     // Dashboard
     welcomeBack: '欢迎回来！',
@@ -1466,9 +1469,10 @@ const translations = {
     tasks: 'Tugas',
     cashControl: 'Kontrol Kas',
     payroll: 'Gaji',
-    payrollManagement: 'Manajemen Gaji',
+    payrollManagement: 'Penggajian',
     settings: 'Pengaturan',
     staffProfile: 'Profil Staf',
+    navigation: 'Navigasi',
     
     // Dashboard
     welcomeBack: 'Selamat datang kembali!',
