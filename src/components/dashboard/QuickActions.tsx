@@ -60,32 +60,23 @@ export function QuickActions() {
   const actions = userRole === 'employee' ? employeeActions : adminActions;
   
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold text-foreground">{t('quickActions')}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-foreground hidden md:block">{t('quickActions')}</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
             <Link key={action.label} to={action.href}>
-              <Card className="card-glass group relative overflow-hidden h-full transition-all duration-300 hover:scale-105 hover:shadow-elevated border-border/50">
-                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300" 
-                     style={{ backgroundImage: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)))` }} />
-                <div className="p-6 relative">
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${action.gradient} shadow-lg`}>
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {action.label}
-                      </h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {action.description}
-                      </p>
-                    </div>
+              <button className={`w-full py-6 md:py-8 rounded-2xl bg-gradient-to-br ${action.gradient} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95`}>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-3 md:p-4 rounded-full bg-white/20 backdrop-blur-sm">
+                    <Icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
                   </div>
+                  <span className="text-white font-semibold text-sm md:text-base px-2 text-center leading-tight">
+                    {action.label}
+                  </span>
                 </div>
-              </Card>
+              </button>
             </Link>
           );
         })}
