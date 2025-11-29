@@ -41,7 +41,7 @@ const getPersonalItems = (t: (key: string) => string) => [
 
 const getManagementItems = (t: (key: string) => string) => [
   { title: t('employees'), url: '/employees', icon: Users },
-  { title: 'Storage Centre', url: '/storage-centre', icon: FileText },
+  { title: t('storageCentre'), url: '/storage-centre', icon: FileText },
   { title: t('reports'), url: '/reports', icon: BarChart3 },
   { title: t('payrollManagement'), url: '/payroll', icon: Wallet },
   { title: t('settings'), url: '/settings', icon: Settings },
@@ -108,7 +108,7 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-            {!collapsed && "Navigation"}
+            {!collapsed && t('navigation')}
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
