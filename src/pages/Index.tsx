@@ -17,6 +17,9 @@ import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDis
 import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
 import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/dashboard/PullToRefreshIndicator';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -24,9 +27,22 @@ const Index = () => {
   const { t } = useLanguage();
   const stats = useEnhancedDashboardStats();
   const counts = useDashboardCounts();
+  const queryClient = useQueryClient();
   
   // Show impersonation indicator for administrators
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
+
+  // Pull to refresh handler
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries();
+    // Add a small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+  };
+
+  const { scrollableRef, isRefreshing, pullDistance, isPulled } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+  });
 
   // Helper function to get pending count for each card
   const getPendingCountForCard = (href: string): number => {
@@ -137,7 +153,15 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8">
+    <div 
+      ref={scrollableRef}
+      className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8 relative overflow-y-auto"
+    >
+      <PullToRefreshIndicator 
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        threshold={80}
+      />
       <div className="text-center space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           {userRole === 'administrator' 
