@@ -156,35 +156,30 @@ const Index = () => {
       {/* Quick Actions */}
       <QuickActions />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         {dashboardCards.map((card) => {
           const Icon = card.icon;
           const pendingCount = getPendingCountForCard(card.href);
           
           return (
             <Link key={card.title} to={card.href}>
-              <Card variant="glass" className="card-glow h-full transition-all duration-300 hover:scale-105 animate-fade-in relative border-border/50">
+              <div className="card-glass relative rounded-2xl p-4 md:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 border-border/50">
                 {pendingCount > 0 && (
                   <Badge 
-                    className="absolute top-2 right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse"
+                    className="absolute -top-2 -right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse z-10"
                   >
                     {pendingCount > 99 ? '99+' : pendingCount}
                   </Badge>
                 )}
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-gradient-primary shadow-sm">
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <div className="p-3 md:p-4 rounded-xl bg-gradient-primary shadow-sm">
+                    <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm leading-relaxed">
-                    {card.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  <h3 className="text-sm md:text-base font-semibold text-foreground leading-tight">
+                    {card.title}
+                  </h3>
+                </div>
+              </div>
             </Link>
           );
         })}
