@@ -10,6 +10,7 @@ import { LogOut, User, Shield, Crown, UserCog, X } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { ImpersonationPanel } from '@/components/admin/ImpersonationPanel';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 export function Header() {
   const { user, userRole, signOut } = useAuth();
@@ -135,6 +136,7 @@ export function Header() {
           <LanguageSwitcher />
           {user && (
             <>
+              <NotificationBell />
               {userRole === 'administrator' && (
                 <Button
                   variant="outline"
@@ -185,6 +187,7 @@ export function Header() {
           <div className="flex items-center justify-between gap-2 px-2 pb-2 border-t border-border/50 pt-2">
             <div className="flex items-center gap-2">
               <LanguageSwitcher />
+              <NotificationBell />
               <Badge variant={getRoleColor(userRole)} className="flex items-center gap-1 text-xs px-2">
                 <RoleIcon className="h-3 w-3" />
               </Badge>

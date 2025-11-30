@@ -19,6 +19,7 @@ import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard'
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/dashboard/PullToRefreshIndicator';
+import { PayrollCard } from '@/components/dashboard/PayrollCard';
 import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
@@ -276,6 +277,9 @@ const Index = () => {
           loading={stats.loading}
         />
       </div>
+
+       {/* Payroll Card */}
+       <PayrollCard />
 
        {/* Role-specific alerts */}
        {(userRole === 'administrator' || userRole === 'hr_admin') && (
