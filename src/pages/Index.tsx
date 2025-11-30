@@ -21,6 +21,7 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/dashboard/PullToRefreshIndicator';
 import { PayrollCard } from '@/components/dashboard/PayrollCard';
 import { useQueryClient } from '@tanstack/react-query';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -163,19 +164,25 @@ const Index = () => {
         pullDistance={pullDistance}
         threshold={80}
       />
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          {userRole === 'administrator' 
-            ? (isImpersonating ? `Dashboard - Viewing Employee Data` : 'Administrator Dashboard')
-            : t('welcomeBack')}
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground">
-          {userRole === 'administrator' 
-            ? (isImpersonating 
-                ? 'Managing selected employee\'s information and requests' 
-                : 'System-wide management and settings')
-            : t('dashboardSubtitle')}
-        </p>
+      <div className="flex items-start justify-between gap-3 md:block text-center md:text-left">
+        <div className="flex-1 space-y-2">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {userRole === 'administrator' 
+              ? (isImpersonating ? `Dashboard - Viewing Employee Data` : 'Administrator Dashboard')
+              : t('welcomeBack')}
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {userRole === 'administrator' 
+              ? (isImpersonating 
+                  ? 'Managing selected employee\'s information and requests' 
+                  : 'System-wide management and settings')
+              : t('dashboardSubtitle')}
+          </p>
+        </div>
+        {/* Extra notification access on mobile so it\'s always visible */}
+        <div className="md:hidden flex items-center justify-end mt-1">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Quick Actions */}
