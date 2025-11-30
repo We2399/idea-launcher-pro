@@ -17,7 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 export function NotificationBell() {
   const { t } = useLanguage();
-  const { data: notifications, refetch } = usePayrollNotifications();
+  const { data: notifications, refetch, isError, isLoading } = usePayrollNotifications();
   const [open, setOpen] = useState(false);
   const unreadCount = notifications?.length || 0;
 
@@ -51,13 +51,13 @@ export function NotificationBell() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="relative h-9 w-9 p-0"
-          aria-label={t('notifications')}
+          className="relative h-8 w-8 p-0"
+          aria-label={t('notifications') || 'Notifications'}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <Badge 
-              className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1 text-xs bg-destructive text-destructive-foreground"
+              className="absolute -top-1 -right-1 h-4 min-w-[16px] flex items-center justify-center px-1 text-[10px] bg-destructive text-destructive-foreground"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
