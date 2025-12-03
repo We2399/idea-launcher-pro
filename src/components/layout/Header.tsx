@@ -128,7 +128,7 @@ export function Header() {
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
           <h1 className="text-xl font-semibold text-foreground truncate">
-            SME EmpRecord Hub
+            Jie Jie Helpers Hub
           </h1>
         </div>
 
@@ -178,7 +178,7 @@ export function Header() {
         <div className="flex items-center gap-2 px-2 py-2">
           <SidebarTrigger className="h-8 w-8 p-1 flex-shrink-0" />
           <h1 className="text-sm font-semibold text-foreground truncate">
-            SME EmpRecord Hub
+            Jie Jie Helpers Hub
           </h1>
         </div>
 
