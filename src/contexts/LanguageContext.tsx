@@ -566,6 +566,12 @@ const translations = {
     chatWelcome: 'Welcome to Jie Jie Hub! How can I help you today?',
     chatAutoReply: 'Thank you for your message. Our team will respond shortly.',
     chatPlaceholder: 'Type a message...',
+    noMessages: 'No messages yet',
+    startConversation: 'Start a conversation',
+    newMessage: 'New Message',
+    messageSendError: 'Failed to send message',
+    you: 'You',
+    support: 'Support',
   },
   'zh-TW': {
     // Navigation
@@ -1113,6 +1119,12 @@ const translations = {
     chatWelcome: '歡迎來到姐姐中心！我今天能幫您什麼？',
     chatAutoReply: '感謝您的訊息。我們的團隊將盡快回覆。',
     chatPlaceholder: '輸入訊息...',
+    noMessages: '尚無訊息',
+    startConversation: '開始對話',
+    newMessage: '新訊息',
+    messageSendError: '發送訊息失敗',
+    you: '您',
+    support: '客服',
   },
   'zh-CN': {
     // Navigation
@@ -1586,6 +1598,12 @@ const translations = {
     chatWelcome: '欢迎来到姐姐中心！我今天能帮您什么？',
     chatAutoReply: '感谢您的消息。我们的团队将尽快回复。',
     chatPlaceholder: '输入消息...',
+    noMessages: '暂无消息',
+    startConversation: '开始对话',
+    newMessage: '新消息',
+    messageSendError: '发送消息失败',
+    you: '您',
+    support: '客服',
   },
   id: {
     // Navigation
@@ -2058,6 +2076,12 @@ const translations = {
     chatWelcome: 'Selamat datang di Jie Jie Hub! Ada yang bisa saya bantu hari ini?',
     chatAutoReply: 'Terima kasih atas pesan Anda. Tim kami akan segera merespons.',
     chatPlaceholder: 'Ketik pesan...',
+    noMessages: 'Belum ada pesan',
+    startConversation: 'Mulai percakapan',
+    newMessage: 'Pesan Baru',
+    messageSendError: 'Gagal mengirim pesan',
+    you: 'Anda',
+    support: 'Dukungan',
   }
 };
 
