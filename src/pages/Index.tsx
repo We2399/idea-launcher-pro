@@ -17,11 +17,13 @@ import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDis
 import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
 import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import { MobileDashboard } from '@/components/dashboard/MobileDashboard';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/dashboard/PullToRefreshIndicator';
 import { PayrollCard } from '@/components/dashboard/PayrollCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -30,6 +32,7 @@ const Index = () => {
   const stats = useEnhancedDashboardStats();
   const counts = useDashboardCounts();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   
   // Show impersonation indicator for administrators
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
@@ -152,6 +155,11 @@ const Index = () => {
       href: '/reports',
       color: 'from-red-500/10 to-red-600/10 border-red-500/20'
     });
+  }
+
+  // Show mobile dashboard on mobile devices
+  if (isMobile) {
+    return <MobileDashboard />;
   }
 
   return (

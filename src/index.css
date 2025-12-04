@@ -234,6 +234,15 @@ body {
   padding-top: calc(env(safe-area-inset-top, 0) + 56px); /* 56px = header height */
 }
 
+/* Safe-area padding for bottom navigation */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
 /* Smooth scrolling on iOS */
 * {
   -webkit-overflow-scrolling: touch;
