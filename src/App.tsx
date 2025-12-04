@@ -11,6 +11,7 @@ import { ImpersonationProvider } from '@/contexts/ImpersonationContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Requests from './pages/Requests';
@@ -25,6 +26,7 @@ import NotFound from './pages/NotFound';
 import StorageCentre from './pages/StorageCentre';
 import Payroll from './pages/Payroll';
 import Notifications from './pages/Notifications';
+import Chat from './pages/Chat';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
@@ -51,7 +53,7 @@ const App = () => {
                           <AppSidebar />
                           <div className="flex-1 flex flex-col">
                             <Header />
-                            <main className="safe-area-main flex-1 p-4 md:p-6 lg:p-8">
+                            <main className="safe-area-main flex-1 p-4 md:p-6 lg:p-8 pb-20 md:pb-8">
                               <Routes>
                                 <Route path="/" element={<Index />} />
                                 <Route path="/requests" element={<Requests />} />
@@ -60,6 +62,7 @@ const App = () => {
                                 <Route path="/cash-control" element={<CashControl />} />
                                 <Route path="/payroll" element={<Payroll />} />
                                 <Route path="/notifications" element={<Notifications />} />
+                                <Route path="/chat" element={<Chat />} />
                                 <Route path="/profile" element={<ProfileWithApproval />} />
                                 <Route path="/employees" element={
                                   <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
@@ -84,6 +87,7 @@ const App = () => {
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                             </main>
+                            <MobileBottomNav />
                           </div>
                         </div>
                       </SidebarProvider>

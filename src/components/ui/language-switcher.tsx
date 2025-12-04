@@ -10,16 +10,40 @@ import {
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 const languages = [
-  { code: 'en' as Language, name: 'English', flag: '🇬🇧' },
-  { code: 'zh-TW' as Language, name: '繁體中文', flag: '🇭🇰' },
-  { code: 'zh-CN' as Language, name: '简体中文', flag: '🇨🇳' },
-  { code: 'id' as Language, name: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'en' as Language, name: 'English', flag: '🇬🇧', short: 'EN' },
+  { code: 'zh-TW' as Language, name: '繁體中文', flag: '🇭🇰', short: '繁' },
+  { code: 'zh-CN' as Language, name: '简体中文', flag: '🇨🇳', short: '简' },
+  { code: 'id' as Language, name: 'Bahasa Indonesia', flag: '🇮🇩', short: 'ID' },
 ];
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  variant?: 'default' | 'pills';
+}
+
+export function LanguageSwitcher({ variant = 'default' }: LanguageSwitcherProps) {
   const { language, setLanguage } = useLanguage();
 
   const currentLanguage = languages.find(lang => lang.code === language);
+
+  if (variant === 'pills') {
+    return (
+      <div className="flex items-center gap-1">
+        {languages.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => setLanguage(lang.code)}
+            className={`px-2 py-1 text-xs rounded-full transition-colors ${
+              language === lang.code
+                ? 'bg-white text-primary font-semibold'
+                : 'bg-white/20 text-primary-foreground hover:bg-white/30'
+            }`}
+          >
+            {lang.short}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu>

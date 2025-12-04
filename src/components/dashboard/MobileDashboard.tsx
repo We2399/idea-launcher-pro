@@ -1,0 +1,111 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useDashboardCounts } from '@/hooks/useDashboardCounts';
+import { CheckSquare, Calendar, DollarSign, MessageCircle } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { Badge } from '@/components/ui/badge';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
+
+export function MobileDashboard() {
+  const { userRole } = useAuth();
+  const { t } = useLanguage();
+  const counts = useDashboardCounts();
+  const { isImpersonating } = useImpersonation();
+  
+  const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
+  
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('goodMorning');
+    if (hour < 18) return t('goodAfternoon');
+    return t('goodEvening');
+  };
+  
+  const getRoleLabel = () => {
+    if (isAdmin) return t('employer');
+    return t('helper');
+  };
+
+  const tasksPending = userRole === 'employee' ? counts.pendingTasks : counts.allPendingTasks;
+  const leaveRequests = userRole === 'employee' ? counts.pendingLeaveRequests : counts.pendingLeaveApprovals;
+
+  return (
+    <div className="md:hidden min-h-screen bg-muted/30 pb-20">
+      {/* Blue Header */}
+      <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground px-4 pt-safe pb-6 rounded-b-3xl">
+        <div className="flex items-center justify-between mb-4 pt-4">
+          <div>
+            <h1 className="text-2xl font-bold">Jie Jie Hub</h1>
+            <p className="text-primary-foreground/80 text-sm">Helpers Hub</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher variant="pills" />
+            <Badge variant="secondary" className="bg-white/20 text-primary-foreground border-0 rounded-full px-3 py-1">
+              {isAdmin ? '👤 ' + t('employerView') : '👤 ' + t('helperView')}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 -mt-4 space-y-4">
+        {/* Greeting Card */}
+        <div className="bg-background rounded-2xl p-4 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">
+            {getGreeting()}, {getRoleLabel()}!
+          </h2>
+          <p className="text-muted-foreground text-sm">{t('hereTodaySummary')}</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/tasks">
+            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 border border-amber-200/50 dark:border-amber-800/30">
+              <div className="flex justify-center mb-2">
+                <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                  <CheckSquare className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-center text-foreground">{tasksPending}</p>
+              <p className="text-sm text-center text-muted-foreground">{t('tasksPending')}</p>
+            </div>
+          </Link>
+          
+          <Link to="/requests">
+            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-2xl p-4 border border-purple-200/50 dark:border-purple-800/30">
+              <div className="flex justify-center mb-2">
+                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50">
+                  <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-center text-foreground">{leaveRequests}</p>
+              <p className="text-sm text-center text-muted-foreground">{t('leaveRequests')}</p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-3">{t('quickActions')}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/cash-control">
+              <div className="bg-background rounded-2xl p-4 border border-border flex items-center gap-3 hover:bg-muted/50 transition-colors">
+                <DollarSign className="h-5 w-5 text-rose-500" />
+                <span className="text-sm font-medium text-foreground">{t('recordExpense')}</span>
+              </div>
+            </Link>
+            <Link to="/chat">
+              <div className="bg-background rounded-2xl p-4 border border-border flex items-center gap-3 hover:bg-muted/50 transition-colors">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                <span className="text-sm font-medium text-foreground">{t('sendMessage')}</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

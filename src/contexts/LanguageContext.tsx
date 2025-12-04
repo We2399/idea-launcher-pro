@@ -544,6 +544,28 @@ const translations = {
     confirmPaymentReceipt: 'Confirm payment receipt',
     selectEmployee: 'Select employee',
     optional: 'Optional',
+    
+    // Mobile Dashboard & Chat
+    home: 'Home',
+    chat: 'Chat',
+    money: 'Money',
+    docs: 'Docs',
+    goodMorning: 'Good Morning',
+    goodAfternoon: 'Good Afternoon',
+    goodEvening: 'Good Evening',
+    employer: 'Employer',
+    helper: 'Helper',
+    employerView: 'Employer View',
+    helperView: 'Helper View',
+    hereTodaySummary: "Here is today's summary.",
+    tasksPending: 'Tasks Pending',
+    recordExpense: 'Record Expense',
+    sendMessage: 'Send Message',
+    chatTitle: 'Jie Jie Hub Chat',
+    chatSubtitle: 'Quick support & messaging',
+    chatWelcome: 'Welcome to Jie Jie Hub! How can I help you today?',
+    chatAutoReply: 'Thank you for your message. Our team will respond shortly.',
+    chatPlaceholder: 'Type a message...',
   },
   'zh-TW': {
     // Navigation
@@ -1068,7 +1090,29 @@ const translations = {
     failedToFetchEmployees: '獲取員工失敗',
     failedToPromoteEmployee: '提升員工失敗',
     failedToDemoteHRAdmin: '降級人力資源管理員失敗',
-    onlyHRAdminsCanManage: '只有人力資源管理員和系統管理員可以管理委派設定。'
+    onlyHRAdminsCanManage: '只有人力資源管理員和系統管理員可以管理委派設定。',
+    
+    // Mobile Dashboard & Chat
+    home: '首頁',
+    chat: '聊天',
+    money: '金錢',
+    docs: '文件',
+    goodMorning: '早安',
+    goodAfternoon: '午安',
+    goodEvening: '晚安',
+    employer: '雇主',
+    helper: '幫傭',
+    employerView: '雇主視圖',
+    helperView: '幫傭視圖',
+    hereTodaySummary: '這是今天的摘要。',
+    tasksPending: '待處理任務',
+    recordExpense: '記錄支出',
+    sendMessage: '發送訊息',
+    chatTitle: '姐姐中心聊天',
+    chatSubtitle: '快速支援與訊息',
+    chatWelcome: '歡迎來到姐姐中心！我今天能幫您什麼？',
+    chatAutoReply: '感謝您的訊息。我們的團隊將盡快回覆。',
+    chatPlaceholder: '輸入訊息...',
   },
   'zh-CN': {
     // Navigation
@@ -1519,7 +1563,29 @@ const translations = {
     failedToFetchEmployees: '获取员工失败',
     failedToPromoteEmployee: '提升员工失败',
     failedToDemoteHRAdmin: '降级人力资源管理员失败',
-    onlyHRAdminsCanManage: '只有人力资源管理员和系统管理员可以管理委派设置。'
+    onlyHRAdminsCanManage: '只有人力资源管理员和系统管理员可以管理委派设置。',
+    
+    // Mobile Dashboard & Chat
+    home: '首页',
+    chat: '聊天',
+    money: '金钱',
+    docs: '文档',
+    goodMorning: '早上好',
+    goodAfternoon: '下午好',
+    goodEvening: '晚上好',
+    employer: '雇主',
+    helper: '帮佣',
+    employerView: '雇主视图',
+    helperView: '帮佣视图',
+    hereTodaySummary: '这是今天的摘要。',
+    tasksPending: '待处理任务',
+    recordExpense: '记录支出',
+    sendMessage: '发送消息',
+    chatTitle: '姐姐中心聊天',
+    chatSubtitle: '快速支持与消息',
+    chatWelcome: '欢迎来到姐姐中心！我今天能帮您什么？',
+    chatAutoReply: '感谢您的消息。我们的团队将尽快回复。',
+    chatPlaceholder: '输入消息...',
   },
   id: {
     // Navigation
@@ -1969,7 +2035,29 @@ const translations = {
     failedToFetchEmployees: 'Gagal mengambil karyawan',
     failedToPromoteEmployee: 'Gagal mempromosikan karyawan',
     failedToDemoteHRAdmin: 'Gagal menurunkan admin SDM',
-    onlyHRAdminsCanManage: 'Hanya Admin SDM dan Administrator yang dapat mengelola pengaturan delegasi.'
+    onlyHRAdminsCanManage: 'Hanya Admin SDM dan Administrator yang dapat mengelola pengaturan delegasi.',
+    
+    // Mobile Dashboard & Chat
+    home: 'Beranda',
+    chat: 'Obrolan',
+    money: 'Uang',
+    docs: 'Dokumen',
+    goodMorning: 'Selamat Pagi',
+    goodAfternoon: 'Selamat Siang',
+    goodEvening: 'Selamat Malam',
+    employer: 'Majikan',
+    helper: 'Pembantu',
+    employerView: 'Tampilan Majikan',
+    helperView: 'Tampilan Pembantu',
+    hereTodaySummary: 'Ini ringkasan hari ini.',
+    tasksPending: 'Tugas Menunggu',
+    recordExpense: 'Catat Pengeluaran',
+    sendMessage: 'Kirim Pesan',
+    chatTitle: 'Jie Jie Hub Chat',
+    chatSubtitle: 'Dukungan & pesan cepat',
+    chatWelcome: 'Selamat datang di Jie Jie Hub! Ada yang bisa saya bantu hari ini?',
+    chatAutoReply: 'Terima kasih atas pesan Anda. Tim kami akan segera merespons.',
+    chatPlaceholder: 'Ketik pesan...',
   }
 };
 
