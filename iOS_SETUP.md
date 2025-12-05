@@ -86,7 +86,7 @@ The app is in offline mode (uses bundled dist assets). To enable live reload:
 ## App Configuration
 
 - **App ID**: `app.lovable.bea471aa244440ca9c0c5142cd0a98fc`
-- **App Name**: `idea-launcher-pro`
+- **App Name**: `Jie Jie Helpers Hub`
 - **Web Assets**: `dist/` folder
 - **Mode**: Local/Offline (no network required)
 
