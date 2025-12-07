@@ -19,6 +19,9 @@ All colors MUST be HSL.
 
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 0 0% 100%;
+    
+    --hermes-orange: 24 95% 53%;
+    --hermes-orange-dark: 20 90% 45%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;

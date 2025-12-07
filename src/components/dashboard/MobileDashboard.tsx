@@ -56,8 +56,8 @@ export function MobileDashboard() {
 
   return (
     <div className="md:hidden min-h-screen bg-muted/30 pb-20">
-      {/* Blue Header - Reduced top padding */}
-      <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground px-4 pt-safe pb-6 rounded-b-3xl">
+      {/* Hermes Orange Header */}
+      <div className="bg-gradient-to-br from-hermes to-hermes-dark text-white px-4 pt-safe pb-6 rounded-b-3xl">
         <div className="flex items-center justify-between pt-2">
           <div>
             <h1 className="text-2xl font-bold">{t('appNameLine1')}</h1>
