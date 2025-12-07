@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,14 +7,36 @@ import { CheckSquare, Calendar, DollarSign, MessageCircle } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export function MobileDashboard() {
-  const { userRole } = useAuth();
+  const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const counts = useDashboardCounts();
-  const { isImpersonating } = useImpersonation();
+  const { isImpersonating, impersonatedUserId } = useImpersonation();
+  const [userName, setUserName] = useState<string>('');
   
   const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
+  
+  // Fetch user's first name
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
+      if (!targetUserId) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('user_id', targetUserId)
+        .single();
+      
+      if (data?.first_name) {
+        setUserName(data.first_name);
+      }
+    };
+    
+    fetchUserName();
+  }, [user?.id, isImpersonating, impersonatedUserId]);
   
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -24,9 +46,9 @@ export function MobileDashboard() {
     return t('goodEvening');
   };
   
-  const getRoleLabel = () => {
-    if (isAdmin) return t('employer');
-    return t('helper');
+  const getDisplayName = () => {
+    if (userName) return userName;
+    return isAdmin ? t('employer') : t('helper');
   };
 
   const tasksPending = userRole === 'employee' ? counts.pendingTasks : counts.allPendingTasks;
@@ -34,12 +56,12 @@ export function MobileDashboard() {
 
   return (
     <div className="md:hidden min-h-screen bg-muted/30 pb-20">
-      {/* Blue Header */}
+      {/* Blue Header - Reduced top padding */}
       <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground px-4 pt-safe pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-4 pt-4">
+        <div className="flex items-center justify-between pt-2">
           <div>
-            <h1 className="text-2xl font-bold">Jie Jie Hub</h1>
-            <p className="text-primary-foreground/80 text-sm">Helpers Hub</p>
+            <h1 className="text-2xl font-bold">{t('appNameLine1')}</h1>
+            <p className="text-primary-foreground/80 text-sm">{t('appNameLine2')}</p>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher variant="pills" />
@@ -55,7 +77,7 @@ export function MobileDashboard() {
         {/* Greeting Card */}
         <div className="bg-background rounded-2xl p-4 shadow-sm">
           <h2 className="text-xl font-semibold text-foreground">
-            {getGreeting()}, {getRoleLabel()}!
+            {getGreeting()}, {getDisplayName()}!
           </h2>
           <p className="text-muted-foreground text-sm">{t('hereTodaySummary')}</p>
         </div>
