@@ -574,6 +574,10 @@ const translations = {
     messageSendError: 'Failed to send message',
     you: 'You',
     support: 'Support',
+    selectContact: 'Select a contact to start chatting',
+    noContacts: 'No contacts available',
+    administrator: 'Admin',
+    hrAdmin: 'HR Admin',
   },
   'zh-TW': {
     // Navigation
@@ -1129,6 +1133,10 @@ const translations = {
     messageSendError: '發送訊息失敗',
     you: '您',
     support: '客服',
+    selectContact: '選擇聯絡人開始聊天',
+    noContacts: '沒有可用的聯絡人',
+    administrator: '管理員',
+    hrAdmin: '人資管理',
   },
   'zh-CN': {
     // Navigation
@@ -1610,6 +1618,10 @@ const translations = {
     messageSendError: '发送消息失败',
     you: '您',
     support: '客服',
+    selectContact: '选择联系人开始聊天',
+    noContacts: '没有可用的联系人',
+    administrator: '管理员',
+    hrAdmin: '人资管理',
   },
   id: {
     // Navigation
@@ -2090,6 +2102,10 @@ const translations = {
     messageSendError: 'Gagal mengirim pesan',
     you: 'Anda',
     support: 'Dukungan',
+    selectContact: 'Pilih kontak untuk memulai chat',
+    noContacts: 'Tidak ada kontak tersedia',
+    administrator: 'Admin',
+    hrAdmin: 'Admin SDM',
   }
 };
 

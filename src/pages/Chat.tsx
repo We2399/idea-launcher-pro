@@ -4,11 +4,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft, Users, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatMessage {
   id: string;
@@ -17,10 +18,16 @@ interface ChatMessage {
   content: string;
   read_at: string | null;
   created_at: string;
-  sender_profile?: {
-    first_name: string | null;
-    last_name: string | null;
-  };
+}
+
+interface Contact {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  role: string;
+  unread_count: number;
+  last_message?: string;
+  last_message_time?: string;
 }
 
 const Chat = () => {
@@ -29,22 +36,107 @@ const Chat = () => {
   const queryClient = useQueryClient();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // For employees, chat with admins. For admins, we could show a list of conversations
-  // For simplicity, we'll use a "support" channel concept where employees message admins
-  const SUPPORT_CHANNEL = 'support';
-
-  // Fetch messages
-  const { data: messages = [], isLoading } = useQuery({
-    queryKey: ['chat-messages', user?.id],
+  // Fetch available contacts based on role
+  const { data: contacts = [], isLoading: loadingContacts } = useQuery({
+    queryKey: ['chat-contacts', user?.id, userRole],
     queryFn: async () => {
       if (!user?.id) return [];
+
+      // For employees: show admins they can message
+      // For admins: show employees who have messaged them OR all employees
+      type AppRole = 'employee' | 'hr_admin' | 'administrator';
+      let roleFilter: AppRole[];
+      
+      if (userRole === 'employee') {
+        roleFilter = ['hr_admin', 'administrator'];
+      } else {
+        roleFilter = ['employee'];
+      }
+
+      // Get users with the target roles
+      const { data: usersWithRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', roleFilter);
+
+      if (rolesError || !usersWithRoles?.length) {
+        console.error('Error fetching roles:', rolesError);
+        return [];
+      }
+
+      const userIds = usersWithRoles.map(u => u.user_id);
+
+      // Get profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return [];
+      }
+
+      // Get unread message counts and last message for each contact
+      const contactsWithDetails: Contact[] = await Promise.all(
+        profiles.map(async (profile) => {
+          const roleInfo = usersWithRoles.find(u => u.user_id === profile.user_id);
+          
+          // Count unread messages from this contact
+          const { count: unreadCount } = await supabase
+            .from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('sender_id', profile.user_id)
+            .eq('receiver_id', user.id)
+            .is('read_at', null);
+
+          // Get last message
+          const { data: lastMsg } = await supabase
+            .from('chat_messages')
+            .select('content, created_at')
+            .or(`and(sender_id.eq.${profile.user_id},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${profile.user_id})`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          return {
+            user_id: profile.user_id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            role: roleInfo?.role || 'employee',
+            unread_count: unreadCount || 0,
+            last_message: lastMsg?.[0]?.content,
+            last_message_time: lastMsg?.[0]?.created_at,
+          };
+        })
+      );
+
+      // Sort by last message time (most recent first), then by unread count
+      return contactsWithDetails.sort((a, b) => {
+        if (a.last_message_time && b.last_message_time) {
+          return new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime();
+        }
+        if (a.last_message_time) return -1;
+        if (b.last_message_time) return 1;
+        return b.unread_count - a.unread_count;
+      });
+    },
+    enabled: !!user?.id,
+    refetchInterval: 30000,
+  });
+
+  // Fetch messages for selected contact
+  const { data: messages = [], isLoading: loadingMessages } = useQuery({
+    queryKey: ['chat-messages', user?.id, selectedContact?.user_id],
+    queryFn: async () => {
+      if (!user?.id || !selectedContact?.user_id) return [];
       
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${selectedContact.user_id}),and(sender_id.eq.${selectedContact.user_id},receiver_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -54,32 +146,7 @@ const Chat = () => {
 
       return data as ChatMessage[];
     },
-    enabled: !!user?.id,
-  });
-
-  // Fetch profiles for message senders
-  const { data: profiles = {} } = useQuery({
-    queryKey: ['chat-profiles', messages],
-    queryFn: async () => {
-      if (!messages.length) return {};
-      
-      const userIds = [...new Set(messages.map(m => m.sender_id))];
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', userIds);
-
-      if (error) {
-        console.error('Error fetching profiles:', error);
-        return {};
-      }
-
-      return data.reduce((acc, profile) => {
-        acc[profile.user_id] = profile;
-        return acc;
-      }, {} as Record<string, { first_name: string | null; last_name: string | null }>);
-    },
-    enabled: messages.length > 0,
+    enabled: !!user?.id && !!selectedContact?.user_id,
   });
 
   // Subscribe to real-time updates
@@ -98,7 +165,8 @@ const Chat = () => {
         },
         (payload) => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-          // Show notification for new messages
+          queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
+          
           if (payload.new && (payload.new as ChatMessage).sender_id !== user.id) {
             toast({
               title: t('newMessage'),
@@ -117,6 +185,7 @@ const Chat = () => {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+          queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
         }
       )
       .subscribe();
@@ -131,13 +200,13 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Mark messages as read
+  // Mark messages as read when viewing conversation
   useEffect(() => {
     const markAsRead = async () => {
-      if (!user?.id || !messages.length) return;
+      if (!user?.id || !selectedContact?.user_id || !messages.length) return;
       
       const unreadMessages = messages.filter(
-        m => m.receiver_id === user.id && !m.read_at
+        m => m.sender_id === selectedContact.user_id && m.receiver_id === user.id && !m.read_at
       );
       
       if (unreadMessages.length > 0) {
@@ -145,45 +214,24 @@ const Chat = () => {
           .from('chat_messages')
           .update({ read_at: new Date().toISOString() })
           .in('id', unreadMessages.map(m => m.id));
+        
+        queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
       }
     };
 
     markAsRead();
-  }, [messages, user?.id]);
+  }, [messages, user?.id, selectedContact?.user_id, queryClient]);
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !user?.id || sending) return;
+    if (!newMessage.trim() || !user?.id || !selectedContact?.user_id || sending) return;
 
     setSending(true);
-    
-    // For employees, send to first admin found. For admins, this would be different.
-    // In a real app, you'd have a proper recipient selection
-    let receiverId = user.id; // Default fallback
-    
-    // Get an admin to send to (if employee) or the last conversation partner
-    if (userRole === 'employee') {
-      const { data: admins } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .in('role', ['hr_admin', 'administrator'])
-        .limit(1);
-      
-      if (admins && admins.length > 0) {
-        receiverId = admins[0].user_id;
-      }
-    } else {
-      // For admins, reply to the last message sender
-      const lastReceivedMessage = [...messages].reverse().find(m => m.sender_id !== user.id);
-      if (lastReceivedMessage) {
-        receiverId = lastReceivedMessage.sender_id;
-      }
-    }
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         sender_id: user.id,
-        receiver_id: receiverId,
+        receiver_id: selectedContact.user_id,
         content: newMessage.trim(),
       });
 
@@ -208,52 +256,131 @@ const Chat = () => {
     }
   };
 
-  const getSenderName = (senderId: string) => {
-    if (senderId === user?.id) return t('you');
-    const profile = profiles[senderId];
-    if (profile) {
-      return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || t('unknown');
-    }
-    return t('support');
+  const getContactName = (contact: Contact) => {
+    return `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || t('unknown');
   };
 
-  const getInitials = (senderId: string) => {
-    if (senderId === user?.id) return 'ME';
-    const profile = profiles[senderId];
-    if (profile) {
-      return `${(profile.first_name || '')[0] || ''}${(profile.last_name || '')[0] || ''}`.toUpperCase() || 'U';
-    }
-    return 'JJ';
+  const getInitials = (contact: Contact) => {
+    return `${(contact.first_name || '')[0] || ''}${(contact.last_name || '')[0] || ''}`.toUpperCase() || 'U';
   };
 
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case 'administrator':
+        return <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{t('administrator')}</span>;
+      case 'hr_admin':
+        return <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{t('hrAdmin')}</span>;
+      default:
+        return <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{t('employee')}</span>;
+    }
+  };
+
+  // Contact List View
+  if (!selectedContact) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-200px)]">
+        {/* Header */}
+        <div className="flex items-center gap-3 p-4 border-b border-border bg-background rounded-t-lg">
+          <Link to="/" className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Users className="h-6 w-6 text-primary" />
+          <div className="flex-1">
+            <h2 className="font-semibold text-foreground">{t('chatTitle')}</h2>
+            <p className="text-xs text-muted-foreground">{t('selectContact')}</p>
+          </div>
+        </div>
+
+        {/* Contact List */}
+        <ScrollArea className="flex-1 bg-muted/30">
+          {loadingContacts ? (
+            <div className="flex items-center justify-center h-full p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : contacts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
+              <MessageCircle className="h-12 w-12 mb-4 opacity-50" />
+              <p>{t('noContacts')}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {contacts.map((contact) => (
+                <button
+                  key={contact.user_id}
+                  onClick={() => setSelectedContact(contact)}
+                  className="w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+                >
+                  <div className="relative">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {getInitials(contact)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {contact.unread_count > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {contact.unread_count}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground truncate">
+                        {getContactName(contact)}
+                      </span>
+                      {getRoleBadge(contact.role)}
+                    </div>
+                    {contact.last_message && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        {contact.last_message}
+                      </p>
+                    )}
+                  </div>
+                  {contact.last_message_time && (
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(contact.last_message_time).toLocaleDateString()}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // Chat View with Selected Contact
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-200px)]">
       {/* Chat Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-background rounded-t-lg">
-        <Link to="/" className="md:hidden">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
+        <Button variant="ghost" size="icon" onClick={() => setSelectedContact(null)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <Avatar className="h-10 w-10 bg-primary">
           <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-            JJ
+            {getInitials(selectedContact)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h2 className="font-semibold text-foreground">{t('chatTitle')}</h2>
-          <p className="text-xs text-muted-foreground">{t('chatSubtitle')}</p>
+          <h2 className="font-semibold text-foreground">{getContactName(selectedContact)}</h2>
+          <div className="flex items-center gap-2">
+            {getRoleBadge(selectedContact.role)}
+          </div>
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
-        {isLoading ? (
+        {loadingMessages ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <MessageCircle className="h-12 w-12 mb-4 opacity-50" />
             <p>{t('noMessages')}</p>
             <p className="text-sm">{t('startConversation')}</p>
           </div>
@@ -268,7 +395,7 @@ const Chat = () => {
                 <div className={`flex items-end gap-2 max-w-[80%] ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarFallback className={`text-xs ${isOwnMessage ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
-                      {getInitials(message.sender_id)}
+                      {isOwnMessage ? 'ME' : getInitials(selectedContact)}
                     </AvatarFallback>
                   </Avatar>
                   <div
@@ -278,11 +405,6 @@ const Chat = () => {
                         : 'bg-background text-foreground border border-border rounded-bl-md'
                     }`}
                   >
-                    {!isOwnMessage && (
-                      <p className="text-xs font-medium mb-1 opacity-70">
-                        {getSenderName(message.sender_id)}
-                      </p>
-                    )}
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     <p className={`text-xs mt-1 ${
                       isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
