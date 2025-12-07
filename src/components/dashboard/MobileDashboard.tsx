@@ -56,9 +56,9 @@ export function MobileDashboard() {
 
   return (
     <div className="md:hidden min-h-screen bg-muted/30 pb-20">
-      {/* Hermes Orange Header */}
-      <div className="bg-gradient-to-br from-hermes to-hermes-dark text-white px-4 pt-safe pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between pt-2">
+      {/* Hermes Orange Header - positioned at top */}
+      <div className="bg-gradient-to-br from-hermes to-hermes-dark text-white px-4 pt-3 pb-8 rounded-b-3xl">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{t('appNameLine1')}</h1>
             <p className="text-primary-foreground/80 text-sm">{t('appNameLine2')}</p>
@@ -72,8 +72,8 @@ export function MobileDashboard() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="px-4 -mt-4 space-y-4">
+      {/* Content - more space from header */}
+      <div className="px-4 mt-4 space-y-4">
         {/* Greeting Card */}
         <div className="bg-background rounded-2xl p-4 shadow-sm">
           <h2 className="text-xl font-semibold text-foreground">
