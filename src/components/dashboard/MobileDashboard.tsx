@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
-import { CheckSquare, Calendar, DollarSign, MessageCircle } from 'lucide-react';
+import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
@@ -82,50 +82,72 @@ export function MobileDashboard() {
           <p className="text-muted-foreground text-sm">{t('hereTodaySummary')}</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Tasks & Leave */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/tasks">
-            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 border border-amber-200/50 dark:border-amber-800/30">
-              <div className="flex justify-center mb-2">
-                <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/50">
-                  <CheckSquare className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-3 border border-amber-200/50 dark:border-amber-800/30">
+              <div className="flex justify-center mb-1">
+                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
+                  <CheckSquare className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-center text-foreground">{tasksPending}</p>
-              <p className="text-sm text-center text-muted-foreground">{t('tasksPending')}</p>
+              <p className="text-2xl font-bold text-center text-foreground">{tasksPending}</p>
+              <p className="text-xs text-center text-muted-foreground">{t('tasksPending')}</p>
             </div>
           </Link>
           
           <Link to="/requests">
-            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-2xl p-4 border border-purple-200/50 dark:border-purple-800/30">
-              <div className="flex justify-center mb-2">
-                <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50">
-                  <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-2xl p-3 border border-purple-200/50 dark:border-purple-800/30">
+              <div className="flex justify-center mb-1">
+                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/50">
+                  <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-center text-foreground">{leaveRequests}</p>
-              <p className="text-sm text-center text-muted-foreground">{t('leaveRequests')}</p>
+              <p className="text-2xl font-bold text-center text-foreground">{leaveRequests}</p>
+              <p className="text-xs text-center text-muted-foreground">{t('leaveRequests')}</p>
             </div>
           </Link>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Access Grid - All Features */}
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-3">{t('quickActions')}</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Link to="/cash-control">
-              <div className="bg-background rounded-2xl p-4 border border-border flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                <DollarSign className="h-5 w-5 text-rose-500" />
-                <span className="text-sm font-medium text-foreground">{t('recordExpense')}</span>
+          <div className="grid grid-cols-4 gap-2">
+            <Link to="/calendar">
+              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <span className="text-xs font-medium text-foreground text-center">{t('calendar')}</span>
               </div>
             </Link>
-            <Link to="/chat">
-              <div className="bg-background rounded-2xl p-4 border border-border flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium text-foreground">{t('sendMessage')}</span>
+            <Link to="/payroll">
+              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
+                <Wallet className="h-5 w-5 text-green-500" />
+                <span className="text-xs font-medium text-foreground text-center">{t('payroll')}</span>
+              </div>
+            </Link>
+            <Link to="/profile">
+              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
+                <User className="h-5 w-5 text-indigo-500" />
+                <span className="text-xs font-medium text-foreground text-center">{t('profile')}</span>
+              </div>
+            </Link>
+            <Link to="/cash-control">
+              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
+                <DollarSign className="h-5 w-5 text-rose-500" />
+                <span className="text-xs font-medium text-foreground text-center">{t('expenses')}</span>
               </div>
             </Link>
           </div>
+        </div>
+
+        {/* Chat Quick Action */}
+        <div>
+          <Link to="/chat">
+            <div className="bg-gradient-to-r from-hermes to-hermes-dark rounded-2xl p-4 flex items-center gap-3 hover:opacity-90 transition-opacity">
+              <MessageCircle className="h-6 w-6 text-white" />
+              <span className="text-sm font-medium text-white">{t('sendMessage')}</span>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
