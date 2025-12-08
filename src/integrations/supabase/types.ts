@@ -259,6 +259,53 @@ export type Database = {
           },
         ]
       }
+      employee_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          expires_at: string
+          id: string
+          invitation_code: string
+          organization_id: string
+          status: Database["public"]["Enums"]["invitation_status"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invitation_code?: string
+          organization_id: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invitation_code?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_recurring_allowances: {
         Row: {
           allowance_type: string
@@ -573,6 +620,74 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          id: string
+          invited_by: string | null
+          joined_at: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          max_employees: number
+          name: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          owner_id: string
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_employees?: number
+          name: string
+          organization_type?: Database["public"]["Enums"]["organization_type"]
+          owner_id: string
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_employees?: number
+          name?: string
+          organization_type?: Database["public"]["Enums"]["organization_type"]
+          owner_id?: string
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payroll_line_items: {
         Row: {
           amount: number
@@ -850,9 +965,11 @@ export type Database = {
           id: string
           id_number: string | null
           initial_setup_completed_at: string | null
+          is_employer: boolean | null
           last_name: string | null
           manager_id: string | null
           marital_status: string | null
+          organization_id: string | null
           passport_number: string | null
           phone_number: string | null
           position: string | null
@@ -877,9 +994,11 @@ export type Database = {
           id?: string
           id_number?: string | null
           initial_setup_completed_at?: string | null
+          is_employer?: boolean | null
           last_name?: string | null
           manager_id?: string | null
           marital_status?: string | null
+          organization_id?: string | null
           passport_number?: string | null
           phone_number?: string | null
           position?: string | null
@@ -904,9 +1023,11 @@ export type Database = {
           id?: string
           id_number?: string | null
           initial_setup_completed_at?: string | null
+          is_employer?: boolean | null
           last_name?: string | null
           manager_id?: string | null
           marital_status?: string | null
+          organization_id?: string | null
           passport_number?: string | null
           phone_number?: string | null
           position?: string | null
@@ -930,6 +1051,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -966,6 +1094,42 @@ export type Database = {
           name?: string
           updated_at?: string
           year?: number
+        }
+        Relationships: []
+      }
+      subscription_pricing: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_employees: number
+          min_employees: number
+          monthly_price: number
+          tier: Database["public"]["Enums"]["subscription_tier"]
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_employees: number
+          min_employees: number
+          monthly_price?: number
+          tier: Database["public"]["Enums"]["subscription_tier"]
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_employees?: number
+          min_employees?: number
+          monthly_price?: number
+          tier?: Database["public"]["Enums"]["subscription_tier"]
         }
         Relationships: []
       }
@@ -1118,6 +1282,9 @@ export type Database = {
     }
     Enums: {
       app_role: "employee" | "hr_admin" | "administrator"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      organization_type: "individual" | "company"
+      subscription_tier: "free" | "mini" | "sme" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1246,6 +1413,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["employee", "hr_admin", "administrator"],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      organization_type: ["individual", "company"],
+      subscription_tier: ["free", "mini", "sme", "enterprise"],
     },
   },
 } as const
