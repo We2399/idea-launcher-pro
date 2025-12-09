@@ -217,7 +217,7 @@ const Auth = () => {
           className="flex flex-col items-center p-6 border-2 rounded-xl hover:border-hermes hover:bg-hermes/5 transition-all"
         >
           <Building2 className="h-12 w-12 text-hermes mb-3" />
-          <span className="font-semibold">{t('employer')}</span>
+          <span className="font-semibold">{t('employerRole')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('employerDescription')}</span>
         </button>
         
@@ -227,7 +227,7 @@ const Auth = () => {
           className="flex flex-col items-center p-6 border-2 rounded-xl hover:border-hermes hover:bg-hermes/5 transition-all"
         >
           <User className="h-12 w-12 text-hermes mb-3" />
-          <span className="font-semibold">{t('employee')}</span>
+          <span className="font-semibold">{t('employeeRole')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('employeeDescription')}</span>
         </button>
       </div>
