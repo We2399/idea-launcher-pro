@@ -215,7 +215,7 @@ export const InviteEmployeeDialog = () => {
           {/* Organization Info */}
           <div className="pt-2 border-t text-sm text-muted-foreground">
             <p>{t('organization')}: <span className="font-medium text-foreground">{organization.name}</span></p>
-            <p>{t('currentCapacity')}: <span className="font-medium text-foreground">{organization.max_employees} {t('employees')}</span></p>
+            <p>{t('currentCapacity')}: <span className="font-medium text-foreground">{organization.max_employees} {t('employeesCount')}</span></p>
           </div>
         </div>
       </DialogContent>
