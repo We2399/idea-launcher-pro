@@ -5,8 +5,9 @@ import { DelegationSettings } from '@/components/admin/DelegationSettings';
 import { LeaveAllocationManager } from '@/components/admin/LeaveAllocationManager';
 import { WorkScheduleManager } from '@/components/admin/WorkScheduleManager';
 import { PublicHolidaysManager } from '@/components/admin/PublicHolidaysManager';
+import { OrganizationManager } from '@/components/admin/OrganizationManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database, Building2 } from 'lucide-react';
 import StorageCentre from '@/pages/StorageCentre';
 
 export default function Settings() {
@@ -31,8 +32,12 @@ export default function Settings() {
         <p className="text-muted-foreground">{t('manageSystemSettings')}</p>
       </div>
 
-      <Tabs defaultValue="delegation" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="organization" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="organization" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            {t('organization')}
+          </TabsTrigger>
           <TabsTrigger value="delegation" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             {t('delegation')}
@@ -54,6 +59,10 @@ export default function Settings() {
             {t('storageCentre')}
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="organization">
+          <OrganizationManager />
+        </TabsContent>
         
         <TabsContent value="delegation">
           <DelegationSettings />

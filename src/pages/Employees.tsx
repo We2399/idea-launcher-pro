@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, Search, Filter, UserCheck, UserX, Crown, Shield, User } from 'lucide-react';
+import { InviteEmployeeDialog } from '@/components/admin/InviteEmployeeDialog';
+import { useOrganization } from '@/hooks/useOrganization';
+import { Users, Search, Filter, UserCheck, UserX, Crown, Shield, User, UserPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Employee {
@@ -41,6 +44,8 @@ interface Employee {
 
 export default function Employees() {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
+  const { organization, isOwner, canAddMoreEmployees, refetch: refetchOrg } = useOrganization();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +53,7 @@ export default function Employees() {
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -211,13 +217,34 @@ export default function Employees() {
     <div className="safe-area-screen space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Team Management</h1>
-          <p className="text-muted-foreground">Manage your team members and their information</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('teamManagement')}</h1>
+          <p className="text-muted-foreground">{t('manageTeamMembers')}</p>
         </div>
         <div className="flex items-center gap-2">
+          {(isOwner || userRole === 'administrator' || userRole === 'hr_admin') && (
+            <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  {t('inviteEmployee')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{t('inviteEmployee')}</DialogTitle>
+                </DialogHeader>
+                <InviteEmployeeDialog 
+                  onInviteSent={() => {
+                    refetchOrg();
+                    setShowInviteDialog(false);
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
+          )}
           <Badge variant="outline" className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            {filteredEmployees.length} Employee{filteredEmployees.length !== 1 ? 's' : ''}
+            {filteredEmployees.length} {t('employeesCount')}
           </Badge>
         </div>
       </div>
