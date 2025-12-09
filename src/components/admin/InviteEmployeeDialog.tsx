@@ -18,7 +18,11 @@ interface Invitation {
   created_at: string;
 }
 
-export const InviteEmployeeDialog = () => {
+interface InviteEmployeeDialogProps {
+  onInviteSent?: () => void;
+}
+
+export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -89,6 +93,7 @@ export const InviteEmployeeDialog = () => {
       setEmail('');
       fetchInvitations();
       toast.success(t('invitationCreated'));
+      onInviteSent?.();
     } catch (error) {
       console.error('Error creating invitation:', error);
       toast.error(t('failedToCreateInvitation'));
