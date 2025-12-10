@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InviteEmployeeDialog } from './InviteEmployeeDialog';
-import { Building2, Users, Crown, TrendingUp, Loader2 } from 'lucide-react';
+import { Building2, Users, Crown, TrendingUp, Loader2, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export function OrganizationManager() {
   const { t } = useLanguage();
+  const [orgName, setOrgName] = useState('');
+  const [orgType, setOrgType] = useState<'individual' | 'company'>('company');
+  const [creating, setCreating] = useState(false);
   const { 
     organization, 
     members, 
@@ -17,9 +22,38 @@ export function OrganizationManager() {
     loading, 
     employeeCount, 
     canAddMoreEmployees,
+    createOrganization,
     upgradeTier,
     refetch 
   } = useOrganization();
+
+  const handleCreateOrganization = async () => {
+    if (!orgName.trim()) {
+      toast({
+        title: t('error'),
+        description: t('pleaseEnterOrganizationName'),
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setCreating(true);
+    const result = await createOrganization(orgName.trim(), orgType);
+    setCreating(false);
+    
+    if (result) {
+      toast({
+        title: t('success'),
+        description: t('organizationCreated'),
+      });
+    } else {
+      toast({
+        title: t('error'),
+        description: t('organizationCreationFailed'),
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleUpgrade = async (tier: 'mini' | 'sme' | 'enterprise') => {
     const success = await upgradeTier(tier);
@@ -48,10 +82,60 @@ export function OrganizationManager() {
   if (!organization) {
     return (
       <Card>
-        <CardContent className="py-8 text-center">
-          <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">{t('noOrganization')}</h3>
-          <p className="text-muted-foreground">{t('noOrganizationDescription')}</p>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            {t('createOrganization')}
+          </CardTitle>
+          <CardDescription>{t('createOrganizationDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="orgName">{t('organizationName')}</Label>
+            <Input
+              id="orgName"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder={t('enterOrganizationName')}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>{t('organizationType')}</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant={orgType === 'individual' ? 'default' : 'outline'}
+                onClick={() => setOrgType('individual')}
+                className="h-auto py-3 flex-col"
+              >
+                <span className="font-medium">{t('individualOrganization')}</span>
+                <span className="text-xs opacity-80">{t('freeTier')} - 1 {t('employeeRole')}</span>
+              </Button>
+              <Button
+                type="button"
+                variant={orgType === 'company' ? 'default' : 'outline'}
+                onClick={() => setOrgType('company')}
+                className="h-auto py-3 flex-col"
+              >
+                <span className="font-medium">{t('companyOrganization')}</span>
+                <span className="text-xs opacity-80">{t('miniTier')} - 5 {t('employeesCount')}</span>
+              </Button>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleCreateOrganization} 
+            className="w-full"
+            disabled={creating || !orgName.trim()}
+          >
+            {creating ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
+            {t('createOrganization')}
+          </Button>
         </CardContent>
       </Card>
     );

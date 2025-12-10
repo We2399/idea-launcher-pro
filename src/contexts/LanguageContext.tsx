@@ -671,6 +671,13 @@ const translations = {
     enterpriseTierDescription: 'For large teams with 21-50 employees',
     teamManagement: 'Team Management',
     manageTeamMembers: 'Manage your team members and their information',
+    createOrganization: 'Create Organization',
+    createOrganizationDescription: 'Set up your organization to manage employees and invitations',
+    organizationName: 'Organization Name',
+    enterOrganizationName: 'Enter organization name',
+    organizationCreated: 'Organization created successfully',
+    organizationCreationFailed: 'Failed to create organization',
+    pleaseEnterOrganizationName: 'Please enter organization name',
   },
   'zh-TW': {
     // Navigation
@@ -1323,6 +1330,13 @@ const translations = {
     enterpriseTierDescription: '適合21-50人的大型團隊',
     teamManagement: '團隊管理',
     manageTeamMembers: '管理您的團隊成員及其資訊',
+    createOrganization: '創建組織',
+    createOrganizationDescription: '設置您的組織以管理員工和邀請',
+    organizationName: '組織名稱',
+    enterOrganizationName: '輸入組織名稱',
+    organizationCreated: '組織創建成功',
+    organizationCreationFailed: '創建組織失敗',
+    pleaseEnterOrganizationName: '請輸入組織名稱',
   },
   'zh-CN': {
     // Navigation
@@ -1901,6 +1915,13 @@ const translations = {
     enterpriseTierDescription: '适合21-50人的大型团队',
     teamManagement: '团队管理',
     manageTeamMembers: '管理您的团队成员及其信息',
+    createOrganization: '创建组织',
+    createOrganizationDescription: '设置您的组织以管理员工和邀请',
+    organizationName: '组织名称',
+    enterOrganizationName: '输入组织名称',
+    organizationCreated: '组织创建成功',
+    organizationCreationFailed: '创建组织失败',
+    pleaseEnterOrganizationName: '请输入组织名称',
   },
   id: {
     // Navigation
@@ -2478,6 +2499,13 @@ const translations = {
     enterpriseTierDescription: 'Untuk tim besar dengan 21-50 karyawan',
     teamManagement: 'Manajemen Tim',
     manageTeamMembers: 'Kelola anggota tim dan informasi mereka',
+    createOrganization: 'Buat Organisasi',
+    createOrganizationDescription: 'Siapkan organisasi Anda untuk mengelola karyawan dan undangan',
+    organizationName: 'Nama Organisasi',
+    enterOrganizationName: 'Masukkan nama organisasi',
+    organizationCreated: 'Organisasi berhasil dibuat',
+    organizationCreationFailed: 'Gagal membuat organisasi',
+    pleaseEnterOrganizationName: 'Silakan masukkan nama organisasi',
   }
 };
 
