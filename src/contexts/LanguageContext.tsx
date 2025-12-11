@@ -645,6 +645,8 @@ const translations = {
     invitationEmailSent: 'Invitation email sent successfully!',
     invitationCreatedEmailFailed: 'Invitation created but email failed to send. Please share the code manually.',
     emailSentToHelper: 'Invitation email sent to helper',
+    shareViaWhatsApp: 'Share via WhatsApp',
+    whatsappInviteMessage: 'Hi! You are invited to join {organizationName} on Jie Jie Helpers Hub. Your invitation code is: {code}\n\nClick here to register: {link}',
     
     // Settings - Organization
     organizationManagement: 'Organization',
@@ -1307,6 +1309,8 @@ const translations = {
     invitationEmailSent: '邀請郵件發送成功！',
     invitationCreatedEmailFailed: '邀請已創建但郵件發送失敗。請手動分享代碼。',
     emailSentToHelper: '邀請郵件已發送給幫手',
+    shareViaWhatsApp: '透過 WhatsApp 分享',
+    whatsappInviteMessage: '您好！誠邀您加入 {organizationName} 的姐姐心連站。您的邀請碼是：{code}\n\n點擊此處註冊：{link}',
     
     // Settings - Organization
     organizationManagement: '組織管理',
@@ -1895,6 +1899,8 @@ const translations = {
     invitationEmailSent: '邀请邮件发送成功！',
     invitationCreatedEmailFailed: '邀请已创建但邮件发送失败。请手动分享代码。',
     emailSentToHelper: '邀请邮件已发送给帮手',
+    shareViaWhatsApp: '通过 WhatsApp 分享',
+    whatsappInviteMessage: '您好！诚邀您加入 {organizationName} 的姐姐心连站。您的邀请码是：{code}\n\n点击此处注册：{link}',
     
     // Settings - Organization
     organizationManagement: '组织管理',
@@ -2482,6 +2488,8 @@ const translations = {
     invitationEmailSent: 'Email undangan berhasil dikirim!',
     invitationCreatedEmailFailed: 'Undangan dibuat tetapi email gagal dikirim. Silakan bagikan kode secara manual.',
     emailSentToHelper: 'Email undangan telah dikirim ke helper',
+    shareViaWhatsApp: 'Bagikan via WhatsApp',
+    whatsappInviteMessage: 'Halo! Anda diundang untuk bergabung dengan {organizationName} di Jie Jie Helpers Hub. Kode undangan Anda: {code}\n\nKlik di sini untuk mendaftar: {link}',
     
     // Settings - Organization
     organizationManagement: 'Manajemen Organisasi',
