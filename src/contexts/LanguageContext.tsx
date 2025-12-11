@@ -628,7 +628,7 @@ const translations = {
     inviteEmployee: 'Invite Employee',
     emailOptional: 'Email (Optional)',
     employeeEmailPlaceholder: 'Enter employee email',
-    emailOptionalNote: 'Leave blank to generate a code-only invitation',
+    emailOptionalNote: 'If email provided, invitation will be sent automatically',
     generateInviteCode: 'Generate Invite Code',
     creating: 'Creating...',
     inviteCodeGenerated: 'Invitation code generated!',
@@ -642,6 +642,9 @@ const translations = {
     invitationCreated: 'Invitation created successfully',
     failedToCreateInvitation: 'Failed to create invitation',
     noOrganizationFound: 'No organization found. Please create one first.',
+    invitationEmailSent: 'Invitation email sent successfully!',
+    invitationCreatedEmailFailed: 'Invitation created but email failed to send. Please share the code manually.',
+    emailSentToHelper: 'Invitation email sent to helper',
     
     // Settings - Organization
     organizationManagement: 'Organization',
@@ -1287,7 +1290,7 @@ const translations = {
     inviteEmployee: '邀請員工',
     emailOptional: '電子郵件（選填）',
     employeeEmailPlaceholder: '輸入員工電子郵件',
-    emailOptionalNote: '留空則生成僅代碼邀請',
+    emailOptionalNote: '如提供電子郵件，邀請將自動發送',
     generateInviteCode: '生成邀請碼',
     creating: '創建中...',
     inviteCodeGenerated: '邀請碼已生成！',
@@ -1301,6 +1304,9 @@ const translations = {
     invitationCreated: '邀請創建成功',
     failedToCreateInvitation: '創建邀請失敗',
     noOrganizationFound: '未找到組織。請先創建一個。',
+    invitationEmailSent: '邀請郵件發送成功！',
+    invitationCreatedEmailFailed: '邀請已創建但郵件發送失敗。請手動分享代碼。',
+    emailSentToHelper: '邀請郵件已發送給幫手',
     
     // Settings - Organization
     organizationManagement: '組織管理',
@@ -1872,7 +1878,7 @@ const translations = {
     inviteEmployee: '邀请员工',
     emailOptional: '电子邮件（选填）',
     employeeEmailPlaceholder: '输入员工电子邮件',
-    emailOptionalNote: '留空则生成仅代码邀请',
+    emailOptionalNote: '如提供电子邮件，邀请将自动发送',
     generateInviteCode: '生成邀请码',
     creating: '创建中...',
     inviteCodeGenerated: '邀请码已生成！',
@@ -1886,6 +1892,9 @@ const translations = {
     invitationCreated: '邀请创建成功',
     failedToCreateInvitation: '创建邀请失败',
     noOrganizationFound: '未找到组织。请先创建一个。',
+    invitationEmailSent: '邀请邮件发送成功！',
+    invitationCreatedEmailFailed: '邀请已创建但邮件发送失败。请手动分享代码。',
+    emailSentToHelper: '邀请邮件已发送给帮手',
     
     // Settings - Organization
     organizationManagement: '组织管理',
@@ -2456,7 +2465,7 @@ const translations = {
     inviteEmployee: 'Undang Karyawan',
     emailOptional: 'Email (Opsional)',
     employeeEmailPlaceholder: 'Masukkan email karyawan',
-    emailOptionalNote: 'Kosongkan untuk membuat undangan hanya kode',
+    emailOptionalNote: 'Jika email diisi, undangan akan dikirim otomatis',
     generateInviteCode: 'Buat Kode Undangan',
     creating: 'Membuat...',
     inviteCodeGenerated: 'Kode undangan berhasil dibuat!',
@@ -2470,6 +2479,9 @@ const translations = {
     invitationCreated: 'Undangan berhasil dibuat',
     failedToCreateInvitation: 'Gagal membuat undangan',
     noOrganizationFound: 'Organisasi tidak ditemukan. Silakan buat terlebih dahulu.',
+    invitationEmailSent: 'Email undangan berhasil dikirim!',
+    invitationCreatedEmailFailed: 'Undangan dibuat tetapi email gagal dikirim. Silakan bagikan kode secara manual.',
+    emailSentToHelper: 'Email undangan telah dikirim ke helper',
     
     // Settings - Organization
     organizationManagement: 'Manajemen Organisasi',

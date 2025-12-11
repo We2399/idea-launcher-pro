@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Copy, Check, Mail } from 'lucide-react';
+import { UserPlus, Copy, Check, Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Invitation {
@@ -32,10 +32,13 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [newInviteCode, setNewInviteCode] = useState<string | null>(null);
   const [organization, setOrganization] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     if (open && user) {
       fetchOrganization();
+      fetchProfile();
       fetchInvitations();
     }
   }, [open, user]);
@@ -50,6 +53,18 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
       .maybeSingle();
     
     setOrganization(data);
+  };
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setProfile(data);
   };
 
   const fetchInvitations = async () => {
@@ -75,6 +90,7 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     }
 
     setIsLoading(true);
+    setEmailSent(false);
     
     try {
       const { data, error } = await supabase
@@ -89,10 +105,43 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
 
       if (error) throw error;
 
-      setNewInviteCode(data.invitation_code);
+      const inviteCode = data.invitation_code;
+      const inviteLink = `${window.location.origin}/auth?invite=${inviteCode}`;
+      
+      setNewInviteCode(inviteCode);
+
+      // Send email if email address is provided
+      if (email.trim()) {
+        try {
+          const inviterName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : undefined;
+          
+          const response = await supabase.functions.invoke('send-invitation-email', {
+            body: {
+              email: email.trim(),
+              invitationCode: inviteCode,
+              inviteLink: inviteLink,
+              organizationName: organization.name,
+              inviterName: inviterName || undefined,
+            },
+          });
+
+          if (response.error) {
+            console.error('Error sending invitation email:', response.error);
+            toast.warning(t('invitationCreatedEmailFailed'));
+          } else {
+            setEmailSent(true);
+            toast.success(t('invitationEmailSent'));
+          }
+        } catch (emailError) {
+          console.error('Error sending invitation email:', emailError);
+          toast.warning(t('invitationCreatedEmailFailed'));
+        }
+      } else {
+        toast.success(t('invitationCreated'));
+      }
+
       setEmail('');
       fetchInvitations();
-      toast.success(t('invitationCreated'));
       onInviteSent?.();
     } catch (error) {
       console.error('Error creating invitation:', error);
@@ -178,14 +227,22 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
-              <Button
-                variant="link"
-                size="sm"
-                className="mt-2 p-0 h-auto text-green-600"
-                onClick={() => copyInviteLink(newInviteCode)}
-              >
-                {t('copyInviteLink')}
-              </Button>
+              <div className="flex items-center gap-2 mt-2">
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0 h-auto text-green-600"
+                  onClick={() => copyInviteLink(newInviteCode)}
+                >
+                  {t('copyInviteLink')}
+                </Button>
+              </div>
+              {emailSent && (
+                <div className="flex items-center gap-2 mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm text-blue-700 dark:text-blue-300">
+                  <Mail className="h-4 w-4" />
+                  <span>{t('emailSentToHelper')}</span>
+                </div>
+              )}
             </div>
           )}
 
