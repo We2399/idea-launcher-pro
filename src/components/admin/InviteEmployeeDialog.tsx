@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Copy, Check, Mail, Loader2 } from 'lucide-react';
+import { UserPlus, Copy, Check, Mail, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Invitation {
@@ -168,6 +168,16 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     return `${window.location.origin}/auth?invite=${code}`;
   };
 
+  const shareViaWhatsApp = (code: string) => {
+    const link = getInviteLink(code);
+    const message = t('whatsappInviteMessage')
+      .replace('{organizationName}', organization?.name || '')
+      .replace('{code}', code)
+      .replace('{link}', link);
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   if (!organization) {
     return null;
   }
@@ -235,6 +245,16 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
                   onClick={() => copyInviteLink(newInviteCode)}
                 >
                   {t('copyInviteLink')}
+                </Button>
+                <span className="text-muted-foreground">|</span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0 h-auto text-green-600 flex items-center gap-1"
+                  onClick={() => shareViaWhatsApp(newInviteCode)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {t('shareViaWhatsApp')}
                 </Button>
               </div>
               {emailSent && (
