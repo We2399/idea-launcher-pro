@@ -265,6 +265,9 @@ const translations = {
     confirmPassword: 'Confirm Password',
     forgotPassword: 'Forgot Password',
     resetPassword: 'Reset Password',
+    signInToAccount: 'Sign in to your account',
+    enterEmail: 'Enter your email',
+    enterPassword: 'Enter your password',
     
     // Profile page
     myProfile: 'My Profile',
@@ -1007,6 +1010,9 @@ const translations = {
     confirmPassword: '確認密碼',
     forgotPassword: '忘記密碼',
     resetPassword: '重設密碼',
+    signInToAccount: '登入您的帳戶',
+    enterEmail: '輸入您的電子郵件',
+    enterPassword: '輸入您的密碼',
     
     // Profile page
     myProfile: '我的個人資料',
@@ -1597,6 +1603,9 @@ const translations = {
     confirmPassword: '确认密码',
     forgotPassword: '忘记密码',
     resetPassword: '重设密码',
+    signInToAccount: '登录您的账户',
+    enterEmail: '输入您的电子邮件',
+    enterPassword: '输入您的密码',
     
     // Profile page
     myProfile: '我的个人资料',
@@ -2186,6 +2195,9 @@ const translations = {
     confirmPassword: 'Konfirmasi Kata Sandi',
     forgotPassword: 'Lupa Kata Sandi',
     resetPassword: 'Reset Kata Sandi',
+    signInToAccount: 'Masuk ke akun Anda',
+    enterEmail: 'Masukkan email Anda',
+    enterPassword: 'Masukkan kata sandi Anda',
     
     // Profile page
     myProfile: 'Profil Saya',
