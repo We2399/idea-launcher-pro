@@ -6,8 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Copy, Check, Mail, MessageCircle } from 'lucide-react';
+import { UserPlus, Copy, Check, Mail, MessageCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { UpgradeTierDialog } from './UpgradeTierDialog';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface Invitation {
   id: string;
@@ -25,35 +27,23 @@ interface InviteEmployeeDialogProps {
 export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { organization, employeeCount, canAddMoreEmployees, upgradeTier, refetch } = useOrganization();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [newInviteCode, setNewInviteCode] = useState<string | null>(null);
-  const [organization, setOrganization] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [emailSent, setEmailSent] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   useEffect(() => {
     if (open && user) {
-      fetchOrganization();
       fetchProfile();
       fetchInvitations();
     }
-  }, [open, user]);
-
-  const fetchOrganization = async () => {
-    if (!user) return;
-    
-    const { data } = await supabase
-      .from('organizations')
-      .select('*')
-      .eq('owner_id', user.id)
-      .maybeSingle();
-    
-    setOrganization(data);
-  };
+  }, [open, user, organization]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -66,6 +56,7 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     
     setProfile(data);
   };
+
 
   const fetchInvitations = async () => {
     if (!user || !organization) return;
@@ -86,6 +77,12 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
   const createInvitation = async () => {
     if (!user || !organization) {
       toast.error(t('noOrganizationFound'));
+      return;
+    }
+
+    // Check capacity before creating invitation
+    if (!canAddMoreEmployees()) {
+      setShowUpgradeDialog(true);
       return;
     }
 
@@ -176,6 +173,18 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
       .replace('{link}', link);
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleUpgrade = async (tier: 'mini' | 'sme' | 'enterprise') => {
+    const success = await upgradeTier(tier);
+    if (success) {
+      toast.success(t('subscriptionUpgraded'));
+      refetch();
+      return true;
+    } else {
+      toast.error(t('upgradeFailed'));
+      return false;
+    }
   };
 
   if (!organization) {
@@ -294,13 +303,31 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
             </div>
           )}
 
-          {/* Organization Info */}
+          {/* Organization Info with capacity warning */}
           <div className="pt-2 border-t text-sm text-muted-foreground">
             <p>{t('organization')}: <span className="font-medium text-foreground">{organization.name}</span></p>
-            <p>{t('currentCapacity')}: <span className="font-medium text-foreground">{organization.max_employees} {t('employeesCount')}</span></p>
+            <div className="flex items-center gap-2">
+              <p>{t('currentCapacity')}: <span className="font-medium text-foreground">{employeeCount} / {organization.max_employees} {t('employeesCount')}</span></p>
+              {!canAddMoreEmployees() && (
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                  <AlertTriangle className="h-3 w-3" />
+                  {t('capacityReached')}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
+
+      {/* Upgrade Dialog */}
+      <UpgradeTierDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        currentTier={organization.subscription_tier}
+        currentMax={organization.max_employees}
+        employeeCount={employeeCount}
+        onUpgrade={handleUpgrade}
+      />
     </Dialog>
   );
 };
