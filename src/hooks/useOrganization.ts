@@ -47,7 +47,31 @@ export const useOrganization = () => {
     setLoading(true);
     
     try {
-      // Check if user owns an organization
+      // First check if user has organization_id in profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id, is_employer')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profile?.organization_id) {
+        // Fetch the organization directly
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', profile.organization_id)
+          .maybeSingle();
+
+        if (org) {
+          setOrganization(org);
+          setIsOwner(org.owner_id === user.id);
+          await fetchMembers(org.id);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Fallback: Check if user owns an organization
       const { data: ownedOrg } = await supabase
         .from('organizations')
         .select('*')
