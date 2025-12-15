@@ -48,19 +48,23 @@ export const useOrganization = () => {
     
     try {
       // First check if user has organization_id in profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('organization_id, is_employer')
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('Profile fetch result:', { profile, profileError, userId: user.id });
+
       if (profile?.organization_id) {
         // Fetch the organization directly
-        const { data: org } = await supabase
+        const { data: org, error: orgError } = await supabase
           .from('organizations')
           .select('*')
           .eq('id', profile.organization_id)
           .maybeSingle();
+
+        console.log('Organization fetch result:', { org, orgError, orgId: profile.organization_id });
 
         if (org) {
           setOrganization(org);
