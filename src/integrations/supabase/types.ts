@@ -1259,11 +1259,14 @@ export type Database = {
           year: number
         }[]
       }
+      get_user_organization_ids: { Args: never; Returns: string[] }
       get_user_role: { Args: { user_id: string }; Returns: string }
       has_delegation_rights: { Args: { user_id: string }; Returns: boolean }
       is_administrator: { Args: { user_id: string }; Returns: boolean }
       is_hr_admin: { Args: { user_id: string }; Returns: boolean }
       is_management: { Args: { user_id: string }; Returns: boolean }
+      is_organization_member: { Args: { org_id: string }; Returns: boolean }
+      is_organization_owner: { Args: { org_id: string }; Returns: boolean }
       is_senior_management: { Args: { user_id: string }; Returns: boolean }
       is_senior_position: { Args: { user_id: string }; Returns: boolean }
       reject_replacement: {
