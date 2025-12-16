@@ -83,7 +83,7 @@ const Auth = () => {
           *,
           organizations:organization_id (name, organization_type)
         `)
-        .eq('invitation_code', code)
+        .ilike('invitation_code', code)
         .eq('status', 'pending')
         .gt('expires_at', new Date().toISOString())
         .maybeSingle();
@@ -388,8 +388,8 @@ const Auth = () => {
           id="invite-code"
           placeholder={t('enterInvitationCode')}
           value={formData.invitationCode}
-          onChange={(e) => updateFormData('invitationCode', e.target.value.toUpperCase())}
-          className="uppercase tracking-widest text-center font-mono"
+          onChange={(e) => updateFormData('invitationCode', e.target.value)}
+          className="tracking-widest text-center font-mono"
           maxLength={8}
           required
         />
