@@ -16,14 +16,21 @@ const ResetPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // If user has an active session (came from email link), switch to update mode
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
+    // Listen for auth state changes to detect when recovery token is processed
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setMode('update');
       }
-    };
-    checkSession();
+    });
+
+    // Also check for existing session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setMode('update');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleRequestReset = async (e: React.FormEvent) => {
