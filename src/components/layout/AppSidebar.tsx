@@ -64,11 +64,8 @@ export function AppSidebar() {
   // Build navigation items based on role
   let navigationItems: typeof getPersonalItems extends (...args: any) => infer R ? R : never = [];
   
-  if (userRole === 'administrator') {
-    // Administrator: Only management pages
-    navigationItems = getManagementItems(t);
-  } else if (userRole === 'hr_admin') {
-    // HR Admin: Personal + management pages, remove duplicate payroll
+  if (userRole === 'administrator' || userRole === 'hr_admin') {
+    // Administrator & HR Admin: Personal + management pages, remove duplicate payroll
     const personalItems = getPersonalItems(t).filter(item => item.url !== '/payroll');
     navigationItems = [...personalItems, ...getManagementItems(t)];
   } else {
