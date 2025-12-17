@@ -650,6 +650,9 @@ const translations = {
     emailSentToHelper: 'Invitation email sent to helper',
     shareViaWhatsApp: 'Share via WhatsApp',
     whatsappInviteMessage: 'Hi! You are invited to join {organizationName} on Jie Jie Helpers Hub. Your invitation code is: {code}\n\nClick here to register: {link}',
+    cancelInvitation: 'Cancel Invitation',
+    invitationCancelled: 'Invitation cancelled successfully',
+    failedToCancelInvitation: 'Failed to cancel invitation',
     
     // Settings - Organization
     organizationManagement: 'Organization',
@@ -1324,6 +1327,9 @@ const translations = {
     emailSentToHelper: '邀請郵件已發送給幫手',
     shareViaWhatsApp: '透過 WhatsApp 分享',
     whatsappInviteMessage: '您好！誠邀您加入 {organizationName} 的姐姐心連站。您的邀請碼是：{code}\n\n點擊此處註冊：{link}',
+    cancelInvitation: '取消邀請',
+    invitationCancelled: '邀請已成功取消',
+    failedToCancelInvitation: '取消邀請失敗',
     
     // Settings - Organization
     organizationManagement: '組織管理',
@@ -1924,6 +1930,9 @@ const translations = {
     emailSentToHelper: '邀请邮件已发送给帮手',
     shareViaWhatsApp: '通过 WhatsApp 分享',
     whatsappInviteMessage: '您好！诚邀您加入 {organizationName} 的姐姐心连站。您的邀请码是：{code}\n\n点击此处注册：{link}',
+    cancelInvitation: '取消邀请',
+    invitationCancelled: '邀请已成功取消',
+    failedToCancelInvitation: '取消邀请失败',
     
     // Settings - Organization
     organizationManagement: '组织管理',
@@ -2523,6 +2532,9 @@ const translations = {
     emailSentToHelper: 'Email undangan telah dikirim ke helper',
     shareViaWhatsApp: 'Bagikan via WhatsApp',
     whatsappInviteMessage: 'Halo! Anda diundang untuk bergabung dengan {organizationName} di Jie Jie Helpers Hub. Kode undangan Anda: {code}\n\nKlik di sini untuk mendaftar: {link}',
+    cancelInvitation: 'Batalkan Undangan',
+    invitationCancelled: 'Undangan berhasil dibatalkan',
+    failedToCancelInvitation: 'Gagal membatalkan undangan',
     
     // Settings - Organization
     organizationManagement: 'Manajemen Organisasi',

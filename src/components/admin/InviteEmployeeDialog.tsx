@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Copy, Check, Mail, MessageCircle, AlertTriangle } from 'lucide-react';
+import { UserPlus, Copy, Check, Mail, MessageCircle, AlertTriangle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { UpgradeTierDialog } from './UpgradeTierDialog';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -176,6 +176,23 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     window.open(whatsappUrl, '_blank');
   };
 
+  const cancelInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('employee_invitations')
+        .update({ status: 'cancelled' })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+
+      toast.success(t('invitationCancelled'));
+      fetchInvitations();
+    } catch (error) {
+      console.error('Error cancelling invitation:', error);
+      toast.error(t('failedToCancelInvitation'));
+    }
+  };
+
   const handleUpgrade = async (tier: 'mini' | 'sme' | 'enterprise') => {
     const success = await upgradeTier(tier);
     if (success) {
@@ -291,13 +308,25 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
                         </p>
                       )}
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => copyInviteCode(inv.invitation_code)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyInviteCode(inv.invitation_code)}
+                        title={t('copyCode')}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => cancelInvitation(inv.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        title={t('cancelInvitation')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
