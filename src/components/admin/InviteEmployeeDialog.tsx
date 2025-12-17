@@ -80,8 +80,9 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
       return;
     }
 
-    // Check capacity before creating invitation
-    if (!canAddMoreEmployees()) {
+    // Check capacity including pending invitations
+    const totalCommitted = employeeCount + invitations.length;
+    if (totalCommitted >= organization.max_employees) {
       setShowUpgradeDialog(true);
       return;
     }
@@ -308,13 +309,16 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
             <p>{t('organization')}: <span className="font-medium text-foreground">{organization.name}</span></p>
             <div className="flex items-center gap-2">
               <p>{t('currentCapacity')}: <span className="font-medium text-foreground">{employeeCount} / {organization.max_employees} {t('employeesCount')}</span></p>
-              {!canAddMoreEmployees() && (
-                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                  <AlertTriangle className="h-3 w-3" />
-                  {t('capacityReached')}
-                </span>
-              )}
             </div>
+            {invitations.length > 0 && (
+              <p className="text-xs">{t('pendingInvitations')}: {invitations.length}</p>
+            )}
+            {(employeeCount + invitations.length) >= organization.max_employees && (
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 mt-1">
+                <AlertTriangle className="h-3 w-3" />
+                {t('capacityReached')}
+              </span>
+            )}
           </div>
         </div>
       </DialogContent>
