@@ -226,24 +226,29 @@ const Chat = () => {
     if (!newMessage.trim() || !user?.id || !selectedContact?.user_id || sending) return;
 
     setSending(true);
+    const messageContent = newMessage.trim();
+    setNewMessage(''); // Clear input immediately for better UX
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         sender_id: user.id,
         receiver_id: selectedContact.user_id,
-        content: newMessage.trim(),
+        content: messageContent,
       });
 
     if (error) {
       console.error('Error sending message:', error);
+      setNewMessage(messageContent); // Restore message on error
       toast({
         title: t('error'),
         description: t('messageSendError'),
         variant: 'destructive',
       });
     } else {
-      setNewMessage('');
+      // Immediately refresh messages to show sent message
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', user.id, selectedContact.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
     }
     
     setSending(false);
