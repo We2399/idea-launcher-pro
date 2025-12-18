@@ -1260,6 +1260,7 @@ export type Database = {
         }[]
       }
       get_user_organization_ids: { Args: never; Returns: string[] }
+      get_user_position: { Args: { target_user_id: string }; Returns: string }
       get_user_role: { Args: { user_id: string }; Returns: string }
       has_delegation_rights: { Args: { user_id: string }; Returns: boolean }
       is_administrator: { Args: { user_id: string }; Returns: boolean }
