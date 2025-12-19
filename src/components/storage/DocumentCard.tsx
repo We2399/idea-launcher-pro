@@ -55,13 +55,24 @@ export function DocumentCard({
         .from(bucket)
         .createSignedUrl(path, 3600); // 1 hour expiry
       
-      if (error) throw error;
+      if (error) {
+        // Check if it's a "not found" error
+        if (error.message?.includes('Object not found') || (error as any).statusCode === '404') {
+          toast({
+            title: 'File Not Found',
+            description: 'This file no longer exists in storage. The record may be orphaned.',
+            variant: 'destructive'
+          });
+          return null;
+        }
+        throw error;
+      }
       return data.signedUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting signed URL:', error);
       toast({
         title: 'Error',
-        description: 'Failed to access document',
+        description: error.message || 'Failed to access document',
         variant: 'destructive'
       });
       return null;
