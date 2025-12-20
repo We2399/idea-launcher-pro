@@ -177,12 +177,26 @@ export default function CalendarWithColors() {
     Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
         const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
-        styles[key] = {
-          backgroundColor: colors[status as 'pending' | 'approved' | 'senior_approved'],
-          color: (status === 'approved' || status === 'senior_approved') ? 'white' : 'black',
-          borderRadius: '4px',
-          fontWeight: 'bold'
-        };
+        const color = colors[status as 'pending' | 'approved' | 'senior_approved'];
+        
+        if (status === 'pending') {
+          // Pending: Show border outline instead of fill
+          styles[key] = {
+            backgroundColor: 'transparent',
+            border: `2px solid ${color}`,
+            borderRadius: '4px',
+            fontWeight: 'bold',
+            color: 'inherit'
+          };
+        } else {
+          // Approved: Fill with background color
+          styles[key] = {
+            backgroundColor: color,
+            color: 'white',
+            borderRadius: '4px',
+            fontWeight: 'bold'
+          };
+        }
       });
     });
 

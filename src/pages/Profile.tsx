@@ -54,6 +54,7 @@ interface ChangeRequest {
   approved_by?: string | null;
   created_at: string;
   approved_at?: string | null;
+  employee_name?: string;
 }
 
 // Department mapping for translations
@@ -169,14 +170,40 @@ export default function Profile() {
 
   const fetchProfileChangeRequests = async () => {
     try {
-      const { data, error } = await supabase
+      const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
+      
+      // For admins, fetch all pending requests; for employees, only their own
+      let query = supabase
         .from('profile_change_requests')
         .select('*')
-        .eq('user_id', effectiveUserId)
         .in('status', ['pending', 'senior_approved'])
         .order('created_at', { ascending: false });
+      
+      if (!isAdmin) {
+        query = query.eq('user_id', effectiveUserId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
-      setChangeRequests(data || []);
+      
+      // For admins, fetch employee names
+      if (isAdmin && data && data.length > 0) {
+        const userIds = [...new Set(data.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name')
+          .in('user_id', userIds);
+        
+        const profileMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) || []);
+        
+        const enrichedData = data.map(req => ({
+          ...req,
+          employee_name: profileMap.get(req.user_id) || 'Unknown'
+        }));
+        setChangeRequests(enrichedData);
+      } else {
+        setChangeRequests(data || []);
+      }
     } catch (error: any) {
       toast({ title: t('error'), description: error.message || t('operationFailed'), variant: 'destructive' });
     }
@@ -541,8 +568,13 @@ export default function Profile() {
                   {changeRequests.map((req) => (
                     <div key={req.id} className="p-3 border rounded-md">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium">
-                          {req.field_name}: <span className="text-muted-foreground">{req.current_value ?? t('unknown')}</span> → <span>{req.new_value}</span>
+                        <div className="text-sm">
+                          {req.employee_name && (
+                            <div className="font-semibold text-primary mb-1">{req.employee_name}</div>
+                          )}
+                          <span className="font-medium">{req.field_name}:</span>{' '}
+                          <span className="text-muted-foreground">{req.current_value ?? (t('empty') || 'Empty')}</span>{' '}
+                          → <span className="font-medium">{req.new_value}</span>
                         </div>
                         <Badge variant="outline">{req.status}</Badge>
                       </div>
