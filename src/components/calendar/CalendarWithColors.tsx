@@ -180,20 +180,21 @@ export default function CalendarWithColors() {
         const color = colors[status as 'pending' | 'approved' | 'senior_approved'];
         
         if (status === 'pending') {
-          // Pending: Show border outline instead of fill
+          // Pending: Show visible border outline (thicker, darker for visibility)
           styles[key] = {
             backgroundColor: 'transparent',
-            border: `2px solid ${color}`,
-            borderRadius: '4px',
+            border: `3px solid ${color}`,
+            borderRadius: '6px',
             fontWeight: 'bold',
-            color: 'inherit'
+            color: 'inherit',
+            boxShadow: `inset 0 0 0 1px ${color}`
           };
         } else {
           // Approved: Fill with background color
           styles[key] = {
             backgroundColor: color,
             color: 'white',
-            borderRadius: '4px',
+            borderRadius: '6px',
             fontWeight: 'bold'
           };
         }
