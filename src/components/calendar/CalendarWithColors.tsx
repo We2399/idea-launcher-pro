@@ -31,31 +31,32 @@ interface LeaveRequest {
   };
 }
 
-const leaveTypeColors = {
+// Keys must EXACTLY match leave_types.name in database
+const leaveTypeColors: Record<string, { pending: string; approved: string; senior_approved: string }> = {
   'Sick Leave': {
-    pending: 'hsl(30, 40%, 80%)', // Light brown
-    approved: 'hsl(30, 40%, 40%)', // Dark brown
-    senior_approved: 'hsl(30, 50%, 25%)'  // Darker brown
+    pending: 'hsl(30, 60%, 50%)', // Brown border
+    approved: 'hsl(30, 40%, 40%)', // Dark brown fill
+    senior_approved: 'hsl(30, 50%, 25%)'
   },
   'Vacation': {
-    pending: 'hsl(200, 60%, 80%)', // Light blue
-    approved: 'hsl(200, 60%, 40%)', // Dark blue
-    senior_approved: 'hsl(200, 70%, 25%)'  // Darker blue
+    pending: 'hsl(200, 70%, 50%)', // Blue border
+    approved: 'hsl(200, 60%, 40%)', // Dark blue fill
+    senior_approved: 'hsl(200, 70%, 25%)'
   },
-  'Maternity': {
-    pending: 'hsl(340, 60%, 85%)', // Light pink
-    approved: 'hsl(340, 60%, 45%)', // Dark pink
-    senior_approved: 'hsl(340, 70%, 30%)'  // Darker pink
+  'Maternity Leave': {
+    pending: 'hsl(340, 70%, 55%)', // Pink border
+    approved: 'hsl(340, 60%, 45%)', // Dark pink fill
+    senior_approved: 'hsl(340, 70%, 30%)'
   },
-  'Paternity': {
-    pending: 'hsl(270, 50%, 80%)', // Light purple
-    approved: 'hsl(270, 50%, 40%)', // Dark purple
-    senior_approved: 'hsl(270, 60%, 30%)'  // Darker purple
+  'Paternity Leave': {
+    pending: 'hsl(270, 60%, 55%)', // Purple border
+    approved: 'hsl(270, 50%, 40%)', // Dark purple fill
+    senior_approved: 'hsl(270, 60%, 30%)'
   },
   'Others': {
-    pending: 'hsl(0, 0%, 75%)',    // Light grey
-    approved: 'hsl(0, 0%, 35%)',   // Dark grey
-    senior_approved: 'hsl(0, 0%, 20%)'  // Darker grey
+    pending: 'hsl(0, 0%, 50%)', // Grey border
+    approved: 'hsl(0, 0%, 35%)', // Dark grey fill
+    senior_approved: 'hsl(0, 0%, 20%)'
   }
 };
 
