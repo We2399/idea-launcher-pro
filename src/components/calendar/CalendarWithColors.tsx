@@ -154,12 +154,13 @@ export default function CalendarWithColors() {
   };
 
   const getDayModifiers = () => {
-    const modifiers: any = {};
+    const modifiers: Record<string, (date: Date) => boolean> = {};
     
     // Create modifiers for each leave type and status
     Object.keys(leaveTypeColors).forEach(leaveType => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
-        const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
+        // Use CSS-friendly key format
+        const key = `leave_${status}_${leaveType.toLowerCase().replace(/\s+/g, '_')}`;
         modifiers[key] = (date: Date) => {
           const dayRequests = getRequestsForDate(date);
           return dayRequests.some(req => 
@@ -172,37 +173,19 @@ export default function CalendarWithColors() {
     return modifiers;
   };
 
-  const getDayModifiersStyles = () => {
-    const styles: any = {};
+  const getDayModifiersClassNames = (): Record<string, string> => {
+    const classNames: Record<string, string> = {};
     
-    Object.entries(leaveTypeColors).forEach(([leaveType, colors]) => {
+    Object.keys(leaveTypeColors).forEach(leaveType => {
       ['pending', 'approved', 'senior_approved'].forEach(status => {
-        const key = `${leaveType.toLowerCase().replace(/\s+/g, '_')}_${status}`;
-        const color = colors[status as 'pending' | 'approved' | 'senior_approved'];
-        
-        if (status === 'pending') {
-          // Pending: Show visible border outline (thicker, darker for visibility)
-          styles[key] = {
-            backgroundColor: 'transparent',
-            border: `3px solid ${color}`,
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            color: 'inherit',
-            boxShadow: `inset 0 0 0 1px ${color}`
-          };
-        } else {
-          // Approved: Fill with background color
-          styles[key] = {
-            backgroundColor: color,
-            color: 'white',
-            borderRadius: '6px',
-            fontWeight: 'bold'
-          };
-        }
+        const key = `leave_${status}_${leaveType.toLowerCase().replace(/\s+/g, '_')}`;
+        // CSS class format: leave-pending-sick-leave, leave-approved-vacation, etc.
+        const cssClass = `leave-${status.replace('_', '-')}-${leaveType.toLowerCase().replace(/\s+/g, '-')}`;
+        classNames[key] = cssClass;
       });
     });
 
-    return styles;
+    return classNames;
   };
 
   const handleDateDoubleClick = (date: Date) => {
@@ -299,10 +282,9 @@ export default function CalendarWithColors() {
               selected={selectedDate}
               onSelect={(date) => {
                 setSelectedDate(date);
-                // For double-click to create, we'll add a button instead
               }}
               modifiers={getDayModifiers()}
-              modifiersStyles={getDayModifiersStyles()}
+              modifiersClassNames={getDayModifiersClassNames()}
               className="rounded-md border"
             />
             
