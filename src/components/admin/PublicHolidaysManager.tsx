@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -11,9 +11,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { CalendarIcon, Plus, Trash2, Globe } from 'lucide-react';
-import { format } from 'date-fns';
+import { CalendarIcon, Plus, Trash2, Globe, Upload, Download, FileText, AlertCircle } from 'lucide-react';
+import { format, parse, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PublicHoliday {
   id: string;
@@ -52,6 +53,9 @@ export function PublicHolidaysManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedCountry, setSelectedCountry] = useState<string>('US');
+  const [importing, setImporting] = useState(false);
+  const [importPreview, setImportPreview] = useState<Array<{ name: string; date: string; isValid: boolean; error?: string }>>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -158,6 +162,170 @@ export function PublicHolidaysManager() {
     }
   };
 
+  // Parse CSV file
+  const parseCSV = (text: string): Array<{ name: string; date: string }> => {
+    const lines = text.trim().split('\n');
+    const results: Array<{ name: string; date: string }> = [];
+    
+    // Skip header row if it looks like a header
+    const startIndex = lines[0]?.toLowerCase().includes('name') || lines[0]?.toLowerCase().includes('date') ? 1 : 0;
+    
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      // Handle both CSV and semicolon-separated formats
+      const separator = line.includes(';') ? ';' : ',';
+      const parts = line.split(separator).map(p => p.trim().replace(/^["']|["']$/g, ''));
+      
+      if (parts.length >= 2) {
+        results.push({
+          name: parts[0],
+          date: parts[1]
+        });
+      }
+    }
+    
+    return results;
+  };
+
+  // Validate and parse date string
+  const parseDate = (dateStr: string): { date: Date | null; format: string } => {
+    const formats = [
+      'yyyy-MM-dd',
+      'dd/MM/yyyy',
+      'MM/dd/yyyy',
+      'dd-MM-yyyy',
+      'MM-dd-yyyy',
+      'dd.MM.yyyy',
+      'yyyy/MM/dd'
+    ];
+    
+    for (const fmt of formats) {
+      try {
+        const parsed = parse(dateStr, fmt, new Date());
+        if (isValid(parsed)) {
+          return { date: parsed, format: fmt };
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    return { date: null, format: '' };
+  };
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const parsed = parseCSV(text);
+      
+      const preview = parsed.map(item => {
+        const { date } = parseDate(item.date);
+        const isValidDate = date !== null;
+        const isCorrectYear = date ? date.getFullYear() === selectedYear : false;
+        
+        return {
+          name: item.name,
+          date: item.date,
+          isValid: isValidDate && isCorrectYear,
+          error: !isValidDate 
+            ? 'Invalid date format' 
+            : !isCorrectYear 
+              ? `Date not in year ${selectedYear}` 
+              : undefined
+        };
+      });
+      
+      setImportPreview(preview);
+    };
+    reader.readAsText(file);
+  };
+
+  // Import holidays from preview
+  const handleImport = async () => {
+    const validItems = importPreview.filter(item => item.isValid);
+    
+    if (validItems.length === 0) {
+      toast({
+        title: t('error'),
+        description: 'No valid holidays to import',
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setImporting(true);
+    
+    try {
+      const holidaysToInsert = validItems.map(item => {
+        const { date } = parseDate(item.date);
+        return {
+          name: item.name,
+          date: format(date!, 'yyyy-MM-dd'),
+          country_code: selectedCountry,
+          year: selectedYear,
+          is_recurring: false,
+          created_by: user?.id
+        };
+      });
+
+      const { error } = await supabase
+        .from('public_holidays')
+        .insert(holidaysToInsert);
+
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: `Successfully imported ${validItems.length} holidays`
+      });
+
+      setImportPreview([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      fetchHolidays();
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message || 'Failed to import holidays',
+        variant: "destructive"
+      });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  // Download template
+  const downloadTemplate = () => {
+    const template = `Holiday Name,Date (YYYY-MM-DD)
+New Year's Day,${selectedYear}-01-01
+Independence Day,${selectedYear}-07-04
+Christmas Day,${selectedYear}-12-25`;
+    
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `public_holidays_template_${selectedCountry}_${selectedYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Clear import preview
+  const clearImportPreview = () => {
+    setImportPreview([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i - 2);
 
   if (loading) {
@@ -176,9 +344,12 @@ export function PublicHolidaysManager() {
             <Globe className="h-5 w-5" />
             Public Holidays Management
           </CardTitle>
+          <CardDescription>
+            Manage public holidays by country and year. Import holidays from CSV or add them manually.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Year</label>
               <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
@@ -209,13 +380,92 @@ export function PublicHolidaysManager() {
               </Select>
             </div>
             
-            <div className="flex-1 flex items-end">
+            <div className="flex-1 flex items-end gap-2 flex-wrap">
               <Button onClick={() => setShowAddForm(!showAddForm)} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Holiday
               </Button>
+              <Button onClick={downloadTemplate} variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Download Template
+              </Button>
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="holiday-csv-upload"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import CSV
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Import Preview */}
+          {importPreview.length > 0 && (
+            <Card className="border-2 border-dashed">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Import Preview ({importPreview.filter(i => i.isValid).length} valid / {importPreview.length} total)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="max-h-64 overflow-y-auto space-y-2">
+                  {importPreview.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className={cn(
+                        "flex items-center justify-between p-2 rounded-lg border",
+                        item.isValid ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800" : "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Badge variant={item.isValid ? "default" : "destructive"}>
+                          {item.isValid ? "Valid" : "Invalid"}
+                        </Badge>
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-muted-foreground">{item.date}</span>
+                      </div>
+                      {item.error && (
+                        <span className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4" />
+                          {item.error}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Supported date formats: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, DD-MM-YYYY, DD.MM.YYYY
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleImport} 
+                    disabled={importing || importPreview.filter(i => i.isValid).length === 0}
+                  >
+                    {importing ? "Importing..." : `Import ${importPreview.filter(i => i.isValid).length} Holidays`}
+                  </Button>
+                  <Button variant="outline" onClick={clearImportPreview}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {showAddForm && (
             <Card>
