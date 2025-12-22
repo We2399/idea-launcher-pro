@@ -158,45 +158,33 @@ export function useEnhancedDashboardStats(): EnhancedDashboardStats {
         }
 
         // Fetch profile change requests stats
-        let profileChangeQuery = supabase
+        // For employees, filter by their own requests. For admins, fetch all.
+        const isEmployeeView = userRole === 'employee' || impersonatedUserId;
+        
+        let pendingProfileQuery = supabase
           .from('profile_change_requests')
-          .select('status', { count: 'exact' });
+          .select('id', { count: 'exact' })
+          .eq('status', 'pending');
+          
+        let approvedProfileQuery = supabase
+          .from('profile_change_requests')
+          .select('id', { count: 'exact' })
+          .eq('status', 'approved');
 
-        if (userRole === 'employee' || impersonatedUserId) {
-          profileChangeQuery = profileChangeQuery.eq('user_id', effectiveUserId);
+        if (isEmployeeView) {
+          pendingProfileQuery = pendingProfileQuery.eq('user_id', effectiveUserId);
+          approvedProfileQuery = approvedProfileQuery.eq('user_id', effectiveUserId);
         }
 
-        const { data: profileRequests } = await profileChangeQuery;
-        
-        // Count by status
-        const pendingProfileRequests = await supabase
-          .from('profile_change_requests')
-          .select('id', { count: 'exact' })
-          .eq('status', 'pending')
-          .then(result => (userRole === 'employee' || impersonatedUserId)
-            ? supabase.from('profile_change_requests')
-                .select('id', { count: 'exact' })
-                .eq('status', 'pending')
-                .eq('user_id', effectiveUserId)
-            : result
-          );
-
-        const approvedProfileRequests = await supabase
-          .from('profile_change_requests')
-          .select('id', { count: 'exact' })
-          .eq('status', 'approved')
-          .then(result => (userRole === 'employee' || impersonatedUserId)
-            ? supabase.from('profile_change_requests')
-                .select('id', { count: 'exact' })
-                .eq('status', 'approved')
-                .eq('user_id', effectiveUserId)
-            : result
-          );
+        const [pendingProfileResult, approvedProfileResult] = await Promise.all([
+          pendingProfileQuery,
+          approvedProfileQuery
+        ]);
 
         const profileChangeRequests = {
-          pending: (await pendingProfileRequests).count || 0,
-          approved: (await approvedProfileRequests).count || 0,
-          total: ((await pendingProfileRequests).count || 0) + ((await approvedProfileRequests).count || 0)
+          pending: pendingProfileResult.count || 0,
+          approved: approvedProfileResult.count || 0,
+          total: (pendingProfileResult.count || 0) + (approvedProfileResult.count || 0)
         };
 
         setStats({

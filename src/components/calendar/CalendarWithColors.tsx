@@ -231,6 +231,11 @@ export default function CalendarWithColors() {
       );
     }
     
+    // Administrator can see all leave requests
+    if (userRole === 'administrator') {
+      options.push({ value: 'all', label: t('allLeave') });
+    }
+    
     return options;
   };
 
