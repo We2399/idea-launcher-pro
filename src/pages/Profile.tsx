@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,6 +89,9 @@ export default function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [impersonationOpen, setImpersonationOpen] = useState(false);
   const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
+  
+  const changeRequestsRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -102,6 +106,15 @@ export default function Profile() {
       fetchProfileChangeRequests();
     }
   }, [effectiveUserId]);
+  
+  // Scroll to change requests section if hash is present
+  useEffect(() => {
+    if (location.hash === '#change-requests' && changeRequestsRef.current) {
+      setTimeout(() => {
+        changeRequestsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [location.hash, changeRequests]);
 
   const fetchProfile = async () => {
     try {
@@ -554,9 +567,9 @@ export default function Profile() {
 
         {/* Profile Change Requests (Management) */}
         {(userRole === 'administrator' || userRole === 'hr_admin' || userRole === 'manager') && (
-          <Card className="lg:col-span-3">
+          <Card className="lg:col-span-3" id="change-requests" ref={changeRequestsRef}>
             <CardHeader>
-              <CardTitle>{t('profileChangeRequests') || 'Profile Change Requests'}</CardTitle>
+              <CardTitle>{t('profileChangeRequests') || 'Profile Change Requests'} ({changeRequests.length})</CardTitle>
             </CardHeader>
             <CardContent>
               {changeRequests.length === 0 ? (

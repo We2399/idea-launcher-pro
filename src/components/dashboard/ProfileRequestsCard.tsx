@@ -53,8 +53,11 @@ export function ProfileRequestsCard({ stats, loading }: ProfileRequestsCardProps
     );
   }
 
+  // For admins, link to profile page with hash to scroll to change requests section
+  const linkPath = userRole === 'employee' ? '/profile' : '/profile#change-requests';
+  
   return (
-    <Link to="/profile">
+    <Link to={linkPath}>
       <Card className="card-professional animate-slide-up hover:scale-105 transition-all duration-300" style={{ animationDelay: '0.4s' }}>
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
