@@ -241,16 +241,15 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
               {getTitle()}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-              {stats.pending > 0 && (
+              {stats.pending > 0 ? (
                 <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20 text-xs px-1.5 py-0">
                   <Clock className="h-2.5 w-2.5 mr-1" />
                   {stats.pending} {t('pending')}
                 </Badge>
-              )}
-              {stats.approved > 0 && (
+              ) : (
                 <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 text-xs px-1.5 py-0">
                   <CheckCircle className="h-2.5 w-2.5 mr-1" />
-                  {stats.approved}
+                  {t('allProcessed') || 'All processed'}
                 </Badge>
               )}
             </div>
@@ -353,22 +352,11 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
   
   return (
     <>
-      {isAdmin ? (
+      <Link to={linkPath}>
         <Card className="card-professional animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
           {cardContent}
-          <div className="px-5 pb-3">
-            <Link to={linkPath} className="text-xs text-primary hover:underline flex items-center gap-1 justify-center">
-              {t('viewAll')} <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
         </Card>
-      ) : (
-        <Link to={linkPath}>
-          <Card className="card-professional animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
-            {cardContent}
-          </Card>
-        </Link>
-      )}
+      </Link>
       
       {/* Reject Reason Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
