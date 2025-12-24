@@ -121,6 +121,9 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
     fetchRequests();
   }, [user?.id, userRole, stats.pending]);
 
+  // Fields that need date type conversion
+  const dateFields = ['date_of_birth'];
+  
   const handleApprove = async (e: React.MouseEvent, request: ProfileChangeRequest) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,10 +133,24 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
     setProcessingId(request.id);
     
     try {
+      // Prepare the value - convert to proper type if needed
+      let updateValue: string | null = request.new_value;
+      
+      // For date fields, ensure the value is in proper date format
+      if (dateFields.includes(request.field_name)) {
+        // The value should already be in YYYY-MM-DD format, but verify it's valid
+        const dateValue = new Date(request.new_value);
+        if (isNaN(dateValue.getTime())) {
+          throw new Error('Invalid date format');
+        }
+        // Format as YYYY-MM-DD for database
+        updateValue = dateValue.toISOString().split('T')[0];
+      }
+      
       // Update the profile field
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ [request.field_name]: request.new_value })
+        .update({ [request.field_name]: updateValue })
         .eq('user_id', request.user_id);
       
       if (profileError) throw profileError;
