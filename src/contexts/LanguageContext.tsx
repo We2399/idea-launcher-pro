@@ -94,6 +94,7 @@ const translations = {
     yourProfileChangeRequests: 'Your profile change requests',
     teamProfileChangeRequests: 'Team profile change requests',
     noRequests: 'No pending requests',
+    allProcessed: 'All processed',
     more: 'more',
     // Landing
     leaveManagementSystem: 'Leave Management System',
@@ -782,6 +783,7 @@ const translations = {
     yourProfileChangeRequests: '您的資料變更申請',
     teamProfileChangeRequests: '團隊資料變更申請',
     noRequests: '無待處理申請',
+    allProcessed: '全部已處理',
     more: '更多',
     // Payroll translations
     payrollDescription: '管理員工薪資發放',
@@ -1470,6 +1472,7 @@ const translations = {
     yourProfileChangeRequests: '您的资料变更申请',
     teamProfileChangeRequests: '团队资料变更申请',
     noRequests: '无待处理申请',
+    allProcessed: '全部已处理',
     more: '更多',
     // Landing
     leaveManagementSystem: '请假管理系统',
@@ -2081,6 +2084,7 @@ const translations = {
     yourProfileChangeRequests: 'Permintaan perubahan profil Anda',
     teamProfileChangeRequests: 'Permintaan perubahan profil tim',
     noRequests: 'Tidak ada permintaan tertunda',
+    allProcessed: 'Semua diproses',
     more: 'lainnya',
     // Landing
     leaveManagementSystem: 'Sistem Manajemen Cuti',
