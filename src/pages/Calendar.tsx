@@ -149,11 +149,14 @@ export default function CalendarPage() {
       let query = supabase
         .from('leave_requests')
         .select('*')
-        .in('status', (userRole === 'employee' || impersonatedUserId) ? ['approved', 'senior_approved'] : ['pending', 'approved', 'senior_approved'])
         .order('start_date');
 
+      // For "My Leave" view, always include pending status so users can see their own pending requests
+      // For other views (team/all), employees only see approved, admins see all statuses
       if (viewMode === 'my') {
-        query = query.eq('user_id', effectiveUserId);
+        query = query
+          .eq('user_id', effectiveUserId)
+          .in('status', ['pending', 'approved', 'senior_approved']);
       } else if (viewMode === 'team' && (userRole === 'hr_admin' || userRole === 'administrator')) {
         // For management, show their team's requests by joining with profiles
         const { data: teamProfiles } = await supabase
@@ -163,11 +166,19 @@ export default function CalendarPage() {
         
         if (teamProfiles && teamProfiles.length > 0) {
           const teamUserIds = teamProfiles.map(p => p.user_id);
-          query = query.in('user_id', teamUserIds);
+          query = query
+            .in('user_id', teamUserIds)
+            .in('status', ['pending', 'approved', 'senior_approved']);
         } else {
           // No team members found, return empty result
           query = query.eq('user_id', 'no-match');
         }
+      } else {
+        // For 'all' view - admins see all, employees only see approved
+        const statusFilter = (userRole === 'hr_admin' || userRole === 'administrator') 
+          ? ['pending', 'approved', 'senior_approved'] 
+          : ['approved', 'senior_approved'];
+        query = query.in('status', statusFilter);
       }
 
       const { data: requestsData, error: requestsError } = await query;
