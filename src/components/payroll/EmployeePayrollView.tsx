@@ -66,6 +66,10 @@ export function EmployeePayrollView() {
       return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />{t('pendingConfirmation')}</Badge>;
     }
     if (record.status === 'pending_admin_approval') {
+      // If employee disputed and HR revised, show awaiting admin
+      if (record.disputed_by_employee && record.dispute_resolution_notes) {
+        return <Badge className="bg-amber-500"><Clock className="w-3 h-3 mr-1" />{t('awaitingAdminApproval')}</Badge>;
+      }
       return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />{t('underReview')}</Badge>;
     }
     return <Badge variant="outline">{record.status}</Badge>;
