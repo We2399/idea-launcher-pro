@@ -112,16 +112,16 @@ export function CreatePayrollDialog({ open, onClose, existingPayroll, resolution
     enabled: !!selectedEmployee,
   });
 
-  // Update base salary when employee selected
+  // Update base salary when employee selected (only for new payrolls, not edit mode)
   useEffect(() => {
-    if (selectedEmployee && employees) {
+    if (selectedEmployee && employees && !isEditMode) {
       const employee = employees.find((e) => e.user_id === selectedEmployee);
       if (employee) {
         setBaseSalary(Number(employee.base_monthly_salary) || 0);
         setCurrency(employee.salary_currency || 'USD');
       }
     }
-  }, [selectedEmployee, employees]);
+  }, [selectedEmployee, employees, isEditMode]);
 
   const addLineItem = (type: LineItem['item_type']) => {
     setLineItems([
@@ -371,8 +371,11 @@ export function CreatePayrollDialog({ open, onClose, existingPayroll, resolution
                     <Label className="text-xs">{t('amount')}</Label>
                     <Input
                       type="number"
-                      value={item.amount}
-                      onChange={(e) => updateLineItem(index, 'amount', Number(e.target.value))}
+                      value={item.amount === 0 ? '' : item.amount}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateLineItem(index, 'amount', val === '' ? 0 : Number(val));
+                      }}
                       placeholder="0"
                       className="mt-1"
                     />

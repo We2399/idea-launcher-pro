@@ -197,6 +197,16 @@ Deno.serve(async (req) => {
           .insert(adminNotifications);
       }
 
+      // Also notify the employee that their dispute is being addressed
+      await supabaseClient
+        .from('payroll_notifications')
+        .insert({
+          sent_to: payroll.user_id,
+          payroll_record_id,
+          notification_type: 'dispute_under_review',
+          message: `Your dispute for payroll ${payroll.month}/${payroll.year} is being reviewed. HR Response: ${resolution_notes}`,
+        });
+
       console.log(`Payroll ${payroll_record_id} revised by HR user ${user.id}`);
 
       return new Response(
