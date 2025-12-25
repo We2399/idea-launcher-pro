@@ -42,9 +42,9 @@ export function EmployeeDiscussionAlertsCard() {
             </div>
           )}
           {filteredPending.slice(0, 10).map((d: any) => (
-            <div key={d.id} className="flex items-center justify-between border rounded-md p-3">
-              <div className="space-y-1">
-                <div className="font-medium text-sm">{d.document_name}</div>
+            <div key={d.id} className="flex items-center justify-between border rounded-md p-3 gap-2">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="font-medium text-sm truncate">{d.document_name}</div>
                 {d.lastAdminComment && (
                   <div className="text-xs text-muted-foreground line-clamp-2">
                     "{d.lastAdminComment.substring(0, 100)}{d.lastAdminComment.length > 100 ? '...' : ''}"
@@ -52,9 +52,11 @@ export function EmployeeDiscussionAlertsCard() {
                 )}
                 <div className="text-xs text-muted-foreground">Waiting {d.daysWaiting} day{d.daysWaiting === 1 ? '' : 's'}</div>
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setSelected(d); setOpen(true); }}>
-                <MessageSquare className="h-4 w-4 mr-1" /> Reply
-              </Button>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button size="sm" variant="outline" onClick={() => { setSelected(d); setOpen(true); }}>
+                  <MessageSquare className="h-4 w-4 mr-1" /> Reply
+                </Button>
+              </div>
             </div>
           ))}
           {filteredPending.length === 0 && searchTerm && (

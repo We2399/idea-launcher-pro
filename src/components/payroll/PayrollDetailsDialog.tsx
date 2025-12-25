@@ -259,12 +259,17 @@ export function PayrollDetailsDialog({ payroll, open, onClose }: Props) {
 
               {/* Current Status */}
               {payroll.dispute_resolved_at && (
-                <div className="bg-green-50 p-3 rounded">
-                  <div className="text-sm font-medium text-green-900">
+                <div className={`p-3 rounded ${payroll.status === 'sent_to_employee' ? 'bg-green-50' : 'bg-amber-50'}`}>
+                  <div className={`text-sm font-medium ${payroll.status === 'sent_to_employee' ? 'text-green-900' : 'text-amber-900'}`}>
                     {payroll.status === 'sent_to_employee' 
                       ? t('disputeResolved') 
-                      : t('underReview')}
+                      : payroll.status === 'pending_admin_approval'
+                        ? t('awaitingAdminApproval')
+                        : t('underReview')}
                   </div>
+                  {payroll.status === 'pending_admin_approval' && (
+                    <p className="text-xs text-amber-700 mt-1">{t('hrRevisedAwaitingAdmin')}</p>
+                  )}
                 </div>
               )}
             </div>
