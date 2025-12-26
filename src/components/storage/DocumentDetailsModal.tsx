@@ -35,6 +35,9 @@ export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentD
     return comments.some((c: any) => c.comment_type === 'discussion_closed');
   }, [comments]);
 
+  // Don't render dialog at all if not open - prevents stale overlay
+  if (!open) return null;
+
   const handleAddComment = () => {
     if (!document || !comment.trim()) return;
 
@@ -70,10 +73,8 @@ export function DocumentDetailsModal({ document, open, onOpenChange }: DocumentD
     });
   };
 
-  if (!document) return null;
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open && !!document} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Document Discussion</DialogTitle>
