@@ -26,6 +26,19 @@ export function AdminNeedsReplyCard() {
   }, [pending, searchTerm]);
 
   const sendReminder = async (docId: string) => {
+    // Check if discussion is already closed before sending reminder
+    const { data: comments } = await supabase
+      .from('document_comments')
+      .select('comment_type')
+      .eq('document_id', docId);
+    
+    const isClosed = comments?.some(c => c.comment_type === 'discussion_closed');
+    if (isClosed) {
+      toast({ title: 'Discussion is closed', description: 'Cannot send reminders on closed discussions.' });
+      queryClient.invalidateQueries({ queryKey: ['admin-needs-reply-discussions'] });
+      return;
+    }
+    
     await supabase.from('document_comments').insert({
       document_id: docId,
       user_id: (await supabase.auth.getUser()).data.user!.id,
