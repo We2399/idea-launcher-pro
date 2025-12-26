@@ -55,7 +55,7 @@ export interface DocumentComment {
   document_id: string;
   user_id: string;
   comment: string;
-  comment_type: 'employee_reply' | 'admin_note' | 'system';
+  comment_type: 'employee_reply' | 'admin_note' | 'system' | 'discussion_closed';
   created_at: string;
   user?: {
     first_name: string;
@@ -302,7 +302,7 @@ export const useAddDocumentComment = () => {
     mutationFn: async ({ docId, comment, type }: { 
       docId: string; 
       comment: string; 
-      type: 'employee_reply' | 'admin_note' | 'system' 
+      type: 'employee_reply' | 'admin_note' | 'system' | 'discussion_closed' 
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -326,6 +326,46 @@ export const useAddDocumentComment = () => {
       toast({
         title: 'Comment added',
         description: 'Your comment has been posted'
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+};
+
+// Close discussion (Admin only)
+export const useCloseDiscussion = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (docId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      
+      const { error } = await supabase
+        .from('document_comments')
+        .insert({
+          document_id: docId,
+          user_id: user.id,
+          comment: 'Discussion closed - no further action required.',
+          comment_type: 'discussion_closed'
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-comments'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-pending-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-pending-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-needs-reply-discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['my-document-issues'] });
+      toast({
+        title: 'Discussion closed',
+        description: 'This discussion has been marked as resolved.'
       });
     },
     onError: (error: any) => {
