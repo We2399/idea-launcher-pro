@@ -5,6 +5,8 @@ import { useAdminPendingDiscussions } from '@/hooks/usePendingDiscussions';
 import { DocumentDetailsModal } from '@/components/storage/DocumentDetailsModal';
 import { Link } from 'react-router-dom';
 import { useAddDocumentComment } from '@/hooks/useStorageCentre';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export function AdminPendingDiscussionsCard() {
   const { data: pending = [] } = useAdminPendingDiscussions();
@@ -15,6 +17,18 @@ export function AdminPendingDiscussionsCard() {
   if (!pending || pending.length === 0) return null;
 
   const sendReminder = async (docId: string) => {
+    // Check if discussion is already closed before sending reminder
+    const { data: comments } = await supabase
+      .from('document_comments')
+      .select('comment_type')
+      .eq('document_id', docId);
+    
+    const isClosed = comments?.some(c => c.comment_type === 'discussion_closed');
+    if (isClosed) {
+      toast({ title: 'Discussion is closed', description: 'Cannot send reminders on closed discussions.' });
+      return;
+    }
+    
     await addComment.mutateAsync({ docId, comment: 'Reminder: please respond so we can proceed.', type: 'admin_note' });
   };
 
