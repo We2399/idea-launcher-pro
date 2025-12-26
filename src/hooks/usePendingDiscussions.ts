@@ -12,8 +12,22 @@ function computePendingByDoc(docs: Pick<DocumentStorage, 'id' | 'user_id' | 'doc
 
   return docs.map((doc) => {
     const list = (byDoc[doc.id] || []).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    
+    // Check if discussion is closed - if any comment is 'discussion_closed', no pending
+    const isClosed = list.some((c) => c.comment_type === 'discussion_closed');
+    if (isClosed) {
+      return {
+        ...doc,
+        pendingDiscussion: false,
+        lastAdminCommentAt: null,
+        daysWaiting: 0,
+        lastAdminComment: null,
+      };
+    }
+    
     let lastAdminAt: number | null = null;
     let lastEmployeeAt: number | null = null;
+    let lastAdminComment: string | null = null;
 
     for (const c of list) {
       const isSystem = (c.comment_type || '').toLowerCase() === 'system';
@@ -22,6 +36,7 @@ function computePendingByDoc(docs: Pick<DocumentStorage, 'id' | 'user_id' | 'doc
         lastEmployeeAt = new Date(c.created_at).getTime();
       } else {
         lastAdminAt = new Date(c.created_at).getTime();
+        lastAdminComment = c.comment || null;
       }
     }
 
@@ -33,6 +48,7 @@ function computePendingByDoc(docs: Pick<DocumentStorage, 'id' | 'user_id' | 'doc
       pendingDiscussion: awaitingEmployee,
       lastAdminCommentAt: lastAdminAt ? new Date(lastAdminAt) : null,
       daysWaiting: awaitingEmployee ? Math.max(0, Math.floor(waitingMs / (1000 * 60 * 60 * 24))) : 0,
+      lastAdminComment,
     };
   });
 }
@@ -164,9 +180,14 @@ export const useAdminNeedsReplyDiscussions = () => {
       if (!comments || comments.length === 0) return [];
 
       // Find documents where the last comment is from employee (needs admin reply)
+      // But exclude closed discussions
       const needsAdminReply = docs.filter((doc: any) => {
         const docComments = comments.filter((c: any) => c.document_id === doc.id);
         if (docComments.length === 0) return false;
+        
+        // Check if any comment is 'discussion_closed'
+        const isClosed = docComments.some((c: any) => c.comment_type === 'discussion_closed');
+        if (isClosed) return false;
         
         const lastComment = docComments[0];
         return lastComment.comment_type === 'employee_reply' && lastComment.user_id === doc.user_id;
