@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
+import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,7 @@ export function MobileDashboard() {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const counts = useDashboardCounts();
+  const taskCounts = useTaskStatusCounts();
   const { isImpersonating, impersonatedUserId } = useImpersonation();
   const [userName, setUserName] = useState<string>('');
   
@@ -51,7 +53,39 @@ export function MobileDashboard() {
     return isAdmin ? t('employer') : t('helper');
   };
 
-  const tasksPending = userRole === 'employee' ? counts.pendingTasks : counts.allPendingTasks;
+  // Get color-coded task badge info
+  const getTaskBadgeInfo = () => {
+    const { unseenCounts } = taskCounts;
+    const total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+    
+    if (total === 0) return null;
+    
+    // Priority: red (new) > yellow (in progress) > green (completed)
+    let bgColor = 'bg-emerald-500';
+    let borderColor = 'border-emerald-200/50 dark:border-emerald-800/30';
+    let lightBg = 'bg-emerald-50 dark:bg-emerald-950/30';
+    let iconBg = 'bg-emerald-100 dark:bg-emerald-900/50';
+    let iconColor = 'text-emerald-600 dark:text-emerald-400';
+    
+    if (unseenCounts.pending > 0) {
+      bgColor = 'bg-red-500';
+      borderColor = 'border-red-200/50 dark:border-red-800/30';
+      lightBg = 'bg-red-50 dark:bg-red-950/30';
+      iconBg = 'bg-red-100 dark:bg-red-900/50';
+      iconColor = 'text-red-600 dark:text-red-400';
+    } else if (unseenCounts.inProgress > 0) {
+      bgColor = 'bg-amber-500';
+      borderColor = 'border-amber-200/50 dark:border-amber-800/30';
+      lightBg = 'bg-amber-50 dark:bg-amber-950/30';
+      iconBg = 'bg-amber-100 dark:bg-amber-900/50';
+      iconColor = 'text-amber-600 dark:text-amber-400';
+    }
+    
+    return { count: total, bgColor, borderColor, lightBg, iconBg, iconColor };
+  };
+
+  const taskBadgeInfo = getTaskBadgeInfo();
+  const taskDisplayCount = taskBadgeInfo?.count || (userRole === 'employee' ? counts.pendingTasks : counts.allPendingTasks);
   const leaveRequests = userRole === 'employee' ? counts.pendingLeaveRequests : counts.pendingLeaveApprovals;
 
   return (
@@ -85,13 +119,20 @@ export function MobileDashboard() {
         {/* Stats Cards - Tasks & Leave */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/tasks">
-            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-3 border border-amber-200/50 dark:border-amber-800/30">
+            <div className={`${taskBadgeInfo?.lightBg || 'bg-amber-50 dark:bg-amber-950/30'} rounded-2xl p-3 border ${taskBadgeInfo?.borderColor || 'border-amber-200/50 dark:border-amber-800/30'} relative`}>
+              {taskBadgeInfo && (
+                <Badge 
+                  className={`absolute -top-1 -right-1 ${taskBadgeInfo.bgColor} text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm`}
+                >
+                  {taskBadgeInfo.count > 99 ? '99+' : taskBadgeInfo.count}
+                </Badge>
+              )}
               <div className="flex justify-center mb-1">
-                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
-                  <CheckSquare className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <div className={`p-2 rounded-full ${taskBadgeInfo?.iconBg || 'bg-amber-100 dark:bg-amber-900/50'}`}>
+                  <CheckSquare className={`h-5 w-5 ${taskBadgeInfo?.iconColor || 'text-amber-600 dark:text-amber-400'}`} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-center text-foreground">{tasksPending}</p>
+              <p className="text-2xl font-bold text-center text-foreground">{taskDisplayCount}</p>
               <p className="text-xs text-center text-muted-foreground">{t('tasksPending')}</p>
             </div>
           </Link>

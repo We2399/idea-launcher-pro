@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckSquare, DollarSign } from 'lucide-react';
 import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
+import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
 import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
@@ -31,6 +32,7 @@ const Index = () => {
   const { t } = useLanguage();
   const stats = useEnhancedDashboardStats();
   const counts = useDashboardCounts();
+  const taskCounts = useTaskStatusCounts();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   
@@ -49,7 +51,7 @@ const Index = () => {
     threshold: 80,
   });
 
-  // Helper function to get pending count for each card
+  // Helper function to get pending count for each card (excluding tasks)
   const getPendingCountForCard = (href: string): number => {
     const isEmployee = userRole === 'employee';
     
@@ -65,10 +67,28 @@ const Index = () => {
       case '/employees': 
         return counts.pendingDocumentApprovals + counts.discussionsNeedingReply;
       case '/tasks':
-        return isEmployee ? counts.pendingTasks : counts.allPendingTasks;
+        return 0; // Handled separately with color-coded badges
       default: 
         return 0;
     }
+  };
+
+  // Helper function to get task badge color and count
+  const getTaskBadge = (): { count: number; bgColor: string } | null => {
+    const { unseenCounts } = taskCounts;
+    const total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+    
+    if (total === 0) return null;
+    
+    // Priority: red (new) > yellow (in progress) > green (completed)
+    let bgColor = 'bg-emerald-500';
+    if (unseenCounts.pending > 0) {
+      bgColor = 'bg-red-500';
+    } else if (unseenCounts.inProgress > 0) {
+      bgColor = 'bg-amber-500';
+    }
+    
+    return { count: total, bgColor };
   };
 
   if (!user) {
@@ -200,15 +220,26 @@ const Index = () => {
         {dashboardCards.map((card) => {
           const Icon = card.icon;
           const pendingCount = getPendingCountForCard(card.href);
+          const isTaskCard = card.href === '/tasks';
+          const taskBadge = isTaskCard ? getTaskBadge() : null;
           
           return (
             <Link key={card.title} to={card.href}>
               <div className="card-glass relative rounded-2xl p-4 md:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 border-border/50">
-                {pendingCount > 0 && (
+                {/* Regular badge for non-task cards */}
+                {!isTaskCard && pendingCount > 0 && (
                   <Badge 
                     className="absolute -top-2 -right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse z-10"
                   >
                     {pendingCount > 99 ? '99+' : pendingCount}
+                  </Badge>
+                )}
+                {/* Color-coded badge for task card */}
+                {isTaskCard && taskBadge && (
+                  <Badge 
+                    className={`absolute -top-2 -right-2 ${taskBadge.bgColor} text-white h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse z-10`}
+                  >
+                    {taskBadge.count > 99 ? '99+' : taskBadge.count}
                   </Badge>
                 )}
                 <div className="flex flex-col items-center gap-3 text-center">
