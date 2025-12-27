@@ -69,6 +69,8 @@ const CashControl = () => {
   });
   const [uploadingFile, setUploadingFile] = useState(false);
   const [dialogType, setDialogType] = useState<'request' | 'expense'>('request');
+  const [employees, setEmployees] = useState<Profile[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('all');
 
   const canApprove = userRole === 'manager' || userRole === 'hr_admin' || userRole === 'administrator';
 
@@ -76,8 +78,25 @@ const CashControl = () => {
     console.log('[CashControl] mounted');
     if (user) {
       fetchTransactions();
+      if (canApprove) {
+        fetchEmployees();
+      }
     }
-  }, [user, userRole, viewMode]);
+  }, [user, userRole, viewMode, selectedEmployee]);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email')
+        .order('first_name');
+      
+      if (error) throw error;
+      setEmployees(data || []);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -102,8 +121,11 @@ const CashControl = () => {
           const teamIds = teamMembers.map(m => m.user_id);
           query = query.in('employee_id', teamIds);
         }
+      } else if (viewMode === 'all' && selectedEmployee !== 'all') {
+        // Filter by selected employee when admin selects specific employee
+        query = query.eq('employee_id', selectedEmployee);
       }
-      // 'all' mode doesn't need additional filtering for hr_admin
+      // 'all' mode with 'all' employees doesn't need additional filtering
 
       const { data: transactionsData, error: transactionsError } = await query;
 
@@ -305,15 +327,16 @@ const CashControl = () => {
     }
   };
 
-  // Helper function to calculate accounting figures
+  // Helper function to calculate accounting figures based on currently displayed transactions
   const calculateAccountingFigures = () => {
-    const userTransactions = transactions.filter(t => t.employee_id === user?.id && t.status === 'approved');
+    // Filter approved transactions from the current view
+    const approvedTransactions = transactions.filter(t => t.status === 'approved');
     
-    const credit = userTransactions
+    const credit = approvedTransactions
       .filter(t => t.type === 'request' || (t.type === 'reimbursement' && t.amount > 0))
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     
-    const debit = userTransactions
+    const debit = approvedTransactions
       .filter(t => t.type === 'expense' || t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     
@@ -384,10 +407,28 @@ const CashControl = () => {
           <h1 className="text-3xl font-bold text-foreground">{t('cashControl')}</h1>
           <p className="text-muted-foreground">{t('cashControlDescription')}</p>
         </div>
-        <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          {t('newTransaction')}
-        </Button>
+        <div className="flex items-center gap-4">
+          {/* Employee Filter for Admins */}
+          {canApprove && employees.length > 1 && (
+            <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder={t('allEmployees')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('allEmployees')}</SelectItem>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.user_id} value={emp.user_id}>
+                    {emp.first_name} {emp.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button onClick={() => openDialog('request')} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            {t('newTransaction')}
+          </Button>
+        </div>
       </div>
 
       {/* Create Transaction Dialog */}
