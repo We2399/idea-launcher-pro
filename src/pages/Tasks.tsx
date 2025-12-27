@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Calendar, User, Flag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 
 interface Task {
   id: string;
@@ -48,6 +49,7 @@ const Tasks = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { markAllAsSeen } = useTaskStatusCounts();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +66,11 @@ const Tasks = () => {
   const canCreateTasks = true;
   // Management and administrators can assign to anyone, employees can only assign to themselves
   const canAssignToOthers = userRole === 'hr_admin' || userRole === 'administrator' || userRole === 'manager';
+
+  // Mark all tasks as seen when visiting the page
+  useEffect(() => {
+    markAllAsSeen();
+  }, []);
 
   useEffect(() => {
     if (user) {
