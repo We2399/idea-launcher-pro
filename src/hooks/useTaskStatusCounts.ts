@@ -45,8 +45,9 @@ const markTasksAsSeen = (userId: string, taskIds: string[]) => {
 // Check if a task has been seen after it was last updated
 const isTaskSeen = (userId: string, taskId: string, updatedAt: string): boolean => {
   const seen = getSeenTaskIds(userId);
-  if (!seen[taskId]) return false;
-  return new Date(seen[taskId]) > new Date(updatedAt);
+  if (!seen[taskId]) return false; // Never seen = not seen
+  // Seen if the "seenAt" timestamp is AFTER the task's "updatedAt"
+  return new Date(seen[taskId]) >= new Date(updatedAt);
 };
 
 export const useTaskStatusCounts = () => {
@@ -76,9 +77,13 @@ export const useTaskStatusCounts = () => {
 
       const { data: tasks, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Task fetch error:', error);
+        throw error;
+      }
 
       const allTasks = tasks || [];
+      console.log('Task status counts - fetched tasks:', allTasks.length, 'isEmployee:', isEmployee);
       
       // Count tasks by status
       const counts: TaskStatusCounts = {
@@ -88,7 +93,7 @@ export const useTaskStatusCounts = () => {
         total: allTasks.length
       };
 
-      // Count unseen tasks by status
+      // Count unseen tasks by status (tasks not yet viewed by this user after last update)
       const unseenCounts: TaskStatusCounts = {
         pending: allTasks.filter(t => t.status === 'pending' && !isTaskSeen(user.id, t.id, t.updated_at)).length,
         inProgress: allTasks.filter(t => t.status === 'in_progress' && !isTaskSeen(user.id, t.id, t.updated_at)).length,
@@ -96,6 +101,8 @@ export const useTaskStatusCounts = () => {
         total: 0
       };
       unseenCounts.total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+      
+      console.log('Task unseen counts:', unseenCounts);
 
       return { counts, unseenCounts, tasks: allTasks };
     },
