@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Calendar, User, Flag } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Plus, Calendar, User, Flag, ChevronDown, ChevronRight, Archive } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 
@@ -54,6 +55,7 @@ const Tasks = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -357,76 +359,143 @@ const Tasks = () => {
         )}
       </div>
 
+      {/* Active Tasks (Pending & In Progress) */}
       <div className="grid gap-4">
-        {tasks.length === 0 ? (
+        {tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled').length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
               <p className="text-muted-foreground">{t('noTasksFound')}</p>
             </CardContent>
           </Card>
         ) : (
-          tasks.map((task) => (
-            <Card key={task.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {task.title}
-                      <Badge variant={getPriorityColor(task.priority)}>
-                        <Flag className="h-3 w-3 mr-1" />
-                        {t(task.priority)}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>{task.description}</CardDescription>
-                  </div>
-                  <Badge variant={getStatusColor(task.status)}>
-                    {translateTaskStatus(task.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
-                      </span>
+          tasks
+            .filter(task => task.status !== 'completed' && task.status !== 'cancelled')
+            .map((task) => (
+              <Card key={task.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {task.title}
+                        <Badge variant={getPriorityColor(task.priority)}>
+                          <Flag className="h-3 w-3 mr-1" />
+                          {t(task.priority)}
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription>{task.description}</CardDescription>
                     </div>
-                    {task.due_date && (
+                    <Badge variant={getStatusColor(task.status)}>
+                      {translateTaskStatus(task.status)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                        <User className="h-4 w-4" />
+                        <span>
+                          {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
+                        </span>
+                      </div>
+                      {task.due_date && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    {(task.assigned_to === user?.id || canAssignToOthers) && task.status !== 'completed' && (
+                      <div className="flex gap-2">
+                        {task.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateTaskStatus(task.id, 'in_progress')}
+                          >
+                            {t('start')}
+                          </Button>
+                        )}
+                        {task.status === 'in_progress' && (
+                          <Button
+                            size="sm"
+                            onClick={() => updateTaskStatus(task.id, 'completed')}
+                          >
+                            {t('complete')}
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
-                  {(task.assigned_to === user?.id || canAssignToOthers) && task.status !== 'completed' && (
-                    <div className="flex gap-2">
-                      {task.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateTaskStatus(task.id, 'in_progress')}
-                        >
-                          {t('start')}
-                        </Button>
-                      )}
-                      {task.status === 'in_progress' && (
-                        <Button
-                          size="sm"
-                          onClick={() => updateTaskStatus(task.id, 'completed')}
-                        >
-                          {t('complete')}
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            ))
         )}
       </div>
+
+      {/* Completed Tasks - Collapsible Section */}
+      {tasks.filter(t => t.status === 'completed' || t.status === 'cancelled').length > 0 && (
+        <Collapsible open={showCompleted} onOpenChange={setShowCompleted}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full flex items-center justify-between p-4 h-auto border border-dashed">
+              <div className="flex items-center gap-2">
+                <Archive className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  {t('completedTasks')} ({tasks.filter(t => t.status === 'completed' || t.status === 'cancelled').length})
+                </span>
+              </div>
+              {showCompleted ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <div className="grid gap-4">
+              {tasks
+                .filter(task => task.status === 'completed' || task.status === 'cancelled')
+                .map((task) => (
+                  <Card key={task.id} className="opacity-70">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="flex items-center gap-2 line-through text-muted-foreground">
+                            {task.title}
+                            <Badge variant={getPriorityColor(task.priority)}>
+                              <Flag className="h-3 w-3 mr-1" />
+                              {t(task.priority)}
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription className="line-through">{task.description}</CardDescription>
+                        </div>
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                          {translateTaskStatus(task.status)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <User className="h-4 w-4" />
+                          <span>
+                            {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
+                          </span>
+                        </div>
+                        {task.completed_at && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>{t('completed')}: {new Date(task.completed_at).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </div>
   );
 };
