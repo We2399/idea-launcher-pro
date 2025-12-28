@@ -418,6 +418,7 @@ const translations = {
     createTask: 'Create Task',
     selectTeamMember: 'Select team member',
     noTasksFound: 'No tasks found',
+    completedTasks: 'Completed Tasks',
     start: 'Start',
     complete: 'Complete',
 
@@ -1198,6 +1199,7 @@ const translations = {
     createTask: '建立任務',
     selectTeamMember: '選擇團隊成員',
     noTasksFound: '未找到任務',
+    completedTasks: '已完成任務',
     start: '開始',
     complete: '完成',
 
@@ -1812,6 +1814,7 @@ const translations = {
     createTask: '创建任务',
     selectTeamMember: '选择团队成员',
     noTasksFound: '未找到任务',
+    completedTasks: '已完成任务',
     start: '开始',
     complete: '完成',
 
@@ -2425,6 +2428,7 @@ const translations = {
     createTask: 'Buat Tugas',
     selectTeamMember: 'Pilih anggota tim',
     noTasksFound: 'Tidak ada tugas ditemukan',
+    completedTasks: 'Tugas Selesai',
     start: 'Mulai',
     complete: 'Selesai',
 
