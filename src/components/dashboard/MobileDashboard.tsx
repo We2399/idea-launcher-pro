@@ -55,25 +55,25 @@ export function MobileDashboard() {
 
   // Get color-coded task badge info
   const getTaskBadgeInfo = () => {
-    const { unseenCounts } = taskCounts;
-    const total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+    const { counts } = taskCounts;
+    const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
     
     if (total === 0) return null;
     
-    // Priority: red (new) > yellow (in progress) > green (completed)
+    // Priority: red (new) > amber (in progress) > green (completed but not acknowledged)
     let bgColor = 'bg-emerald-500';
     let borderColor = 'border-emerald-200/50 dark:border-emerald-800/30';
     let lightBg = 'bg-emerald-50 dark:bg-emerald-950/30';
     let iconBg = 'bg-emerald-100 dark:bg-emerald-900/50';
     let iconColor = 'text-emerald-600 dark:text-emerald-400';
     
-    if (unseenCounts.pending > 0) {
+    if (counts.pending > 0) {
       bgColor = 'bg-red-500';
       borderColor = 'border-red-200/50 dark:border-red-800/30';
       lightBg = 'bg-red-50 dark:bg-red-950/30';
       iconBg = 'bg-red-100 dark:bg-red-900/50';
       iconColor = 'text-red-600 dark:text-red-400';
-    } else if (unseenCounts.inProgress > 0) {
+    } else if (counts.inProgress > 0) {
       bgColor = 'bg-amber-500';
       borderColor = 'border-amber-200/50 dark:border-amber-800/30';
       lightBg = 'bg-amber-50 dark:bg-amber-950/30';

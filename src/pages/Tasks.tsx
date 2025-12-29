@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Calendar, User, Flag, ChevronDown, ChevronRight, Archive } from 'lucide-react';
+import { Plus, Calendar, User, Flag, ChevronDown, ChevronRight, Archive, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Task {
   id: string;
@@ -27,6 +28,8 @@ interface Task {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  admin_acknowledged_at: string | null;
+  admin_acknowledged_by: string | null;
   assignee?: {
     first_name: string;
     last_name: string;
@@ -50,7 +53,7 @@ const Tasks = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { markAllAsSeen } = useTaskStatusCounts();
+  const { acknowledgeTask, acknowledgeAllCompleted, isAdmin, isAcknowledging, refetch: refetchCounts } = useTaskStatusCounts();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,10 +72,10 @@ const Tasks = () => {
   // Management and administrators can assign to anyone, employees can only assign to themselves
   const canAssignToOthers = userRole === 'hr_admin' || userRole === 'administrator' || userRole === 'manager';
 
-  // Mark all tasks as seen when visiting the page
+  // Refetch counts when tasks change
   useEffect(() => {
-    markAllAsSeen();
-  }, []);
+    refetchCounts();
+  }, [tasks]);
 
   useEffect(() => {
     if (user) {
@@ -443,6 +446,12 @@ const Tasks = () => {
                 <span className="text-muted-foreground">
                   {t('completedTasks')} ({tasks.filter(t => t.status === 'completed' || t.status === 'cancelled').length})
                 </span>
+                {/* Show unacknowledged count badge */}
+                {tasks.filter(t => t.status === 'completed' && !t.admin_acknowledged_at).length > 0 && (
+                  <Badge className="bg-emerald-500 text-white text-xs px-1.5">
+                    {tasks.filter(t => t.status === 'completed' && !t.admin_acknowledged_at).length} {t('pending')}
+                  </Badge>
+                )}
               </div>
               {showCompleted ? (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -452,46 +461,99 @@ const Tasks = () => {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">
+            {/* Acknowledge All button for admins */}
+            {isAdmin && tasks.filter(t => t.status === 'completed' && !t.admin_acknowledged_at).length > 0 && (
+              <div className="mb-4 flex justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                  onClick={() => {
+                    acknowledgeAllCompleted();
+                    fetchTasks();
+                  }}
+                  disabled={isAcknowledging}
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  {t('acknowledgeAll') || 'Acknowledge All'}
+                </Button>
+              </div>
+            )}
             <div className="grid gap-4">
               {tasks
                 .filter(task => task.status === 'completed' || task.status === 'cancelled')
-                .map((task) => (
-                  <Card key={task.id} className="opacity-70">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="flex items-center gap-2 line-through text-muted-foreground">
-                            {task.title}
-                            <Badge variant={getPriorityColor(task.priority)}>
-                              <Flag className="h-3 w-3 mr-1" />
-                              {t(task.priority)}
-                            </Badge>
-                          </CardTitle>
-                          <CardDescription className="line-through">{task.description}</CardDescription>
-                        </div>
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
-                          {translateTaskStatus(task.status)}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>
-                            {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
-                          </span>
-                        </div>
-                        {task.completed_at && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{t('completed')}: {new Date(task.completed_at).toLocaleDateString()}</span>
+                .map((task) => {
+                  const isUnacknowledged = task.status === 'completed' && !task.admin_acknowledged_at;
+                  return (
+                    <Card key={task.id} className={isUnacknowledged ? 'border-emerald-300 bg-emerald-50/30 dark:bg-emerald-950/20' : 'opacity-70'}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className={`flex items-center gap-2 ${!isUnacknowledged ? 'line-through text-muted-foreground' : ''}`}>
+                              {task.title}
+                              <Badge variant={getPriorityColor(task.priority)}>
+                                <Flag className="h-3 w-3 mr-1" />
+                                {t(task.priority)}
+                              </Badge>
+                              {isUnacknowledged && (
+                                <Badge className="bg-emerald-500 text-white text-xs">
+                                  {t('awaitingAcknowledgment') || 'Awaiting Acknowledgment'}
+                                </Badge>
+                              )}
+                            </CardTitle>
+                            <CardDescription className={!isUnacknowledged ? 'line-through' : ''}>{task.description}</CardDescription>
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                            {translateTaskStatus(task.status)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <User className="h-4 w-4" />
+                              <span>
+                                {task.assignee ? `${task.assignee.first_name} ${task.assignee.last_name}` : t('unknown')}
+                              </span>
+                            </div>
+                            {task.completed_at && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                <span>{t('completed')}: {new Date(task.completed_at).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Admin acknowledge button */}
+                          {isAdmin && isUnacknowledged && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-emerald-600 border-emerald-300 hover:bg-emerald-100"
+                                    onClick={() => {
+                                      acknowledgeTask(task.id);
+                                      setTimeout(fetchTasks, 500);
+                                    }}
+                                    disabled={isAcknowledging}
+                                  >
+                                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                                    {t('acknowledge') || 'Noted'}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t('acknowledgeTaskTooltip') || 'Mark this task as acknowledged. Badge will be removed from dashboard.'}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
             </div>
           </CollapsibleContent>
         </Collapsible>

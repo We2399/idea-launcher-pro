@@ -3,30 +3,22 @@ import { Badge } from '@/components/ui/badge';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 
 interface TaskStatusBadgesProps {
-  showOnlyUnseen?: boolean;
   compact?: boolean;
 }
 
-export function TaskStatusBadges({ showOnlyUnseen = true, compact = false }: TaskStatusBadgesProps) {
-  const { counts, unseenCounts } = useTaskStatusCounts();
-  
-  const displayCounts = showOnlyUnseen ? unseenCounts : counts;
+export function TaskStatusBadges({ compact = false }: TaskStatusBadgesProps) {
+  const { counts } = useTaskStatusCounts();
   
   // Don't show anything if no counts
-  if (displayCounts.pending === 0 && displayCounts.inProgress === 0 && displayCounts.completed === 0) {
-    return null;
-  }
+  const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
+  if (total === 0) return null;
 
   if (compact) {
-    // Single badge with total unseen count
-    const total = displayCounts.pending + displayCounts.inProgress + displayCounts.completed;
-    if (total === 0) return null;
-    
     // Use the most urgent color
-    let bgColor = 'bg-emerald-500'; // default green
-    if (displayCounts.pending > 0) {
+    let bgColor = 'bg-emerald-500';
+    if (counts.pending > 0) {
       bgColor = 'bg-red-500';
-    } else if (displayCounts.inProgress > 0) {
+    } else if (counts.inProgress > 0) {
       bgColor = 'bg-amber-500';
     }
     
@@ -41,28 +33,28 @@ export function TaskStatusBadges({ showOnlyUnseen = true, compact = false }: Tas
 
   return (
     <div className="flex items-center gap-1">
-      {displayCounts.pending > 0 && (
+      {counts.pending > 0 && (
         <Badge 
           className="bg-red-500 hover:bg-red-600 text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm"
           title="New tasks"
         >
-          {displayCounts.pending}
+          {counts.pending}
         </Badge>
       )}
-      {displayCounts.inProgress > 0 && (
+      {counts.inProgress > 0 && (
         <Badge 
           className="bg-amber-500 hover:bg-amber-600 text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm"
           title="In progress"
         >
-          {displayCounts.inProgress}
+          {counts.inProgress}
         </Badge>
       )}
-      {displayCounts.completed > 0 && (
+      {counts.completedUnacknowledged > 0 && (
         <Badge 
           className="bg-emerald-500 hover:bg-emerald-600 text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm"
-          title="Completed"
+          title="Completed - pending acknowledgment"
         >
-          {displayCounts.completed}
+          {counts.completedUnacknowledged}
         </Badge>
       )}
     </div>
@@ -71,17 +63,17 @@ export function TaskStatusBadges({ showOnlyUnseen = true, compact = false }: Tas
 
 // Standalone badge component for dashboard cards
 export function TaskCardBadge() {
-  const { unseenCounts } = useTaskStatusCounts();
+  const { counts } = useTaskStatusCounts();
   
-  const total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+  const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
   
   if (total === 0) return null;
   
-  // Determine color based on priority: red > yellow > green
+  // Determine color based on priority: red > amber > green
   let bgColor = 'bg-emerald-500';
-  if (unseenCounts.pending > 0) {
+  if (counts.pending > 0) {
     bgColor = 'bg-red-500';
-  } else if (unseenCounts.inProgress > 0) {
+  } else if (counts.inProgress > 0) {
     bgColor = 'bg-amber-500';
   }
   

@@ -1162,6 +1162,8 @@ export type Database = {
       }
       tasks: {
         Row: {
+          admin_acknowledged_at: string | null
+          admin_acknowledged_by: string | null
           assigned_by: string
           assigned_to: string
           completed_at: string | null
@@ -1175,6 +1177,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_acknowledged_at?: string | null
+          admin_acknowledged_by?: string | null
           assigned_by: string
           assigned_to: string
           completed_at?: string | null
@@ -1188,6 +1192,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_acknowledged_at?: string | null
+          admin_acknowledged_by?: string | null
           assigned_by?: string
           assigned_to?: string
           completed_at?: string | null
