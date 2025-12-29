@@ -419,6 +419,10 @@ const translations = {
     selectTeamMember: 'Select team member',
     noTasksFound: 'No tasks found',
     completedTasks: 'Completed Tasks',
+    acknowledge: 'Noted',
+    acknowledgeAll: 'Acknowledge All',
+    awaitingAcknowledgment: 'Awaiting Acknowledgment',
+    acknowledgeTaskTooltip: 'Mark this task as acknowledged. Badge will be removed from dashboard.',
     start: 'Start',
     complete: 'Complete',
 
@@ -1200,6 +1204,10 @@ const translations = {
     selectTeamMember: '選擇團隊成員',
     noTasksFound: '未找到任務',
     completedTasks: '已完成任務',
+    acknowledge: '已閱',
+    acknowledgeAll: '全部確認',
+    awaitingAcknowledgment: '待確認',
+    acknowledgeTaskTooltip: '標記此任務為已確認。儀表板上的徽章將被移除。',
     start: '開始',
     complete: '完成',
 
@@ -1815,6 +1823,10 @@ const translations = {
     selectTeamMember: '选择团队成员',
     noTasksFound: '未找到任务',
     completedTasks: '已完成任务',
+    acknowledge: '已阅',
+    acknowledgeAll: '全部确认',
+    awaitingAcknowledgment: '待确认',
+    acknowledgeTaskTooltip: '标记此任务为已确认。仪表板上的徽章将被移除。',
     start: '开始',
     complete: '完成',
 
@@ -2429,6 +2441,10 @@ const translations = {
     selectTeamMember: 'Pilih anggota tim',
     noTasksFound: 'Tidak ada tugas ditemukan',
     completedTasks: 'Tugas Selesai',
+    acknowledge: 'Dicatat',
+    acknowledgeAll: 'Konfirmasi Semua',
+    awaitingAcknowledgment: 'Menunggu Konfirmasi',
+    acknowledgeTaskTooltip: 'Tandai tugas ini sebagai dikonfirmasi. Lencana akan dihapus dari dasbor.',
     start: 'Mulai',
     complete: 'Selesai',
 

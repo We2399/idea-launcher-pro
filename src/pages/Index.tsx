@@ -75,16 +75,16 @@ const Index = () => {
 
   // Helper function to get task badge color and count
   const getTaskBadge = (): { count: number; bgColor: string } | null => {
-    const { unseenCounts } = taskCounts;
-    const total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
+    const { counts } = taskCounts;
+    const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
     
     if (total === 0) return null;
     
-    // Priority: red (new) > yellow (in progress) > green (completed)
+    // Priority: red (new) > amber (in progress) > green (completed but not acknowledged)
     let bgColor = 'bg-emerald-500';
-    if (unseenCounts.pending > 0) {
+    if (counts.pending > 0) {
       bgColor = 'bg-red-500';
-    } else if (unseenCounts.inProgress > 0) {
+    } else if (counts.inProgress > 0) {
       bgColor = 'bg-amber-500';
     }
     

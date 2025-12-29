@@ -3,52 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface TaskStatusCounts {
-  pending: number;      // New tasks (red)
-  inProgress: number;   // Started tasks (yellow/orange)
-  completed: number;    // Finished tasks needing acknowledgment (green)
+  pending: number;           // New tasks (red)
+  inProgress: number;        // Started tasks (yellow/amber)
+  completedUnacknowledged: number;  // Finished but not acknowledged by admin (green badge)
   total: number;
 }
-
-interface SeenTaskRecord {
-  taskId: string;
-  seenAt: string;
-}
-
-const SEEN_TASKS_KEY = 'task-seen-records';
-
-// Get seen task IDs from localStorage
-const getSeenTaskIds = (userId: string): Record<string, string> => {
-  try {
-    const stored = localStorage.getItem(`${SEEN_TASKS_KEY}-${userId}`);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-};
-
-// Mark a task as seen
-const markTaskAsSeen = (userId: string, taskId: string) => {
-  const seen = getSeenTaskIds(userId);
-  seen[taskId] = new Date().toISOString();
-  localStorage.setItem(`${SEEN_TASKS_KEY}-${userId}`, JSON.stringify(seen));
-};
-
-// Mark multiple tasks as seen
-const markTasksAsSeen = (userId: string, taskIds: string[]) => {
-  const seen = getSeenTaskIds(userId);
-  taskIds.forEach(id => {
-    seen[id] = new Date().toISOString();
-  });
-  localStorage.setItem(`${SEEN_TASKS_KEY}-${userId}`, JSON.stringify(seen));
-};
-
-// Check if a task has been seen after it was last updated
-const isTaskSeen = (userId: string, taskId: string, updatedAt: string): boolean => {
-  const seen = getSeenTaskIds(userId);
-  if (!seen[taskId]) return false; // Never seen = not seen
-  // Seen if the "seenAt" timestamp is AFTER the task's "updatedAt"
-  return new Date(seen[taskId]) >= new Date(updatedAt);
-};
 
 export const useTaskStatusCounts = () => {
   const { user, userRole } = useAuth();
@@ -58,16 +17,15 @@ export const useTaskStatusCounts = () => {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['task-status-counts', user?.id, userRole],
-    queryFn: async (): Promise<{ counts: TaskStatusCounts; unseenCounts: TaskStatusCounts; tasks: any[] }> => {
+    queryFn: async (): Promise<{ counts: TaskStatusCounts; tasks: any[] }> => {
       if (!user?.id) {
         return { 
-          counts: { pending: 0, inProgress: 0, completed: 0, total: 0 },
-          unseenCounts: { pending: 0, inProgress: 0, completed: 0, total: 0 },
+          counts: { pending: 0, inProgress: 0, completedUnacknowledged: 0, total: 0 },
           tasks: []
         };
       }
 
-      let query = supabase.from('tasks').select('id, status, updated_at');
+      let query = supabase.from('tasks').select('id, status, updated_at, completed_at, admin_acknowledged_at, assigned_to, assigned_by');
 
       if (isEmployee) {
         // Employees see tasks assigned to them
@@ -83,57 +41,76 @@ export const useTaskStatusCounts = () => {
       }
 
       const allTasks = tasks || [];
-      console.log('Task status counts - fetched tasks:', allTasks.length, 'isEmployee:', isEmployee);
       
-      // Count tasks by status
+      // Count tasks that need attention
+      // For BOTH admin and employee: show badge for tasks not yet acknowledged
       const counts: TaskStatusCounts = {
         pending: allTasks.filter(t => t.status === 'pending').length,
         inProgress: allTasks.filter(t => t.status === 'in_progress').length,
-        completed: allTasks.filter(t => t.status === 'completed').length,
-        total: allTasks.length
-      };
-
-      // Count unseen tasks by status (tasks not yet viewed by this user after last update)
-      const unseenCounts: TaskStatusCounts = {
-        pending: allTasks.filter(t => t.status === 'pending' && !isTaskSeen(user.id, t.id, t.updated_at)).length,
-        inProgress: allTasks.filter(t => t.status === 'in_progress' && !isTaskSeen(user.id, t.id, t.updated_at)).length,
-        completed: allTasks.filter(t => t.status === 'completed' && !isTaskSeen(user.id, t.id, t.updated_at)).length,
+        // Completed but NOT acknowledged by admin - shows on both sides
+        completedUnacknowledged: allTasks.filter(t => 
+          t.status === 'completed' && !t.admin_acknowledged_at
+        ).length,
         total: 0
       };
-      unseenCounts.total = unseenCounts.pending + unseenCounts.inProgress + unseenCounts.completed;
-      
-      console.log('Task unseen counts:', unseenCounts);
+      counts.total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
 
-      return { counts, unseenCounts, tasks: allTasks };
+      return { counts, tasks: allTasks };
     },
     enabled: !!user?.id,
     refetchInterval: 30000,
   });
 
-  // Mark all tasks as seen (when user visits tasks page)
-  const markAllAsSeen = () => {
-    if (!user?.id || !data?.tasks) return;
-    
-    const taskIds = data.tasks.map(t => t.id);
-    markTasksAsSeen(user.id, taskIds);
-    
-    // Refetch to update counts
-    queryClient.invalidateQueries({ queryKey: ['task-status-counts'] });
-  };
+  // Admin acknowledges completed task - removes badge from both sides
+  const acknowledgeTask = useMutation({
+    mutationFn: async (taskId: string) => {
+      if (!user?.id || !isAdmin) throw new Error('Unauthorized');
+      
+      const { error } = await supabase
+        .from('tasks')
+        .update({ 
+          admin_acknowledged_at: new Date().toISOString(),
+          admin_acknowledged_by: user.id
+        })
+        .eq('id', taskId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-status-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    }
+  });
 
-  // Mark specific task as seen
-  const markSingleTaskAsSeen = (taskId: string) => {
-    if (!user?.id) return;
-    markTaskAsSeen(user.id, taskId);
-    queryClient.invalidateQueries({ queryKey: ['task-status-counts'] });
-  };
+  // Admin acknowledges all completed tasks
+  const acknowledgeAllCompleted = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !isAdmin) throw new Error('Unauthorized');
+      
+      const { error } = await supabase
+        .from('tasks')
+        .update({ 
+          admin_acknowledged_at: new Date().toISOString(),
+          admin_acknowledged_by: user.id
+        })
+        .eq('status', 'completed')
+        .is('admin_acknowledged_at', null);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-status-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    }
+  });
 
   return {
-    counts: data?.counts || { pending: 0, inProgress: 0, completed: 0, total: 0 },
-    unseenCounts: data?.unseenCounts || { pending: 0, inProgress: 0, completed: 0, total: 0 },
+    counts: data?.counts || { pending: 0, inProgress: 0, completedUnacknowledged: 0, total: 0 },
     loading: isLoading,
-    markAllAsSeen,
-    markSingleTaskAsSeen,
+    isAdmin,
+    acknowledgeTask: acknowledgeTask.mutate,
+    acknowledgeAllCompleted: acknowledgeAllCompleted.mutate,
+    isAcknowledging: acknowledgeTask.isPending || acknowledgeAllCompleted.isPending,
     refetch
   };
 };
