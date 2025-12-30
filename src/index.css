@@ -305,12 +305,15 @@ button.leave-pending-others,
 }
 
 /* Approved leave styles - solid fill backgrounds */
+/* Use very high specificity to override day_selected and all other states */
 .leave-approved-sick-leave,
 .leave-senior-approved-sick-leave,
 button.leave-approved-sick-leave,
 button.leave-senior-approved-sick-leave,
 .rdp .leave-approved-sick-leave,
-.rdp .leave-senior-approved-sick-leave {
+.rdp .leave-senior-approved-sick-leave,
+[aria-selected].leave-approved-sick-leave,
+[aria-selected].leave-senior-approved-sick-leave {
   background-color: hsl(30, 40%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
@@ -322,7 +325,9 @@ button.leave-senior-approved-sick-leave,
 button.leave-approved-vacation,
 button.leave-senior-approved-vacation,
 .rdp .leave-approved-vacation,
-.rdp .leave-senior-approved-vacation {
+.rdp .leave-senior-approved-vacation,
+[aria-selected].leave-approved-vacation,
+[aria-selected].leave-senior-approved-vacation {
   background-color: hsl(200, 60%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
@@ -334,7 +339,9 @@ button.leave-senior-approved-vacation,
 button.leave-approved-maternity-leave,
 button.leave-senior-approved-maternity-leave,
 .rdp .leave-approved-maternity-leave,
-.rdp .leave-senior-approved-maternity-leave {
+.rdp .leave-senior-approved-maternity-leave,
+[aria-selected].leave-approved-maternity-leave,
+[aria-selected].leave-senior-approved-maternity-leave {
   background-color: hsl(340, 60%, 45%) !important;
   color: white !important;
   border-radius: 6px !important;
@@ -346,7 +353,9 @@ button.leave-senior-approved-maternity-leave,
 button.leave-approved-paternity-leave,
 button.leave-senior-approved-paternity-leave,
 .rdp .leave-approved-paternity-leave,
-.rdp .leave-senior-approved-paternity-leave {
+.rdp .leave-senior-approved-paternity-leave,
+[aria-selected].leave-approved-paternity-leave,
+[aria-selected].leave-senior-approved-paternity-leave {
   background-color: hsl(270, 50%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
@@ -358,9 +367,20 @@ button.leave-senior-approved-paternity-leave,
 button.leave-approved-others,
 button.leave-senior-approved-others,
 .rdp .leave-approved-others,
-.rdp .leave-senior-approved-others {
+.rdp .leave-senior-approved-others,
+[aria-selected].leave-approved-others,
+[aria-selected].leave-senior-approved-others {
   background-color: hsl(0, 0%, 35%) !important;
   color: white !important;
   border-radius: 6px !important;
   border: none !important;
+}
+
+/* Pending leave with aria-selected override */
+[aria-selected].leave-pending-sick-leave,
+[aria-selected].leave-pending-vacation,
+[aria-selected].leave-pending-maternity-leave,
+[aria-selected].leave-pending-paternity-leave,
+[aria-selected].leave-pending-others {
+  background-color: transparent !important;
 }
