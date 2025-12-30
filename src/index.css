@@ -252,83 +252,115 @@ body {
 }
 
 /* Calendar leave request modifiers - High specificity to override react-day-picker styles */
-/* Target the day button element which has the modifier class applied */
+/* Target the day element which has the modifier class applied */
+/* react-day-picker v8 applies modifier classes directly to the day element */
+.leave-pending-sick-leave,
 button.leave-pending-sick-leave,
-.rdp button.leave-pending-sick-leave {
+.rdp .leave-pending-sick-leave,
+.rdp-day.leave-pending-sick-leave {
   background-color: transparent !important;
   border: 3px solid hsl(30, 60%, 50%) !important;
   border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px hsl(30, 60%, 50%) !important;
 }
 
+.leave-pending-vacation,
 button.leave-pending-vacation,
-.rdp button.leave-pending-vacation {
+.rdp .leave-pending-vacation,
+.rdp-day.leave-pending-vacation {
   background-color: transparent !important;
   border: 3px solid hsl(200, 70%, 50%) !important;
   border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px hsl(200, 70%, 50%) !important;
 }
 
+.leave-pending-maternity-leave,
 button.leave-pending-maternity-leave,
-.rdp button.leave-pending-maternity-leave {
+.rdp .leave-pending-maternity-leave,
+.rdp-day.leave-pending-maternity-leave {
   background-color: transparent !important;
   border: 3px solid hsl(340, 70%, 55%) !important;
   border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px hsl(340, 70%, 55%) !important;
 }
 
+.leave-pending-paternity-leave,
 button.leave-pending-paternity-leave,
-.rdp button.leave-pending-paternity-leave {
+.rdp .leave-pending-paternity-leave,
+.rdp-day.leave-pending-paternity-leave {
   background-color: transparent !important;
   border: 3px solid hsl(270, 60%, 55%) !important;
   border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px hsl(270, 60%, 55%) !important;
 }
 
+.leave-pending-others,
 button.leave-pending-others,
-.rdp button.leave-pending-others {
+.rdp .leave-pending-others,
+.rdp-day.leave-pending-others {
   background-color: transparent !important;
   border: 3px solid hsl(0, 0%, 50%) !important;
   border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px hsl(0, 0%, 50%) !important;
 }
 
+/* Approved leave styles - solid fill backgrounds */
+.leave-approved-sick-leave,
+.leave-senior-approved-sick-leave,
 button.leave-approved-sick-leave,
 button.leave-senior-approved-sick-leave,
-.rdp button.leave-approved-sick-leave,
-.rdp button.leave-senior-approved-sick-leave {
+.rdp .leave-approved-sick-leave,
+.rdp .leave-senior-approved-sick-leave {
   background-color: hsl(30, 40%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
+  border: none !important;
 }
 
+.leave-approved-vacation,
+.leave-senior-approved-vacation,
 button.leave-approved-vacation,
 button.leave-senior-approved-vacation,
-.rdp button.leave-approved-vacation,
-.rdp button.leave-senior-approved-vacation {
+.rdp .leave-approved-vacation,
+.rdp .leave-senior-approved-vacation {
   background-color: hsl(200, 60%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
+  border: none !important;
 }
 
+.leave-approved-maternity-leave,
+.leave-senior-approved-maternity-leave,
 button.leave-approved-maternity-leave,
 button.leave-senior-approved-maternity-leave,
-.rdp button.leave-approved-maternity-leave,
-.rdp button.leave-senior-approved-maternity-leave {
+.rdp .leave-approved-maternity-leave,
+.rdp .leave-senior-approved-maternity-leave {
   background-color: hsl(340, 60%, 45%) !important;
   color: white !important;
   border-radius: 6px !important;
+  border: none !important;
 }
 
+.leave-approved-paternity-leave,
+.leave-senior-approved-paternity-leave,
 button.leave-approved-paternity-leave,
 button.leave-senior-approved-paternity-leave,
-.rdp button.leave-approved-paternity-leave,
-.rdp button.leave-senior-approved-paternity-leave {
+.rdp .leave-approved-paternity-leave,
+.rdp .leave-senior-approved-paternity-leave {
   background-color: hsl(270, 50%, 40%) !important;
   color: white !important;
   border-radius: 6px !important;
+  border: none !important;
 }
 
+.leave-approved-others,
+.leave-senior-approved-others,
 button.leave-approved-others,
 button.leave-senior-approved-others,
-.rdp button.leave-approved-others,
-.rdp button.leave-senior-approved-others {
+.rdp .leave-approved-others,
+.rdp .leave-senior-approved-others {
   background-color: hsl(0, 0%, 35%) !important;
   color: white !important;
   border-radius: 6px !important;
+  border: none !important;
 }

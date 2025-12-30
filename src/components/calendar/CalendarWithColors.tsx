@@ -66,19 +66,34 @@ export default function CalendarWithColors() {
   const { translateLeaveType, translateStatus } = useTranslationHelpers();
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>('my');
+  // Default to 'all' for administrators and hr_admin, 'my' for employees
+  const getDefaultViewMode = () => {
+    if (userRole === 'administrator' || userRole === 'hr_admin') return 'all';
+    return 'my';
+  };
+  const [viewMode, setViewMode] = useState<'my' | 'team' | 'all'>(getDefaultViewMode());
   const [loading, setLoading] = useState(true);
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [newRequestDate, setNewRequestDate] = useState<Date | undefined>();
 
+  // Update viewMode when userRole changes (e.g., after login)
   useEffect(() => {
-    if (user) {
+    if (userRole === 'administrator' || userRole === 'hr_admin') {
+      setViewMode('all');
+    }
+  }, [userRole]);
+
+  useEffect(() => {
+    if (user && userRole) {
       fetchRequests();
     }
   }, [user, userRole, viewMode]);
 
   const fetchRequests = async () => {
+    setLoading(true);
     try {
+      console.log('Fetching leave requests with viewMode:', viewMode, 'userRole:', userRole);
+      
       let query = supabase
         .from('leave_requests')
         .select('*')
@@ -102,8 +117,10 @@ export default function CalendarWithColors() {
           query = query.eq('user_id', 'no-match');
         }
       }
+      // For viewMode === 'all', no additional filter is applied
 
       const { data: requestsData, error: requestsError } = await query;
+      console.log('Leave requests data:', requestsData, 'error:', requestsError);
       if (requestsError) throw requestsError;
 
       // Fetch related data separately
@@ -125,11 +142,13 @@ export default function CalendarWithColors() {
           leave_types: leaveTypesMap.get(request.leave_type_id) || null
         }));
 
+        console.log('Enriched leave requests:', enrichedData);
         setRequests(enrichedData);
       } else {
         setRequests([]);
       }
     } catch (error: any) {
+      console.error('Error fetching leave requests:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to fetch calendar data",
