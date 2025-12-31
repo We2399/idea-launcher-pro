@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { DocumentFilters } from '@/components/storage/DocumentFilters';
 import { DocumentCard } from '@/components/storage/DocumentCard';
 import { DocumentDetailsModal } from '@/components/storage/DocumentDetailsModal';
@@ -23,6 +24,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function StorageCentre() {
   const { userRole } = useAuth();
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<Filters>({});
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [selectedDocForDetails, setSelectedDocForDetails] = useState<any>(null);
@@ -128,7 +130,7 @@ export default function StorageCentre() {
       <div className="container mx-auto p-6">
         <Alert>
           <AlertDescription>
-            You don't have permission to access the Storage Centre.
+            {t('noPermissionStorageCentre')}
           </AlertDescription>
         </Alert>
       </div>
@@ -139,9 +141,9 @@ export default function StorageCentre() {
     <div className="container mx-auto safe-area-screen p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Storage Centre</h1>
+          <h1 className="text-3xl font-bold">{t('storageCentreTitle')}</h1>
           <p className="text-muted-foreground">
-            Centralized document management and approval system
+            {t('storageCentreDescription')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -150,7 +152,7 @@ export default function StorageCentre() {
               variant={showDeleted ? "default" : "outline"}
               onClick={() => setShowDeleted(!showDeleted)}
             >
-              {showDeleted ? 'Show Active' : `Show Deleted (${stats.deleted})`}
+              {showDeleted ? t('showActive') : `${t('showDeleted')} (${stats.deleted})`}
             </Button>
           )}
           <Button 
@@ -159,7 +161,7 @@ export default function StorageCentre() {
             variant="outline"
           >
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            {t('exportCSV')}
           </Button>
           <Button 
             onClick={handleExportWithFiles} 
@@ -168,12 +170,12 @@ export default function StorageCentre() {
             {exportProgress ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Exporting... ({exportProgress.current}/{exportProgress.total})
+                {t('exporting')} ({exportProgress.current}/{exportProgress.total})
               </>
             ) : (
               <>
                 <Package className="h-4 w-4 mr-2" />
-                Export with Files
+                {t('exportWithFiles')}
               </>
             )}
           </Button>
@@ -186,7 +188,7 @@ export default function StorageCentre() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center">
               <FileText className="h-4 w-4 mr-2" />
-              Total Documents
+              {t('totalDocuments')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -198,7 +200,7 @@ export default function StorageCentre() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center">
               <Clock className="h-4 w-4 mr-2 text-blue-600" />
-              Pending Approval
+              {t('pendingApprovalDocs')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -210,7 +212,7 @@ export default function StorageCentre() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center">
               <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-              Active
+              {t('activeDocs')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -222,7 +224,7 @@ export default function StorageCentre() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center">
               <XCircle className="h-4 w-4 mr-2 text-red-600" />
-              Rejected
+              {t('rejectedDocs')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -243,7 +245,7 @@ export default function StorageCentre() {
         <Card>
           <CardContent className="py-12 text-center">
             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No documents found</p>
+            <p className="text-muted-foreground">{t('noDocumentsFound')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -306,17 +308,17 @@ export default function StorageCentre() {
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Document</DialogTitle>
+            <DialogTitle>{t('rejectDocument')}</DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting this document. The employee will see this message.
+              {t('rejectDocumentDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="rejection-reason">Rejection Reason *</Label>
+              <Label htmlFor="rejection-reason">{t('rejectionReasonRequired')}</Label>
               <Textarea
                 id="rejection-reason"
-                placeholder="Explain why this document is being rejected..."
+                placeholder={t('explainRejection')}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={4}
@@ -325,7 +327,7 @@ export default function StorageCentre() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               variant="destructive" 
@@ -335,10 +337,10 @@ export default function StorageCentre() {
               {rejectMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Rejecting...
+                  {t('rejecting')}
                 </>
               ) : (
-                'Reject Document'
+                t('rejectDocument')
               )}
             </Button>
           </DialogFooter>
@@ -356,17 +358,17 @@ export default function StorageCentre() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Document</DialogTitle>
+            <DialogTitle>{t('deleteDocumentTitle')}</DialogTitle>
             <DialogDescription>
-              This will soft-delete the document. It will be archived but not permanently removed.
+              {t('deleteDocumentDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="deletion-reason">Deletion Reason (Optional)</Label>
+              <Label htmlFor="deletion-reason">{t('deletionReasonOptional')}</Label>
               <Textarea
                 id="deletion-reason"
-                placeholder="Optional: Explain why this document is being deleted..."
+                placeholder={t('explainDeletion')}
                 value={deletionReason}
                 onChange={(e) => setDeletionReason(e.target.value)}
                 rows={3}
@@ -375,7 +377,7 @@ export default function StorageCentre() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               variant="destructive" 
@@ -385,10 +387,10 @@ export default function StorageCentre() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t('deleting')}
                 </>
               ) : (
-                'Delete Document'
+                t('delete')
               )}
             </Button>
           </DialogFooter>
