@@ -342,16 +342,16 @@ Christmas Day,${selectedYear}-12-25`;
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Public Holidays Management
+            {t('publicHolidaysManagement')}
           </CardTitle>
           <CardDescription>
-            Manage public holidays by country and year. Import holidays from CSV or add them manually.
+            {t('publicHolidaysDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-wrap gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Year</label>
+              <label className="text-sm font-medium mb-2 block">{t('year')}</label>
               <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -365,7 +365,7 @@ Christmas Day,${selectedYear}-12-25`;
             </div>
             
             <div>
-              <label className="text-sm font-medium mb-2 block">Country</label>
+              <label className="text-sm font-medium mb-2 block">{t('country')}</label>
               <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
@@ -383,11 +383,11 @@ Christmas Day,${selectedYear}-12-25`;
             <div className="flex-1 flex items-end gap-2 flex-wrap">
               <Button onClick={() => setShowAddForm(!showAddForm)} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Holiday
+                {t('addHoliday')}
               </Button>
               <Button onClick={downloadTemplate} variant="outline">
                 <Download className="h-4 w-4 mr-2" />
-                Download Template
+                {t('downloadTemplate')}
               </Button>
               <div>
                 <input
@@ -403,7 +403,7 @@ Christmas Day,${selectedYear}-12-25`;
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Import CSV
+                  {t('importCSV')}
                 </Button>
               </div>
             </div>
@@ -549,12 +549,12 @@ Christmas Day,${selectedYear}-12-25`;
 
           <div className="space-y-3">
             <h3 className="text-lg font-medium">
-              Holidays for {selectedCountry} - {selectedYear}
+              {t('holidaysFor')} {selectedCountry} - {selectedYear}
             </h3>
             
             {holidays.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No holidays found for this year and country.
+                {t('noHolidaysFound')}
               </div>
             ) : (
               <div className="space-y-2">
@@ -566,7 +566,7 @@ Christmas Day,${selectedYear}-12-25`;
                         {format(new Date(holiday.date), 'MMMM dd, yyyy')}
                         {holiday.is_recurring && (
                           <Badge variant="outline" className="ml-2 text-xs">
-                            Recurring
+                            {t('recurring')}
                           </Badge>
                         )}
                       </div>
