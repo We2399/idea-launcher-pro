@@ -281,15 +281,16 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{t('documents')}</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
+        <CardTitle className="text-lg">{t('documents')}</CardTitle>
         {canManage && (
           <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="flex items-center gap-2 shrink-0">
                 <Upload className="h-4 w-4" />
-                {t('uploadDocument')}
+                <span className="hidden sm:inline">{t('uploadDocument')}</span>
+                <span className="sm:hidden">{t('upload')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -351,11 +352,11 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
         {documents.length > 0 ? (
           <div className="space-y-3">
             {documents.map((document) => (
-              <div key={document.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <File className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium text-sm">{document.document_name}</p>
+              <div key={document.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-border rounded-lg gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <File className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{document.document_name}</p>
                     <p className="text-xs text-muted-foreground">
                       {t(documentTypes.find(type => type.value === document.document_type)?.label || 'document')} • {formatFileSize(document.file_size)}
                     </p>
@@ -364,7 +365,7 @@ export default function DocumentManager({ userId, canManage = true }: DocumentMa
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                   <div className="relative">
                     <Button
                       variant="outline"
