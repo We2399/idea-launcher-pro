@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [mode, setMode] = useState<'request' | 'update'>('request');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -104,7 +106,7 @@ const ResetPassword: React.FC = () => {
                 className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to Login
+                {t('backToLogin')}
               </Link>
             </form>
           ) : (
@@ -141,7 +143,7 @@ const ResetPassword: React.FC = () => {
                 className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to Login
+                {t('backToLogin')}
               </Link>
             </form>
           )}
