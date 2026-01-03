@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -98,6 +99,13 @@ const ResetPassword: React.FC = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </Button>
+              <Link 
+                to="/auth" 
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Login
+              </Link>
             </form>
           ) : (
             <form onSubmit={handleUpdatePassword} className="space-y-4">
@@ -128,6 +136,13 @@ const ResetPassword: React.FC = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Updating...' : 'Update Password'}
               </Button>
+              <Link 
+                to="/auth" 
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Login
+              </Link>
             </form>
           )}
         </CardContent>
