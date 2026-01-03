@@ -1,44 +1,142 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
-import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User } from 'lucide-react';
+import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User, Search } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from '@/components/ui/dialog';
+
+interface Employee {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  department: string;
+  position: string;
+}
 
 export function MobileDashboard() {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const counts = useDashboardCounts();
   const taskCounts = useTaskStatusCounts();
-  const { isImpersonating, impersonatedUserId } = useImpersonation();
+  const { isImpersonating, impersonatedUserId, startImpersonation } = useImpersonation();
+  const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [impersonationOpen, setImpersonationOpen] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
   
   const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
   
-  // Fetch user's first name
+  // Fetch user's first name and avatar
   useEffect(() => {
-    const fetchUserName = async () => {
+    const fetchUserProfile = async () => {
       const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
       if (!targetUserId) return;
       
       const { data } = await supabase
         .from('profiles')
-        .select('first_name')
+        .select('first_name, last_name')
         .eq('user_id', targetUserId)
         .single();
       
       if (data?.first_name) {
         setUserName(data.first_name);
       }
+      
+      // Check for avatar in profile_documents
+      const { data: avatarDoc } = await supabase
+        .from('profile_documents')
+        .select('file_path')
+        .eq('user_id', targetUserId)
+        .eq('document_type', 'avatar')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (avatarDoc?.file_path) {
+        const { data: signedUrl } = await supabase.storage
+          .from('profile-documents')
+          .createSignedUrl(avatarDoc.file_path, 3600);
+        if (signedUrl?.signedUrl) {
+          setAvatarUrl(signedUrl.signedUrl);
+        }
+      } else {
+        setAvatarUrl(null);
+      }
     };
     
-    fetchUserName();
+    fetchUserProfile();
   }, [user?.id, isImpersonating, impersonatedUserId]);
+  
+  const getInitials = () => {
+    if (userName) return userName.charAt(0).toUpperCase();
+    return isAdmin ? 'E' : 'H';
+  };
+
+  // Fetch employees when impersonation dialog opens
+  useEffect(() => {
+    if (impersonationOpen && isAdmin) {
+      fetchEmployees();
+    }
+  }, [impersonationOpen, isAdmin]);
+
+  const fetchEmployees = async () => {
+    setLoadingEmployees(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email, department, position')
+        .order('first_name');
+      if (error) throw error;
+      setEmployees(data || []);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
+
+  const filteredEmployees = employees.filter(emp => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      emp.first_name?.toLowerCase().includes(searchLower) ||
+      emp.last_name?.toLowerCase().includes(searchLower) ||
+      emp.email?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const handleImpersonate = (employee: Employee) => {
+    startImpersonation(employee.user_id);
+    toast({
+      title: t('impersonationStarted') || 'Impersonation Started',
+      description: `${t('nowViewingAs') || 'Now viewing as'} ${employee.first_name} ${employee.last_name}`
+    });
+    setImpersonationOpen(false);
+    navigate('/');
+  };
+
+  const getEmployeeInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+  };
   
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -99,9 +197,83 @@ export function MobileDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher variant="pills" />
-            <Badge variant="secondary" className="bg-white/20 text-primary-foreground border-0 rounded-full px-3 py-1">
-              {isAdmin ? '👤 ' + t('employerView') : '👤 ' + t('helperView')}
-            </Badge>
+            {isAdmin ? (
+              <Dialog open={impersonationOpen} onOpenChange={setImpersonationOpen}>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-2 bg-white/20 rounded-full px-2 py-1 hover:bg-white/30 transition-colors">
+                    <Avatar className="h-6 w-6 border border-white/30">
+                      <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                      <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
+                        {getInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-primary-foreground font-medium pr-1">
+                      {t('employerView')}
+                    </span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{t('switchView') || 'Switch View'}</DialogTitle>
+                    <DialogDescription>
+                      {t('selectEmployeeToView') || 'Select an employee to view the system as them'}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder={t('searchEmployees') || 'Search employees...'}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                      {loadingEmployees ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">{t('loading') || 'Loading...'}</p>
+                      ) : filteredEmployees.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          {searchQuery ? (t('noEmployeesFound') || 'No employees found') : (t('noEmployees') || 'No employees')}
+                        </p>
+                      ) : (
+                        filteredEmployees.map((employee) => (
+                          <div
+                            key={employee.user_id}
+                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                            onClick={() => handleImpersonate(employee)}
+                          >
+                            <Avatar className="h-9 w-9">
+                              <AvatarFallback>
+                                {getEmployeeInitials(employee.first_name, employee.last_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {employee.first_name} {employee.last_name}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">{employee.position}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <div className="flex items-center gap-2 bg-white/20 rounded-full px-2 py-1">
+                <Avatar className="h-6 w-6 border border-white/30">
+                  <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                  <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-primary-foreground font-medium pr-1">
+                  {t('helperView')}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
