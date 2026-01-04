@@ -91,6 +91,7 @@ const translations = {
     // Profile Requests card
     myProfileRequests: 'My Profile Requests',
     profileChangeRequests: 'Profile Change Requests',
+    profileChanges: 'Profile Changes',
     yourProfileChangeRequests: 'Your profile change requests',
     teamProfileChangeRequests: 'Team profile change requests',
     noRequests: 'No pending requests',
@@ -878,6 +879,7 @@ const translations = {
     // Profile Requests card
     myProfileRequests: '我的資料變更申請',
     profileChangeRequests: '資料變更申請',
+    profileChanges: '個人資料變更',
     yourProfileChangeRequests: '您的資料變更申請',
     teamProfileChangeRequests: '團隊資料變更申請',
     noRequests: '無待處理申請',
@@ -1664,6 +1666,7 @@ const translations = {
     // Profile Requests card
     myProfileRequests: '我的资料变更申请',
     profileChangeRequests: '资料变更申请',
+    profileChanges: '个人资料变更',
     yourProfileChangeRequests: '您的资料变更申请',
     teamProfileChangeRequests: '团队资料变更申请',
     noRequests: '无待处理申请',
@@ -2367,6 +2370,7 @@ const translations = {
     // Profile Requests card
     myProfileRequests: 'Permintaan Profil Saya',
     profileChangeRequests: 'Permintaan Perubahan Profil',
+    profileChanges: 'Perubahan Profil',
     yourProfileChangeRequests: 'Permintaan perubahan profil Anda',
     teamProfileChangeRequests: 'Permintaan perubahan profil tim',
     noRequests: 'Tidak ada permintaan tertunda',
