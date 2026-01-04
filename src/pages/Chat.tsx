@@ -149,51 +149,51 @@ const Chat = () => {
     enabled: !!user?.id && !!selectedContact?.user_id,
   });
 
-  // Subscribe to real-time updates
+  // Subscribe to real-time updates - listen to all messages for this user
   useEffect(() => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('chat-realtime')
+      .channel(`chat-realtime-${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'chat_messages',
-          filter: `receiver_id=eq.${user.id}`,
         },
         (payload) => {
+          const newMessage = payload.new as ChatMessage;
+          
+          // Only process if this message involves the current user
+          if (newMessage.sender_id !== user.id && newMessage.receiver_id !== user.id) {
+            return;
+          }
+          
+          // Immediately refetch to show the new message
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
           queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
           
-          if (payload.new && (payload.new as ChatMessage).sender_id !== user.id) {
-            toast({
-              title: t('newMessage'),
-              description: (payload.new as ChatMessage).content.substring(0, 50) + '...',
-            });
+          // Show toast notification for incoming messages (not from self, and not from currently selected contact)
+          if (newMessage.sender_id !== user.id) {
+            const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
+            if (!isFromSelectedContact) {
+              toast({
+                title: t('newMessage'),
+                description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
+              });
+            }
           }
         }
       )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `sender_id=eq.${user.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-          queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
-        }
-      )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Chat realtime subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, t]);
+  }, [user?.id, queryClient, t, selectedContact?.user_id]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
