@@ -288,6 +288,11 @@ const translations = {
     signInToAccount: 'Sign in to your account',
     enterEmail: 'Enter your email',
     enterPassword: 'Enter your password',
+    dontHaveAccount: "Don't have an account?",
+    alreadyHaveAccount: 'Already have an account?',
+    signUpHere: 'Sign up here',
+    signInHere: 'Sign in here',
+    signingIn: 'Signing in...',
     
     // Profile page
     myProfile: 'My Profile',
@@ -1166,6 +1171,11 @@ const translations = {
     signInToAccount: '登入您的帳戶',
     enterEmail: '輸入您的電子郵件',
     enterPassword: '輸入您的密碼',
+    dontHaveAccount: '還沒有帳戶？',
+    alreadyHaveAccount: '已有帳戶？',
+    signUpHere: '在此註冊',
+    signInHere: '在此登入',
+    signingIn: '登入中...',
     
     // Profile page
     myProfile: '我的個人資料',
@@ -1879,6 +1889,11 @@ const translations = {
     signInToAccount: '登录您的账户',
     enterEmail: '输入您的电子邮件',
     enterPassword: '输入您的密码',
+    dontHaveAccount: '还没有账户？',
+    alreadyHaveAccount: '已有账户？',
+    signUpHere: '在此注册',
+    signInHere: '在此登录',
+    signingIn: '登录中...',
     
     // Profile page
     myProfile: '我的个人资料',
@@ -2591,6 +2606,11 @@ const translations = {
     signInToAccount: 'Masuk ke akun Anda',
     enterEmail: 'Masukkan email Anda',
     enterPassword: 'Masukkan kata sandi Anda',
+    dontHaveAccount: 'Belum punya akun?',
+    alreadyHaveAccount: 'Sudah punya akun?',
+    signUpHere: 'Daftar di sini',
+    signInHere: 'Masuk di sini',
+    signingIn: 'Masuk...',
     
     // Profile page
     myProfile: 'Profil Saya',

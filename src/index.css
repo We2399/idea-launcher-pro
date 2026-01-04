@@ -8,106 +8,111 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Teal/Cream color scheme inspired by Social Network UI */
+    --background: 160 25% 92%;
+    --foreground: 200 25% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 200 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 200 25% 20%;
 
-    --primary: 217.2 91.2% 59.8%;
+    /* Teal primary color */
+    --primary: 174 42% 51%;
     --primary-foreground: 0 0% 100%;
     
-    --hermes-orange: 24 95% 53%;
-    --hermes-orange-dark: 20 90% 45%;
+    /* Golden/Yellow accent (hermes becomes golden) */
+    --hermes-orange: 45 90% 55%;
+    --hermes-orange-dark: 42 85% 48%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 160 20% 96%;
+    --secondary-foreground: 200 25% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 160 15% 94%;
+    --muted-foreground: 200 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 90% 55%;
+    --accent-foreground: 200 25% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217.2 91.2% 59.8%;
+    --border: 160 20% 88%;
+    --input: 160 20% 88%;
+    --ring: 174 42% 51%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 200 25% 20%;
+    --sidebar-primary: 174 42% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 160 15% 94%;
+    --sidebar-accent-foreground: 200 25% 15%;
+    --sidebar-border: 160 20% 88%;
+    --sidebar-ring: 174 42% 51%;
 
-    /* Professional gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217.2 91.2% 59.8%), hsl(217.2 91.2% 69.8%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 99%));
+    /* Teal gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(174 42% 51%), hsl(174 42% 61%));
+    --gradient-subtle: linear-gradient(180deg, hsl(160 25% 92%), hsl(160 20% 88%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(160 15% 98%));
+    --gradient-golden: linear-gradient(135deg, hsl(45 90% 55%), hsl(42 85% 48%));
     
-    /* Professional shadows */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-elevated: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    /* Soft shadows */
+    --shadow-card: 0 2px 8px 0 hsl(174 42% 51% / 0.08), 0 1px 3px -1px hsl(0 0% 0% / 0.08);
+    --shadow-card-hover: 0 8px 20px -4px hsl(174 42% 51% / 0.15), 0 4px 8px -2px hsl(0 0% 0% / 0.08);
+    --shadow-elevated: 0 12px 30px -6px hsl(174 42% 51% / 0.2), 0 6px 12px -4px hsl(0 0% 0% / 0.1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 200 25% 10%;
+    --foreground: 160 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 200 25% 14%;
+    --card-foreground: 160 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 200 25% 14%;
+    --popover-foreground: 160 20% 95%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 174 42% 51%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 200 20% 18%;
+    --secondary-foreground: 160 20% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 200 20% 18%;
+    --muted-foreground: 160 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 90% 55%;
+    --accent-foreground: 200 25% 10%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 91.2% 59.8%;
+    --border: 200 20% 20%;
+    --input: 200 20% 20%;
+    --ring: 174 42% 51%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-background: 200 25% 12%;
+    --sidebar-foreground: 160 20% 95%;
+    --sidebar-primary: 174 42% 51%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 200 20% 18%;
+    --sidebar-accent-foreground: 160 20% 95%;
+    --sidebar-border: 200 20% 20%;
+    --sidebar-ring: 174 42% 51%;
 
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217.2 91.2% 59.8%), hsl(217.2 91.2% 49.8%));
-    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 17.5%));
-    --gradient-card: linear-gradient(135deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 15.5%));
+    --gradient-primary: linear-gradient(135deg, hsl(174 42% 51%), hsl(174 42% 41%));
+    --gradient-subtle: linear-gradient(180deg, hsl(200 25% 10%), hsl(200 20% 15%));
+    --gradient-card: linear-gradient(135deg, hsl(200 25% 14%), hsl(200 20% 18%));
+    --gradient-golden: linear-gradient(135deg, hsl(45 90% 50%), hsl(42 85% 42%));
     
     /* Dark mode shadows */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-card: 0 2px 8px 0 hsl(0 0% 0% / 0.3), 0 1px 3px -1px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 8px 20px -4px hsl(0 0% 0% / 0.4), 0 4px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 12px 30px -6px hsl(0 0% 0% / 0.5), 0 6px 12px -4px hsl(0 0% 0% / 0.4);
   }
 }
 
