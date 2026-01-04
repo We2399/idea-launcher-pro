@@ -6,20 +6,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, User, Users } from 'lucide-react';
+import { Building2, User, Users, MessageCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 type UserType = 'employer' | 'employee' | null;
 type OrgType = 'individual' | 'company';
+type AuthMode = 'signin' | 'signup';
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get('invite');
+  
+  const [authMode, setAuthMode] = useState<AuthMode>('signin');
   
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<UserType>(inviteCode ? 'employee' : null);
@@ -207,27 +209,31 @@ const Auth = () => {
   };
 
   const renderUserTypeSelection = () => (
-    <div className="space-y-4">
-      <p className="text-center text-muted-foreground mb-4">{t('selectAccountType')}</p>
+    <div className="space-y-5">
+      <p className="text-center text-muted-foreground">{t('selectAccountType')}</p>
       
       <div className="grid grid-cols-2 gap-4">
         <button
           type="button"
           onClick={() => setUserType('employer')}
-          className="flex flex-col items-center p-6 border-2 rounded-xl hover:border-hermes hover:bg-hermes/5 transition-all"
+          className="flex flex-col items-center p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30"
         >
-          <Building2 className="h-12 w-12 text-hermes mb-3" />
-          <span className="font-semibold">{t('employerRole')}</span>
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+            <Building2 className="h-7 w-7 text-primary" />
+          </div>
+          <span className="font-semibold text-sm">{t('employerRole')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('employerDescription')}</span>
         </button>
         
         <button
           type="button"
           onClick={() => setUserType('employee')}
-          className="flex flex-col items-center p-6 border-2 rounded-xl hover:border-hermes hover:bg-hermes/5 transition-all"
+          className="flex flex-col items-center p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30"
         >
-          <User className="h-12 w-12 text-hermes mb-3" />
-          <span className="font-semibold">{t('employeeRole')}</span>
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+            <User className="h-7 w-7 text-primary" />
+          </div>
+          <span className="font-semibold text-sm">{t('employeeRole')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('employeeDescription')}</span>
         </button>
       </div>
@@ -241,70 +247,77 @@ const Auth = () => {
         onClick={() => setUserType(null)}
         className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
       >
-        ← {t('back')}
+        <ArrowLeft className="w-4 h-4" /> {t('back')}
       </button>
 
       {/* Organization Type Selection */}
       <div className="space-y-3">
-        <Label>{t('organizationType')}</Label>
+        <Label className="text-muted-foreground text-sm">{t('organizationType')}</Label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => setOrgType('individual')}
-            className={`p-4 border-2 rounded-lg text-left transition-all ${
-              orgType === 'individual' ? 'border-hermes bg-hermes/5' : 'hover:border-muted-foreground'
+            className={`p-4 border-2 rounded-2xl text-left transition-all ${
+              orgType === 'individual' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground bg-muted/30'
             }`}
           >
-            <User className="h-6 w-6 mb-2 text-hermes" />
-            <p className="font-medium">{t('individualEmployer')}</p>
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              <User className="h-5 w-5 text-primary" />
+            </div>
+            <p className="font-medium text-sm">{t('individualEmployer')}</p>
             <p className="text-xs text-muted-foreground">{t('oneHelperFree')}</p>
           </button>
           
           <button
             type="button"
             onClick={() => setOrgType('company')}
-            className={`p-4 border-2 rounded-lg text-left transition-all ${
-              orgType === 'company' ? 'border-hermes bg-hermes/5' : 'hover:border-muted-foreground'
+            className={`p-4 border-2 rounded-2xl text-left transition-all ${
+              orgType === 'company' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground bg-muted/30'
             }`}
           >
-            <Users className="h-6 w-6 mb-2 text-hermes" />
-            <p className="font-medium">{t('company')}</p>
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <p className="font-medium text-sm">{t('company')}</p>
             <p className="text-xs text-muted-foreground">{t('multipleEmployeesPaid')}</p>
           </button>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="org-name">{orgType === 'individual' ? t('yourName') : t('companyName')}</Label>
+        <Label htmlFor="org-name" className="text-muted-foreground text-sm">{orgType === 'individual' ? t('yourName') : t('companyName')}</Label>
         <Input
           id="org-name"
           placeholder={orgType === 'individual' ? t('yourNamePlaceholder') : t('companyNamePlaceholder')}
           value={formData.organizationName}
           onChange={(e) => updateFormData('organizationName', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
         />
         {errors.organizationName && <p className="text-sm text-destructive">{errors.organizationName}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="first-name">{t('firstName')}</Label>
+          <Label htmlFor="first-name" className="text-muted-foreground text-sm">{t('firstName')}</Label>
           <Input
             id="first-name"
             placeholder={t('firstNamePlaceholder')}
             value={formData.firstName}
             onChange={(e) => updateFormData('firstName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last-name">{t('lastName')}</Label>
+          <Label htmlFor="last-name" className="text-muted-foreground text-sm">{t('lastName')}</Label>
           <Input
             id="last-name"
             placeholder={t('lastNamePlaceholder')}
             value={formData.lastName}
             onChange={(e) => updateFormData('lastName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
@@ -312,26 +325,28 @@ const Auth = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-email">{t('email')}</Label>
+        <Label htmlFor="signup-email" className="text-muted-foreground text-sm">{t('email')}</Label>
         <Input
           id="signup-email"
           type="email"
           placeholder={t('emailPlaceholder')}
           value={formData.email}
           onChange={(e) => updateFormData('email', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
         />
         {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-password">{t('password')}</Label>
+        <Label htmlFor="signup-password" className="text-muted-foreground text-sm">{t('password')}</Label>
         <Input
           id="signup-password"
           type="password"
           placeholder={t('createStrongPassword')}
           value={formData.password}
           onChange={(e) => updateFormData('password', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
           minLength={6}
         />
@@ -340,7 +355,7 @@ const Auth = () => {
 
       {/* Pricing Info */}
       {orgType === 'company' && (
-        <div className="p-3 bg-muted rounded-lg text-sm">
+        <div className="p-4 bg-muted/50 rounded-2xl text-sm">
           <p className="font-medium mb-2">{t('pricingTiers')}</p>
           <ul className="space-y-1 text-muted-foreground text-xs">
             <li>• {t('tier1to5')}</li>
@@ -351,19 +366,23 @@ const Auth = () => {
       )}
 
       {orgType === 'individual' && (
-        <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm">
-          <p className="font-medium text-green-800 dark:text-green-200">{t('freeForIndividual')}</p>
-          <p className="text-xs text-green-600 dark:text-green-400 mt-1">{t('oneHelperNoCharge')}</p>
+        <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl text-sm">
+          <p className="font-medium text-primary">{t('freeForIndividual')}</p>
+          <p className="text-xs text-primary/80 mt-1">{t('oneHelperNoCharge')}</p>
         </div>
       )}
 
       {errors.submit && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
           {errors.submit}
         </div>
       )}
 
-      <Button type="submit" className="w-full bg-hermes hover:bg-hermes-dark" disabled={isLoading}>
+      <Button 
+        type="submit" 
+        className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" 
+        disabled={isLoading}
+      >
         {isLoading ? t('creatingAccount') : t('createEmployerAccount')}
       </Button>
     </div>
@@ -377,55 +396,57 @@ const Auth = () => {
           onClick={() => setUserType(null)}
           className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
         >
-          ← {t('back')}
+          <ArrowLeft className="w-4 h-4" /> {t('back')}
         </button>
       )}
 
       {/* Invitation Code */}
       <div className="space-y-2">
-        <Label htmlFor="invite-code">{t('invitationCode')}</Label>
+        <Label htmlFor="invite-code" className="text-muted-foreground text-sm">{t('invitationCode')}</Label>
         <Input
           id="invite-code"
           placeholder={t('enterInvitationCode')}
           value={formData.invitationCode}
           onChange={(e) => updateFormData('invitationCode', e.target.value)}
-          className="tracking-widest text-center font-mono"
+          className="tracking-widest text-center font-mono rounded-xl border-border bg-muted/50 h-12"
           maxLength={8}
           required
         />
         {errors.invitationCode && <p className="text-sm text-destructive">{errors.invitationCode}</p>}
         
         {invitationDetails && (
-          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+          <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl">
+            <p className="text-sm font-medium text-primary">
               ✓ {t('validInvitation')}
             </p>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+            <p className="text-xs text-primary/80 mt-1">
               {t('joiningOrganization')}: {invitationDetails.organizations?.name}
             </p>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="first-name">{t('firstName')}</Label>
+          <Label htmlFor="first-name" className="text-muted-foreground text-sm">{t('firstName')}</Label>
           <Input
             id="first-name"
             placeholder={t('firstNamePlaceholder')}
             value={formData.firstName}
             onChange={(e) => updateFormData('firstName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last-name">{t('lastName')}</Label>
+          <Label htmlFor="last-name" className="text-muted-foreground text-sm">{t('lastName')}</Label>
           <Input
             id="last-name"
             placeholder={t('lastNamePlaceholder')}
             value={formData.lastName}
             onChange={(e) => updateFormData('lastName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
@@ -433,55 +454,58 @@ const Auth = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="position">{t('position')}</Label>
+        <Label htmlFor="position" className="text-muted-foreground text-sm">{t('position')}</Label>
         <Input
           id="position"
           placeholder={t('positionPlaceholder')}
           value={formData.position}
           onChange={(e) => updateFormData('position', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-email">{t('email')}</Label>
+        <Label htmlFor="signup-email" className="text-muted-foreground text-sm">{t('email')}</Label>
         <Input
           id="signup-email"
           type="email"
           placeholder={t('emailPlaceholder')}
           value={formData.email}
           onChange={(e) => updateFormData('email', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
         />
         {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-password">{t('password')}</Label>
+        <Label htmlFor="signup-password" className="text-muted-foreground text-sm">{t('password')}</Label>
         <Input
           id="signup-password"
           type="password"
           placeholder={t('createStrongPassword')}
           value={formData.password}
           onChange={(e) => updateFormData('password', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
           minLength={6}
         />
         {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
       </div>
 
-      <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
+      <div className="p-4 bg-muted/50 rounded-2xl text-sm text-muted-foreground">
         <p>{t('employeeJoinNote')}</p>
       </div>
 
       {errors.submit && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
           {errors.submit}
         </div>
       )}
 
       <Button 
         type="submit" 
-        className="w-full bg-hermes hover:bg-hermes-dark" 
+        className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" 
         disabled={isLoading || (!invitationDetails && formData.invitationCode.length >= 8)}
       >
         {isLoading ? t('creatingAccount') : t('joinAsEmployee')}
@@ -491,30 +515,32 @@ const Auth = () => {
 
   const renderFirstUserForm = () => (
     <div className="space-y-4">
-      <div className="p-3 text-sm bg-primary/10 border border-primary/20 rounded-md">
+      <div className="p-4 text-sm bg-primary/10 border border-primary/20 rounded-2xl">
         <p className="font-medium mb-1">{t('firstAdminAccount')}</p>
         <p className="text-muted-foreground text-xs">{t('firstAdminDescription')}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="first-name">{t('firstName')}</Label>
+          <Label htmlFor="first-name" className="text-muted-foreground text-sm">{t('firstName')}</Label>
           <Input
             id="first-name"
             placeholder={t('firstNamePlaceholder')}
             value={formData.firstName}
             onChange={(e) => updateFormData('firstName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last-name">{t('lastName')}</Label>
+          <Label htmlFor="last-name" className="text-muted-foreground text-sm">{t('lastName')}</Label>
           <Input
             id="last-name"
             placeholder={t('lastNamePlaceholder')}
             value={formData.lastName}
             onChange={(e) => updateFormData('lastName', e.target.value)}
+            className="rounded-xl border-border bg-muted/50 h-12"
             required
           />
           {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
@@ -522,26 +548,28 @@ const Auth = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-email">{t('email')}</Label>
+        <Label htmlFor="signup-email" className="text-muted-foreground text-sm">{t('email')}</Label>
         <Input
           id="signup-email"
           type="email"
           placeholder={t('emailPlaceholder')}
           value={formData.email}
           onChange={(e) => updateFormData('email', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
         />
         {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup-password">{t('password')}</Label>
+        <Label htmlFor="signup-password" className="text-muted-foreground text-sm">{t('password')}</Label>
         <Input
           id="signup-password"
           type="password"
           placeholder={t('createStrongPassword')}
           value={formData.password}
           onChange={(e) => updateFormData('password', e.target.value)}
+          className="rounded-xl border-border bg-muted/50 h-12"
           required
           minLength={6}
         />
@@ -549,76 +577,136 @@ const Auth = () => {
       </div>
 
       {errors.submit && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+        <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
           {errors.submit}
         </div>
       )}
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button 
+        type="submit" 
+        className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold" 
+        disabled={isLoading}
+      >
         {isLoading ? t('creatingAccount') : t('createAdminAccount')}
       </Button>
     </div>
   );
 
   return (
-    <div className="min-h-screen safe-area-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t('appNameLine1')} {t('appNameLine2')}</CardTitle>
-          <CardDescription>{t('signInToAccount')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">{t('signIn')}</TabsTrigger>
-              <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">{t('email')}</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder={t('enterEmail')}
-                    value={formData.email}
-                    onChange={(e) => updateFormData('email', e.target.value)}
-                    required
-                  />
+    <div className="min-h-screen safe-area-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-sm">
+        {/* Sign In View */}
+        {authMode === 'signin' && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Logo/Branding Section */}
+            <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 bg-primary-foreground/20 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-10 h-10" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">{t('password')}</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder={t('enterPassword')}
-                    value={formData.password}
-                    onChange={(e) => updateFormData('password', e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-hermes hover:bg-hermes-dark" disabled={isLoading}>
-                  {isLoading ? t('signingIn') : t('signIn')}
-                </Button>
-                <div className="flex justify-end pt-2">
+              </div>
+              <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
+              <p className="text-lg opacity-90">{t('appNameLine2')}</p>
+            </div>
+
+            {/* Sign In Form */}
+            <Card className="rounded-3xl shadow-card border-0">
+              <CardContent className="p-6 space-y-4">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email" className="text-muted-foreground text-sm">{t('email')}</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder={t('enterEmail')}
+                      value={formData.email}
+                      onChange={(e) => updateFormData('email', e.target.value)}
+                      className="rounded-xl border-border bg-muted/50 h-12"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password" className="text-muted-foreground text-sm">{t('password')}</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder={t('enterPassword')}
+                      value={formData.password}
+                      onChange={(e) => updateFormData('password', e.target.value)}
+                      className="rounded-xl border-border bg-muted/50 h-12"
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base shadow-md" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? t('signingIn') : t('signIn')}
+                  </Button>
+                </form>
+
+                <div className="flex justify-center pt-2">
                   <Link to="/reset-password" className="text-sm text-primary hover:underline">{t('forgotPassword')}</Link>
                 </div>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp}>
-                {isFirstUser ? renderFirstUserForm() : (
-                  userType === null ? renderUserTypeSelection() :
-                  userType === 'employer' ? renderEmployerForm() :
-                  renderEmployeeForm()
-                )}
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+
+            {/* Sign Up Link */}
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground text-sm">{t('dontHaveAccount')}</p>
+              <button 
+                onClick={() => setAuthMode('signup')}
+                className="text-primary font-semibold hover:underline"
+              >
+                {t('signUpHere')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Sign Up View */}
+        {authMode === 'signup' && (
+          <div className="space-y-4 animate-fade-in">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <button 
+                onClick={() => {
+                  setAuthMode('signin');
+                  setUserType(null);
+                }}
+                className="p-2 rounded-full bg-card hover:bg-muted transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h1 className="text-xl font-bold">{t('signUp')}</h1>
+            </div>
+
+            <Card className="rounded-3xl shadow-card border-0">
+              <CardContent className="p-6">
+                <form onSubmit={handleSignUp}>
+                  {isFirstUser ? renderFirstUserForm() : (
+                    userType === null ? renderUserTypeSelection() :
+                    userType === 'employer' ? renderEmployerForm() :
+                    renderEmployeeForm()
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Sign In Link */}
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground text-sm">{t('alreadyHaveAccount')}</p>
+              <button 
+                onClick={() => setAuthMode('signin')}
+                className="text-primary font-semibold hover:underline"
+              >
+                {t('signInHere')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
