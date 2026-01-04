@@ -1309,6 +1309,76 @@ export default function ProfileWithApproval() {
           </CardContent>
         </Card>
 
+        {/* Change Password - Only show for own profile, not when viewing other profiles */}
+        {/* MOVED BEFORE Leave Balances for better mobile visibility */}
+        {!isManager && !isImpersonating && viewingUserId === user?.id && (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Lock className="h-4 w-4" />
+                {t('changePassword') || 'Change Password'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-0">
+              <div className="space-y-1.5">
+                <Label htmlFor="newPassword" className="text-sm">{t('newPassword') || 'New Password'}</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="h-9"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword" className="text-sm">{t('confirmPassword') || 'Confirm Password'}</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="h-9"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleChangePassword} 
+                disabled={changingPassword || !newPassword || !confirmPassword}
+                className="w-full h-9"
+                size="sm"
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                {changingPassword ? (t('saving') || 'Saving...') : (t('changePassword') || 'Change Password')}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Leave Balances */}
         <Card>
           <CardHeader>
@@ -1355,72 +1425,6 @@ export default function ProfileWithApproval() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Change Password - Only show for own profile, not when viewing other profiles */}
-        {!isManager && !isImpersonating && viewingUserId === user?.id && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5" />
-                {t('changePassword') || 'Change Password'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">{t('newPassword') || 'New Password'}</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showNewPassword ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="••••••••"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                  >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t('confirmPassword') || 'Confirm Password'}</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleChangePassword} 
-                disabled={changingPassword || !newPassword || !confirmPassword}
-                className="w-full"
-              >
-                <Lock className="h-4 w-4 mr-2" />
-                {changingPassword ? (t('saving') || 'Saving...') : (t('changePassword') || 'Change Password')}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Change Requests */}
