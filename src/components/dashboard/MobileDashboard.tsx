@@ -262,17 +262,19 @@ export function MobileDashboard() {
                 </DialogContent>
               </Dialog>
             ) : (
-              <div className="flex items-center gap-2 bg-white/20 rounded-full px-2 py-1">
-                <Avatar className="h-6 w-6 border border-white/30">
-                  <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                  <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-primary-foreground font-medium pr-1">
-                  {t('helperView')}
-                </span>
-              </div>
+              <Link to="/profile">
+                <div className="flex items-center gap-2 bg-white/20 rounded-full px-2 py-1 hover:bg-white/30 transition-colors">
+                  <Avatar className="h-6 w-6 border border-white/30">
+                    <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                    <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-primary-foreground font-medium pr-1 max-w-[60px] truncate">
+                    {userName || t('profile')}
+                  </span>
+                </div>
+              </Link>
             )}
           </div>
         </div>
