@@ -805,6 +805,14 @@ const translations = {
     importSuccess: 'Successfully imported',
     holidays: 'holidays',
     pleaseSelectDate: 'Select date',
+    
+    // Avatar upload
+    pleaseSelectImage: 'Please select an image file',
+    fileTooLarge: 'File size must be less than 5MB',
+    avatarUpdated: 'Profile photo updated successfully',
+    failedToUploadAvatar: 'Failed to upload profile photo',
+    clickToUploadPhoto: 'Click to upload photo',
+    profilePhoto: 'Profile Photo',
   },
   'zh-TW': {
     // Navigation
@@ -1590,6 +1598,14 @@ const translations = {
     importSuccess: '成功匯入',
     holidays: '個假期',
     pleaseSelectDate: '選擇日期',
+    
+    // Avatar upload
+    pleaseSelectImage: '請選擇圖片檔案',
+    fileTooLarge: '檔案大小須小於 5MB',
+    avatarUpdated: '個人照片更新成功',
+    failedToUploadAvatar: '上傳個人照片失敗',
+    clickToUploadPhoto: '點擊上傳照片',
+    profilePhoto: '個人照片',
   },
   'zh-CN': {
     // Navigation
@@ -2295,6 +2311,14 @@ const translations = {
     importSuccess: '成功导入',
     holidays: '个假期',
     pleaseSelectDate: '选择日期',
+    
+    // Avatar upload
+    pleaseSelectImage: '请选择图片文件',
+    fileTooLarge: '文件大小须小于 5MB',
+    avatarUpdated: '个人照片更新成功',
+    failedToUploadAvatar: '上传个人照片失败',
+    clickToUploadPhoto: '点击上传照片',
+    profilePhoto: '个人照片',
   },
   id: {
     // Navigation
@@ -2999,6 +3023,14 @@ const translations = {
     importSuccess: 'Berhasil mengimpor',
     holidays: 'hari libur',
     pleaseSelectDate: 'Pilih tanggal',
+    
+    // Avatar upload
+    pleaseSelectImage: 'Silakan pilih file gambar',
+    fileTooLarge: 'Ukuran file harus kurang dari 5MB',
+    avatarUpdated: 'Foto profil berhasil diperbarui',
+    failedToUploadAvatar: 'Gagal mengunggah foto profil',
+    clickToUploadPhoto: 'Klik untuk unggah foto',
+    profilePhoto: 'Foto Profil',
   }
 };
 

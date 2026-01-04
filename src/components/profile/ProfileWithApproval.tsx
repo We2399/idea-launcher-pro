@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import DocumentManager from './DocumentManager';
+import AvatarUpload from './AvatarUpload';
 
 interface Profile {
   id: string;
@@ -871,6 +872,15 @@ export default function ProfileWithApproval() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Avatar Upload Section */}
+            <div className="flex justify-center pb-4 border-b border-border">
+              <AvatarUpload 
+                userId={viewingUserId || ''} 
+                userName={`${currentProfile.first_name || ''} ${currentProfile.last_name || ''}`.trim()}
+                canEdit={!isImpersonating && (viewingUserId === user?.id || canHrAdminEdit)}
+              />
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Core Profile Fields - Setup/Display/HR Edit Mode */}
               <div className="space-y-2">
