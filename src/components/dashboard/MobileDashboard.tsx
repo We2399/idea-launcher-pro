@@ -283,43 +283,43 @@ export function MobileDashboard() {
       {/* Content - more space from header */}
       <div className="px-4 mt-4 space-y-4">
         {/* Greeting Card */}
-        <div className="bg-background rounded-2xl p-4 shadow-sm">
-          <h2 className="text-xl font-semibold text-foreground">
+        <div className="bg-primary rounded-2xl p-4 shadow-sm">
+          <h2 className="text-xl font-semibold text-primary-foreground">
             {getGreeting()}, {getDisplayName()}!
           </h2>
-          <p className="text-muted-foreground text-sm">{t('hereTodaySummary')}</p>
+          <p className="text-primary-foreground/80 text-sm">{t('hereTodaySummary')}</p>
         </div>
 
         {/* Stats Cards - Tasks & Leave */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/tasks">
-            <div className={`${taskBadgeInfo?.lightBg || 'bg-amber-50 dark:bg-amber-950/30'} rounded-2xl p-3 border ${taskBadgeInfo?.borderColor || 'border-amber-200/50 dark:border-amber-800/30'} relative`}>
+            <div className="bg-primary/90 rounded-2xl p-3 relative shadow-sm">
               {taskBadgeInfo && (
                 <Badge 
-                  className={`absolute -top-1 -right-1 ${taskBadgeInfo.bgColor} text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm`}
+                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm"
                 >
                   {taskBadgeInfo.count > 99 ? '99+' : taskBadgeInfo.count}
                 </Badge>
               )}
               <div className="flex justify-center mb-1">
-                <div className={`p-2 rounded-full ${taskBadgeInfo?.iconBg || 'bg-amber-100 dark:bg-amber-900/50'}`}>
-                  <CheckSquare className={`h-5 w-5 ${taskBadgeInfo?.iconColor || 'text-amber-600 dark:text-amber-400'}`} />
+                <div className="p-2 rounded-full bg-white/20">
+                  <CheckSquare className="h-5 w-5 text-primary-foreground" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-center text-foreground">{taskDisplayCount}</p>
-              <p className="text-xs text-center text-muted-foreground">{t('tasksPending')}</p>
+              <p className="text-2xl font-bold text-center text-primary-foreground">{taskDisplayCount}</p>
+              <p className="text-xs text-center text-primary-foreground/80">{t('tasksPending')}</p>
             </div>
           </Link>
           
           <Link to="/requests">
-            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-2xl p-3 border border-purple-200/50 dark:border-purple-800/30">
+            <div className="bg-primary/90 rounded-2xl p-3 shadow-sm">
               <div className="flex justify-center mb-1">
-                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/50">
-                  <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div className="p-2 rounded-full bg-white/20">
+                  <FileText className="h-5 w-5 text-primary-foreground" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-center text-foreground">{leaveRequests}</p>
-              <p className="text-xs text-center text-muted-foreground">{t('leaveRequests')}</p>
+              <p className="text-2xl font-bold text-center text-primary-foreground">{leaveRequests}</p>
+              <p className="text-xs text-center text-primary-foreground/80">{t('leaveRequests')}</p>
             </div>
           </Link>
         </div>
@@ -329,27 +329,27 @@ export function MobileDashboard() {
           <h3 className="text-lg font-semibold text-foreground mb-3">{t('quickActions')}</h3>
           <div className="grid grid-cols-4 gap-2">
             <Link to="/calendar">
-              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
-                <Calendar className="h-5 w-5 text-blue-500" />
-                <span className="text-xs font-medium text-foreground text-center">{t('calendar')}</span>
+              <div className="bg-primary rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm">
+                <Calendar className="h-5 w-5 text-primary-foreground" />
+                <span className="text-xs font-medium text-primary-foreground text-center">{t('calendar')}</span>
               </div>
             </Link>
             <Link to="/payroll">
-              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
-                <Wallet className="h-5 w-5 text-green-500" />
-                <span className="text-xs font-medium text-foreground text-center">{t('payroll')}</span>
+              <div className="bg-primary rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm">
+                <Wallet className="h-5 w-5 text-primary-foreground" />
+                <span className="text-xs font-medium text-primary-foreground text-center">{t('payroll')}</span>
               </div>
             </Link>
             <Link to="/profile">
-              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
-                <User className="h-5 w-5 text-indigo-500" />
-                <span className="text-xs font-medium text-foreground text-center">{t('profile')}</span>
+              <div className="bg-primary rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm">
+                <User className="h-5 w-5 text-primary-foreground" />
+                <span className="text-xs font-medium text-primary-foreground text-center">{t('profile')}</span>
               </div>
             </Link>
             <Link to="/cash-control">
-              <div className="bg-background rounded-xl p-3 border border-border flex flex-col items-center gap-1 hover:bg-muted/50 transition-colors">
-                <DollarSign className="h-5 w-5 text-rose-500" />
-                <span className="text-xs font-medium text-foreground text-center">{t('expenses')}</span>
+              <div className="bg-primary rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm">
+                <DollarSign className="h-5 w-5 text-primary-foreground" />
+                <span className="text-xs font-medium text-primary-foreground text-center">{t('expenses')}</span>
               </div>
             </Link>
           </div>
@@ -358,9 +358,9 @@ export function MobileDashboard() {
         {/* Chat Quick Action */}
         <div>
           <Link to="/chat">
-            <div className="bg-gradient-to-r from-hermes to-hermes-dark rounded-2xl p-4 flex items-center gap-3 hover:opacity-90 transition-opacity">
-              <MessageCircle className="h-6 w-6 text-white" />
-              <span className="text-sm font-medium text-white">{t('sendMessage')}</span>
+            <div className="bg-accent rounded-2xl p-4 flex items-center gap-3 hover:bg-accent/90 transition-opacity shadow-sm">
+              <MessageCircle className="h-6 w-6 text-accent-foreground" />
+              <span className="text-sm font-medium text-accent-foreground">{t('sendMessage')}</span>
             </div>
           </Link>
         </div>
