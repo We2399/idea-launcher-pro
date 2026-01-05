@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useChatNotificationSound } from '@/hooks/useChatNotificationSound';
 
 interface ChatMessage {
   id: string;
@@ -34,6 +35,7 @@ const Chat = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const { playNotificationSound } = useChatNotificationSound();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -174,8 +176,11 @@ const Chat = () => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
           queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
           
-          // Show toast notification for incoming messages (not from self, and not from currently selected contact)
+          // Show toast notification and play sound for incoming messages (not from self)
           if (newMessage.sender_id !== user.id) {
+            // Play notification sound
+            playNotificationSound();
+            
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
             if (!isFromSelectedContact) {
               toast({
@@ -193,7 +198,7 @@ const Chat = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, t, selectedContact?.user_id]);
+  }, [user?.id, queryClient, t, selectedContact?.user_id, playNotificationSound]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
