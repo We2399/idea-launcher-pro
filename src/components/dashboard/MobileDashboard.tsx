@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User, Search } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,7 @@ export function MobileDashboard() {
   const { t } = useLanguage();
   const counts = useDashboardCounts();
   const taskCounts = useTaskStatusCounts();
+  const { unreadCount: unreadMessages } = useUnreadMessagesCount();
   const { isImpersonating, impersonatedUserId, startImpersonation } = useImpersonation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
@@ -290,36 +292,55 @@ export function MobileDashboard() {
           <p className="text-primary-foreground/80 text-sm">{t('hereTodaySummary')}</p>
         </div>
 
-        {/* Stats Cards - Tasks & Leave */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Stats Cards - Tasks, Leave & Messages */}
+        <div className="grid grid-cols-3 gap-2">
           <Link to="/tasks">
-            <div className="bg-primary/90 rounded-2xl p-3 relative shadow-sm">
+            <div className="bg-primary/90 rounded-2xl p-2.5 relative shadow-sm">
               {taskBadgeInfo && (
                 <Badge 
-                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs shadow-sm"
+                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground h-4 min-w-[16px] flex items-center justify-center px-1 text-[10px] shadow-sm"
                 >
                   {taskBadgeInfo.count > 99 ? '99+' : taskBadgeInfo.count}
                 </Badge>
               )}
               <div className="flex justify-center mb-1">
-                <div className="p-2 rounded-full bg-white/20">
-                  <CheckSquare className="h-5 w-5 text-primary-foreground" />
+                <div className="p-1.5 rounded-full bg-white/20">
+                  <CheckSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-center text-primary-foreground">{taskDisplayCount}</p>
-              <p className="text-xs text-center text-primary-foreground/80">{t('tasksPending')}</p>
+              <p className="text-xl font-bold text-center text-primary-foreground">{taskDisplayCount}</p>
+              <p className="text-[10px] text-center text-primary-foreground/80">{t('tasksPending')}</p>
             </div>
           </Link>
           
           <Link to="/requests">
-            <div className="bg-primary/90 rounded-2xl p-3 shadow-sm">
+            <div className="bg-primary/90 rounded-2xl p-2.5 shadow-sm">
               <div className="flex justify-center mb-1">
-                <div className="p-2 rounded-full bg-white/20">
-                  <FileText className="h-5 w-5 text-primary-foreground" />
+                <div className="p-1.5 rounded-full bg-white/20">
+                  <FileText className="h-4 w-4 text-primary-foreground" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-center text-primary-foreground">{leaveRequests}</p>
-              <p className="text-xs text-center text-primary-foreground/80">{t('leaveRequests')}</p>
+              <p className="text-xl font-bold text-center text-primary-foreground">{leaveRequests}</p>
+              <p className="text-[10px] text-center text-primary-foreground/80">{t('leaveRequests')}</p>
+            </div>
+          </Link>
+
+          <Link to="/chat">
+            <div className="bg-primary/90 rounded-2xl p-2.5 relative shadow-sm">
+              {unreadMessages > 0 && (
+                <Badge 
+                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground h-4 min-w-[16px] flex items-center justify-center px-1 text-[10px] shadow-sm"
+                >
+                  {unreadMessages > 99 ? '99+' : unreadMessages}
+                </Badge>
+              )}
+              <div className="flex justify-center mb-1">
+                <div className="p-1.5 rounded-full bg-white/20">
+                  <MessageCircle className="h-4 w-4 text-primary-foreground" />
+                </div>
+              </div>
+              <p className="text-xl font-bold text-center text-primary-foreground">{unreadMessages}</p>
+              <p className="text-[10px] text-center text-primary-foreground/80">{t('messages')}</p>
             </div>
           </Link>
         </div>
