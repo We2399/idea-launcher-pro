@@ -15,9 +15,9 @@ interface UpgradeTierDialogProps {
 }
 
 const tierOptions = [
-  { tier: 'mini' as const, employees: 5, price: 'Contact Sales' },
-  { tier: 'sme' as const, employees: 20, price: 'Contact Sales' },
-  { tier: 'enterprise' as const, employees: 50, price: 'Contact Sales' },
+  { tier: 'mini' as const, employees: 9, price: '$18/month' },
+  { tier: 'sme' as const, employees: 50, price: '$58/month' },
+  { tier: 'enterprise' as const, employees: 100, price: '$98/month' },
 ];
 
 export const UpgradeTierDialog = ({
