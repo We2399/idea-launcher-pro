@@ -35,6 +35,7 @@ import ResetPassword from './pages/ResetPassword';
 
 const queryClient = new QueryClient();
 
+// App component with all providers
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
