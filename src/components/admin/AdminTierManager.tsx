@@ -45,9 +45,9 @@ export function AdminTierManager() {
     
     const maxEmployeesMap: Record<string, number> = {
       free: 1,
-      mini: 5,
-      sme: 20,
-      enterprise: 50
+      mini: 9,
+      sme: 50,
+      enterprise: 100
     };
 
     const { error } = await supabase
@@ -147,9 +147,9 @@ export function AdminTierManager() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="free">{t('freeTier')} (1)</SelectItem>
-                      <SelectItem value="mini">{t('miniTier')} (5)</SelectItem>
-                      <SelectItem value="sme">{t('smeTier')} (20)</SelectItem>
-                      <SelectItem value="enterprise">{t('enterpriseTier')} (50)</SelectItem>
+                      <SelectItem value="mini">{t('miniTier')} (9)</SelectItem>
+                      <SelectItem value="sme">{t('smeTier')} (50)</SelectItem>
+                      <SelectItem value="enterprise">{t('enterpriseTier')} (100)</SelectItem>
                     </SelectContent>
                   </Select>
                   {upgrading === org.id && (

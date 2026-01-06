@@ -133,7 +133,7 @@ export const useOrganization = () => {
   const createOrganization = async (name: string, type: 'individual' | 'company') => {
     if (!user) return null;
 
-    const maxEmployees = type === 'individual' ? 1 : 5;
+    const maxEmployees = type === 'individual' ? 1 : 9;
     const tier = type === 'individual' ? 'free' : 'mini';
 
     const { data, error } = await supabase
@@ -171,9 +171,9 @@ export const useOrganization = () => {
     if (!organization || !isOwner) return false;
 
     const maxEmployeesMap = {
-      mini: 5,
-      sme: 20,
-      enterprise: 50
+      mini: 9,
+      sme: 50,
+      enterprise: 100
     };
 
     const { error } = await supabase
