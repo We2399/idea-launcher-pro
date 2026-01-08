@@ -602,9 +602,7 @@ const Auth = () => {
             {/* Logo/Branding Section */}
             <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
               <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 bg-primary-foreground/20 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src={jiejieLadyIcon} alt="Jie Jie" className="w-16 h-16 object-cover" />
-                </div>
+                <img src={jiejieLadyIcon} alt="Jie Jie" className="w-20 h-20 rounded-full object-cover" />
               </div>
               <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
               <p className="text-lg opacity-90">{t('appNameLine2')}</p>
