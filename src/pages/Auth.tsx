@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, User, Users, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Building2, User, Users, ArrowLeft } from 'lucide-react';
+import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
 import { toast } from 'sonner';
 
 type UserType = 'employer' | 'employee' | null;
@@ -601,8 +602,8 @@ const Auth = () => {
             {/* Logo/Branding Section */}
             <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
               <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 bg-primary-foreground/20 rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-10 h-10" />
+                <div className="w-20 h-20 bg-primary-foreground/20 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src={jiejieLadyIcon} alt="Jie Jie" className="w-16 h-16 object-cover" />
                 </div>
               </div>
               <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
