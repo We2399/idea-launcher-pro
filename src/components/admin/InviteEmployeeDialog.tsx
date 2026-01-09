@@ -91,11 +91,26 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     setEmailSent(false);
     
     try {
+      // SECURITY CHECK: If email is provided, verify it doesn't already exist in the system
+      if (email.trim()) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, email')
+          .eq('email', email.trim().toLowerCase())
+          .maybeSingle();
+
+        if (existingProfile) {
+          toast.error(t('emailAlreadyRegistered') || 'This email is already registered. The person should log in with their existing account.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const { data, error } = await supabase
         .from('employee_invitations')
         .insert({
           organization_id: organization.id,
-          email: email.trim() || null,
+          email: email.trim().toLowerCase() || null,
           created_by: user.id,
         })
         .select()

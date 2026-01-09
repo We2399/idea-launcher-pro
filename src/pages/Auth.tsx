@@ -158,6 +158,22 @@ const Auth = () => {
     setErrors({});
     
     try {
+      // SECURITY CHECK: Verify email doesn't already exist in profiles
+      // This prevents someone from using an invitation code to access another user's account
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('user_id, email')
+        .eq('email', formData.email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (existingProfile) {
+        setErrors({ 
+          email: t('emailAlreadyRegistered') || 'This email is already registered. Please sign in instead.' 
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // Build metadata based on user type
       const metadata: Record<string, any> = {
         first_name: formData.firstName.trim(),
