@@ -1,7 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { getTierByProductId } from '@/lib/stripeTiers';
+
+interface SubscriptionState {
+  subscribed: boolean;
+  productId: string | null;
+  subscriptionEnd: string | null;
+  status: string;
+  tierKey: string | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -11,19 +20,71 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   userRole: string | null;
+  subscription: SubscriptionState;
+  checkSubscription: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const defaultSubscription: SubscriptionState = {
+  subscribed: false,
+  productId: null,
+  subscriptionEnd: null,
+  status: 'none',
+  tierKey: null,
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionState>(defaultSubscription);
+
+  const checkSubscription = useCallback(async () => {
+    if (!session) {
+      setSubscription(defaultSubscription);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+
+      if (data) {
+        // Find tier key from product ID
+        let tierKey: string | null = null;
+        if (data.product_id) {
+          const tier = getTierByProductId(data.product_id);
+          if (tier) {
+            // Find the key for this tier
+            const { STRIPE_TIERS } = await import('@/lib/stripeTiers');
+            tierKey = Object.entries(STRIPE_TIERS).find(
+              ([_, t]) => t.product_id === data.product_id
+            )?.[0] || null;
+          }
+        }
+
+        setSubscription({
+          subscribed: data.subscribed || false,
+          productId: data.product_id || null,
+          subscriptionEnd: data.subscription_end || null,
+          status: data.status || 'none',
+          tierKey,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to check subscription:', err);
+    }
+  }, [session]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -45,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
         } else {
           setUserRole(null);
+          setSubscription(defaultSubscription);
         }
         
         setLoading(false);
@@ -58,8 +120,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => authSubscription.unsubscribe();
   }, []);
+
+  // Check subscription when session changes
+  useEffect(() => {
+    if (session) {
+      checkSubscription();
+    }
+  }, [session, checkSubscription]);
+
+  // Periodically check subscription (every 60 seconds)
+  useEffect(() => {
+    if (!session) return;
+    
+    const interval = setInterval(() => {
+      checkSubscription();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [session, checkSubscription]);
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -122,6 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setUserRole(null);
+    setSubscription(defaultSubscription);
     toast({
       title: "Success",
       description: "Signed out successfully"
@@ -135,7 +216,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
-    userRole
+    userRole,
+    subscription,
+    checkSubscription,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

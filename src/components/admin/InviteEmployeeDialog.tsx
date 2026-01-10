@@ -208,16 +208,9 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
     }
   };
 
-  const handleUpgrade = async (tier: 'mini' | 'sme' | 'enterprise') => {
-    const success = await upgradeTier(tier);
-    if (success) {
-      toast.success(t('subscriptionUpgraded'));
-      refetch();
-      return true;
-    } else {
-      toast.error(t('upgradeFailed'));
-      return false;
-    }
+  const handleUpgradeSuccess = () => {
+    toast.success(t('subscriptionUpgraded') || 'Subscription upgraded! Please complete checkout.');
+    refetch();
   };
 
   if (!organization) {
@@ -374,7 +367,8 @@ export const InviteEmployeeDialog = ({ onInviteSent }: InviteEmployeeDialogProps
         currentTier={organization.subscription_tier}
         currentMax={organization.max_employees}
         employeeCount={employeeCount}
-        onUpgrade={handleUpgrade}
+        organizationId={organization.id}
+        onUpgradeSuccess={handleUpgradeSuccess}
       />
     </Dialog>
   );

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Building2, Users, Crown, Loader2 } from 'lucide-react';
+import { Building2, Users, Crown, Loader2, ExternalLink, RefreshCw, CreditCard } from 'lucide-react';
+import { UpgradeTierDialog } from './UpgradeTierDialog';
+import { STRIPE_TIERS } from '@/lib/stripeTiers';
 
 interface Organization {
   id: string;
@@ -19,9 +21,13 @@ interface Organization {
 
 export function AdminTierManager() {
   const { t } = useLanguage();
+  const { subscription, checkSubscription } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
-  const [upgrading, setUpgrading] = useState<string | null>(null);
+  const [openingPortal, setOpeningPortal] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [employeeCounts, setEmployeeCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchOrganizations();
@@ -36,62 +42,78 @@ export function AdminTierManager() {
 
     if (!error && data) {
       setOrganizations(data);
+      
+      // Fetch employee counts for each organization
+      const counts: Record<string, number> = {};
+      for (const org of data) {
+        const { count } = await supabase
+          .from('organization_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', org.id);
+        counts[org.id] = count || 0;
+      }
+      setEmployeeCounts(counts);
     }
     setLoading(false);
   };
 
-  const handleUpgrade = async (orgId: string, newTier: 'free' | 'mini' | 'sme' | 'enterprise') => {
-    setUpgrading(orgId);
+  const handleManageSubscription = async () => {
+    setOpeningPortal(true);
     
-    const maxEmployeesMap: Record<string, number> = {
-      free: 1,
-      mini: 9,
-      sme: 50,
-      enterprise: 100
-    };
-
-    const { error } = await supabase
-      .from('organizations')
-      .update({
-        subscription_tier: newTier,
-        max_employees: maxEmployeesMap[newTier]
-      })
-      .eq('id', orgId);
-
-    if (error) {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No portal URL received');
+      }
+    } catch (error: any) {
+      console.error('Portal error:', error);
       toast({
         title: t('error'),
-        description: t('upgradeFailed'),
+        description: error.message || 'Failed to open subscription portal',
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: t('success'),
-        description: t('subscriptionUpgraded'),
-      });
-      fetchOrganizations();
+    } finally {
+      setOpeningPortal(false);
     }
-    
-    setUpgrading(null);
+  };
+
+  const handleUpgradeClick = (org: Organization) => {
+    setSelectedOrg(org);
+    setUpgradeDialogOpen(true);
   };
 
   const getTierLabel = (tier: string) => {
     switch (tier) {
-      case 'free': return t('freeTier');
-      case 'mini': return t('miniTier');
-      case 'sme': return t('smeTier');
-      case 'enterprise': return t('enterpriseTier');
+      case 'free': return t('trialTier') || 'Trial';
+      case 'mini': return t('seTier') || 'SE';
+      case 'sme': return t('smeTier') || 'SME';
+      case 'enterprise': return t('enterpriseTier') || 'Enterprise';
       default: return tier;
     }
   };
 
-  const getTierColor = (tier: string) => {
+  const getTierColor = (tier: string): "outline" | "secondary" | "default" | "destructive" => {
     switch (tier) {
       case 'free': return 'outline';
       case 'mini': return 'secondary';
       case 'sme': return 'default';
       case 'enterprise': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getTierPrice = (tier: string) => {
+    switch (tier) {
+      case 'free': return '$0/mo';
+      case 'mini': return '$28/mo';
+      case 'sme': return '$88/mo';
+      case 'enterprise': return '$168/mo';
+      default: return '';
     }
   };
 
@@ -104,63 +126,174 @@ export function AdminTierManager() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Crown className="h-5 w-5" />
-          {t('manageSubscriptions')}
-        </CardTitle>
-        <CardDescription>{t('manageSubscriptionsDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {organizations.length === 0 ? (
-          <p className="text-muted-foreground text-center py-4">{t('noOrganizations')}</p>
-        ) : (
-          <div className="space-y-4">
-            {organizations.map((org) => (
-              <div 
-                key={org.id} 
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-8 w-8 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{org.name}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{org.max_employees} {t('employeesMax')}</span>
-                      <Badge variant={getTierColor(org.subscription_tier) as any} className="ml-2">
-                        {getTierLabel(org.subscription_tier)}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                
+    <>
+      <div className="space-y-6">
+        {/* Subscription Status Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              {t('subscriptionStatus') || 'Subscription Status'}
+            </CardTitle>
+            <CardDescription>
+              {t('subscriptionStatusDescription') || 'View and manage your Stripe subscription'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
                 <div className="flex items-center gap-2">
-                  <Select
-                    value={org.subscription_tier}
-                    onValueChange={(value) => handleUpgrade(org.id, value as any)}
-                    disabled={upgrading === org.id}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="free">{t('freeTier')} (1)</SelectItem>
-                      <SelectItem value="mini">{t('miniTier')} (9)</SelectItem>
-                      <SelectItem value="sme">{t('smeTier')} (50)</SelectItem>
-                      <SelectItem value="enterprise">{t('enterpriseTier')} (100)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {upgrading === org.id && (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm text-muted-foreground">{t('status') || 'Status'}:</span>
+                  {subscription.subscribed ? (
+                    <Badge variant="default" className="bg-green-500">
+                      {subscription.status === 'trialing' ? 'Trial Active' : 'Active'}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">No Subscription</Badge>
                   )}
                 </div>
+                {subscription.subscriptionEnd && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {subscription.status === 'trialing' ? 'Trial ends' : 'Renews'}: {' '}
+                    {new Date(subscription.subscriptionEnd).toLocaleDateString()}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => checkSubscription()}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {t('refresh') || 'Refresh'}
+                </Button>
+                {subscription.subscribed && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleManageSubscription}
+                    disabled={openingPortal}
+                  >
+                    {openingPortal ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                    )}
+                    {t('manageSubscription') || 'Manage Subscription'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Organizations Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5" />
+              {t('manageSubscriptions') || 'Organization Tiers'}
+            </CardTitle>
+            <CardDescription>
+              {t('manageSubscriptionsDescription') || 'Upgrade organization subscription tiers'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {organizations.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">
+                {t('noOrganizations') || 'No organizations found'}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {organizations.map((org) => (
+                  <div 
+                    key={org.id} 
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Building2 className="h-8 w-8 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">{org.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span>
+                            {employeeCounts[org.id] || 0} / {org.max_employees} {t('employees') || 'employees'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <Badge variant={getTierColor(org.subscription_tier)}>
+                          {getTierLabel(org.subscription_tier)}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {getTierPrice(org.subscription_tier)}
+                        </p>
+                      </div>
+                      {org.subscription_tier !== 'enterprise' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpgradeClick(org)}
+                        >
+                          <Crown className="h-4 w-4 mr-1" />
+                          {t('upgrade') || 'Upgrade'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tier Pricing Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('availablePlans') || 'Available Plans'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Object.entries(STRIPE_TIERS).map(([key, tier]) => (
+                <div key={key} className="p-4 border rounded-lg">
+                  <h3 className="font-semibold">{tier.name}</h3>
+                  <p className="text-2xl font-bold mt-2">
+                    ${tier.price}<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Up to {tier.maxEmployees} employees
+                  </p>
+                  {tier.trialMonths && (
+                    <Badge variant="secondary" className="mt-2">
+                      {tier.trialMonths}-month free trial
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Upgrade Dialog */}
+      {selectedOrg && (
+        <UpgradeTierDialog
+          open={upgradeDialogOpen}
+          onOpenChange={setUpgradeDialogOpen}
+          currentTier={selectedOrg.subscription_tier}
+          currentMax={selectedOrg.max_employees}
+          employeeCount={employeeCounts[selectedOrg.id] || 0}
+          organizationId={selectedOrg.id}
+          onUpgradeSuccess={() => {
+            fetchOrganizations();
+            checkSubscription();
+          }}
+        />
+      )}
+    </>
   );
 }
