@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText, Lock, Eye, EyeOff, Upload } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import DocumentManager from './DocumentManager';
 import AvatarUpload from './AvatarUpload';
@@ -95,6 +95,10 @@ export default function ProfileWithApproval() {
   const [setupMode, setSetupMode] = useState(false);
   const [setupValues, setSetupValues] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
+  
+  // Document upload dialog state for ID/Passport/Visa
+  const [showDocumentUploadDialog, setShowDocumentUploadDialog] = useState(false);
+  const [pendingDocumentType, setPendingDocumentType] = useState<'id_card' | 'passport' | 'visa' | null>(null);
 
   // For managers - staff profile selection
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
@@ -967,27 +971,27 @@ export default function ProfileWithApproval() {
                 </div>
               </div>
 
+              {/* Employee ID - Only Admin/HR can edit, read-only for employees */}
               <div className="space-y-2">
-                <Label>{t('employeeId')}</Label>
-                {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
+                <Label className="flex items-center gap-2">
+                  {t('employeeId')}
+                  {!canHrAdminEdit && (
+                    <span title={t('adminOnlyField') || 'Admin/HR only'}>
+                      <Lock className="h-3 w-3 text-muted-foreground" />
+                    </span>
+                  )}
+                </Label>
+                {canHrAdminEdit && hrEditMode ? (
                   <Input
-                    value={
-                      canUserEditDirectly && setupMode 
-                        ? (setupValues.employee_id ?? currentProfile.employee_id ?? '')
-                        : (hrEditValues.employee_id ?? currentProfile.employee_id ?? '')
-                    }
-                    onChange={(e) => 
-                      canUserEditDirectly && setupMode
-                        ? updateSetupValue('employee_id', e.target.value)
-                        : updateHrEditValue('employee_id', e.target.value)
-                    }
+                    value={hrEditValues.employee_id ?? currentProfile.employee_id ?? ''}
+                    onChange={(e) => updateHrEditValue('employee_id', e.target.value)}
                     placeholder={t('enterEmployeeId')}
                     className="flex items-center gap-2"
                   />
                 ) : (
-                  <div className="flex items-center gap-2 p-2 border border-border rounded">
+                  <div className="flex items-center gap-2 p-2 border border-border rounded bg-muted/30">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentProfile.employee_id}</span>
+                    <span>{currentProfile.employee_id || t('notAssigned') || 'Not Assigned'}</span>
                   </div>
                 )}
               </div>
@@ -1107,7 +1111,12 @@ export default function ProfileWithApproval() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('idNumber')}</Label>
+                <Label className="flex items-center gap-2">
+                  {t('idNumber')}
+                  <span title={t('documentRequired') || 'Document upload required'}>
+                    <Upload className="h-3 w-3 text-muted-foreground" />
+                  </span>
+                </Label>
                 {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
                     value={
@@ -1115,11 +1124,19 @@ export default function ProfileWithApproval() {
                         ? (setupValues.id_number ?? currentProfile.id_number ?? '')
                         : (hrEditValues.id_number ?? currentProfile.id_number ?? '')
                     }
-                    onChange={(e) => 
-                      canUserEditDirectly && setupMode
-                        ? updateSetupValue('id_number', e.target.value)
-                        : updateHrEditValue('id_number', e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (canUserEditDirectly && setupMode) {
+                        updateSetupValue('id_number', value);
+                      } else {
+                        updateHrEditValue('id_number', value);
+                      }
+                      // Prompt for document upload when value is entered
+                      if (value.trim() && value.trim().toUpperCase() !== 'NIL') {
+                        setPendingDocumentType('id_card');
+                        setShowDocumentUploadDialog(true);
+                      }
+                    }}
                     placeholder={t('enterIdNumber')}
                     className="flex items-center gap-2"
                   />
@@ -1134,7 +1151,12 @@ export default function ProfileWithApproval() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('passportNumber')}</Label>
+                <Label className="flex items-center gap-2">
+                  {t('passportNumber')}
+                  <span title={t('documentRequired') || 'Document upload required'}>
+                    <Upload className="h-3 w-3 text-muted-foreground" />
+                  </span>
+                </Label>
                 {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
                     value={
@@ -1142,11 +1164,19 @@ export default function ProfileWithApproval() {
                         ? (setupValues.passport_number ?? currentProfile.passport_number ?? '')
                         : (hrEditValues.passport_number ?? currentProfile.passport_number ?? '')
                     }
-                    onChange={(e) => 
-                      canUserEditDirectly && setupMode
-                        ? updateSetupValue('passport_number', e.target.value)
-                        : updateHrEditValue('passport_number', e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (canUserEditDirectly && setupMode) {
+                        updateSetupValue('passport_number', value);
+                      } else {
+                        updateHrEditValue('passport_number', value);
+                      }
+                      // Prompt for document upload when value is entered
+                      if (value.trim() && value.trim().toUpperCase() !== 'NIL') {
+                        setPendingDocumentType('passport');
+                        setShowDocumentUploadDialog(true);
+                      }
+                    }}
                     placeholder={t('enterPassportNumber')}
                     className="flex items-center gap-2"
                   />
@@ -1161,7 +1191,12 @@ export default function ProfileWithApproval() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t('visaNumber')}</Label>
+                <Label className="flex items-center gap-2">
+                  {t('visaNumber')}
+                  <span title={t('documentRequired') || 'Document upload required'}>
+                    <Upload className="h-3 w-3 text-muted-foreground" />
+                  </span>
+                </Label>
                 {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
                   <Input
                     value={
@@ -1169,11 +1204,19 @@ export default function ProfileWithApproval() {
                         ? (setupValues.visa_number ?? currentProfile.visa_number ?? '')
                         : (hrEditValues.visa_number ?? currentProfile.visa_number ?? '')
                     }
-                    onChange={(e) => 
-                      canUserEditDirectly && setupMode
-                        ? updateSetupValue('visa_number', e.target.value)
-                        : updateHrEditValue('visa_number', e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (canUserEditDirectly && setupMode) {
+                        updateSetupValue('visa_number', value);
+                      } else {
+                        updateHrEditValue('visa_number', value);
+                      }
+                      // Prompt for document upload when value is entered
+                      if (value.trim() && value.trim().toUpperCase() !== 'NIL') {
+                        setPendingDocumentType('visa');
+                        setShowDocumentUploadDialog(true);
+                      }
+                    }}
                     placeholder={t('enterVisaNumber')}
                     className="flex items-center gap-2"
                   />
@@ -1309,13 +1352,66 @@ export default function ProfileWithApproval() {
             <Separator className="my-4" />
 
             {/* Document Manager */}
-            <DocumentManager 
-              userId={currentProfile.user_id} 
-              canManage={
-                userRole === 'hr_admin' || 
-                (!isManager || selectedStaffId === user?.id)
-              } 
-            />
+            <div data-document-manager>
+              <DocumentManager 
+                userId={currentProfile.user_id} 
+                canManage={
+                  userRole === 'hr_admin' || 
+                  (!isManager || selectedStaffId === user?.id)
+                } 
+              />
+            </div>
+
+            {/* Document Upload Prompt Dialog for ID/Passport/Visa */}
+            <Dialog open={showDocumentUploadDialog} onOpenChange={setShowDocumentUploadDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5" />
+                    {t('uploadDocumentPrompt') || 'Upload Supporting Document'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {pendingDocumentType === 'id_card' && (t('uploadIdCardPrompt') || 'Please upload a copy of your ID card for verification.')}
+                    {pendingDocumentType === 'passport' && (t('uploadPassportPrompt') || 'Please upload a copy of your passport for verification.')}
+                    {pendingDocumentType === 'visa' && (t('uploadVisaPrompt') || 'Please upload a copy of your visa document for verification.')}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    {t('documentUploadNote') || 'You can upload the document now or later from the Documents section below.'}
+                  </p>
+                  <div className="flex gap-2 justify-end">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowDocumentUploadDialog(false);
+                        setPendingDocumentType(null);
+                      }}
+                    >
+                      {t('uploadLater') || 'Upload Later'}
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setShowDocumentUploadDialog(false);
+                        // Scroll to document manager section
+                        const docSection = document.querySelector('[data-document-manager]');
+                        if (docSection) {
+                          docSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        toast({
+                          title: t('scrolledToDocuments') || 'Document Section',
+                          description: t('uploadDocumentNow') || 'Please upload your document in the Documents section.'
+                        });
+                        setPendingDocumentType(null);
+                      }}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {t('uploadNow') || 'Upload Now'}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Change Password - Integrated within Personal Details */}
             {!isManager && !isImpersonating && viewingUserId === user?.id && (
