@@ -310,28 +310,46 @@ export default function ProfileWithApproval() {
   const handleCompleteSetup = async () => {
     if (!currentProfile) return;
 
-    // Required fields for initial setup
+    // Required fields for initial setup - ALL must be filled
     const requiredFields = [
       'first_name', 'last_name', 'phone_number', 'home_address',
-      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'
+      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 
+      'id_number', 'passport_number', 'visa_number', 'date_of_birth'
     ];
 
-    // Auto-fill NIL for any empty required fields (using currentProfile as fallback)
     const updates: Partial<Profile> = { ...setupValues };
-    const missing: string[] = [];
+    const missingFields: string[] = [];
+    
+    // Check for empty required fields
     requiredFields.forEach((field) => {
       const current = (updates as any)[field] ?? (currentProfile as any)[field];
       if (!current || String(current).trim() === '') {
-        (updates as any)[field] = 'NIL';
-        missing.push(field);
+        missingFields.push(field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
       }
     });
 
-    if (missing.length > 0) {
+    // If there are missing fields, alert admin/HR and don't complete
+    if (missingFields.length > 0) {
+      // Create alert notification for admin/HR about incomplete profile
+      try {
+        await supabase.from('profile_change_requests').insert({
+          user_id: currentProfile.user_id,
+          requested_by: user?.id,
+          field_name: 'profile_incomplete_alert',
+          current_value: '',
+          new_value: `Missing fields: ${missingFields.join(', ')}`,
+          status: 'pending'
+        });
+      } catch (err) {
+        console.error('Failed to create incomplete profile alert:', err);
+      }
+
       toast({
-        title: 'Note',
-        description: `Empty required fields filled with "NIL": ${missing.join(', ')}`,
+        title: t('profileIncomplete') || 'Profile Incomplete',
+        description: `${t('missingRequiredFields') || 'Missing required fields'}: ${missingFields.join(', ')}. ${t('adminNotified') || 'Admin/HR has been notified.'}`,
+        variant: 'destructive'
       });
+      return;
     }
 
     setSaving(true);
@@ -349,8 +367,8 @@ export default function ProfileWithApproval() {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Profile setup completed successfully'
+        title: t('success') || 'Success',
+        description: t('profileSetupComplete') || 'Profile setup completed successfully'
       });
 
       setSetupMode(false);
@@ -364,8 +382,8 @@ export default function ProfileWithApproval() {
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to complete profile setup',
+        title: t('error') || 'Error',
+        description: error.message || t('failedToCompleteSetup') || 'Failed to complete profile setup',
         variant: 'destructive'
       });
     } finally {
@@ -382,28 +400,22 @@ export default function ProfileWithApproval() {
     setSetupValues(prev => ({ ...prev, [field]: value }));
   };
 
-  // Helper: fill "NIL" for any empty required fields during setup
-  const fillNilForEmptyRequired = () => {
-    if (!currentProfile) return;
+  // Helper: check which fields are still missing
+  const getMissingFields = () => {
+    if (!currentProfile) return [];
     const requiredFields = [
       'first_name', 'last_name', 'phone_number', 'home_address',
-      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 'id_number'
+      'marital_status', 'emergency_contact_name', 'emergency_contact_phone', 
+      'id_number', 'passport_number', 'visa_number', 'date_of_birth'
     ];
-    const updates: Partial<Profile> = { ...setupValues };
-    const filled: string[] = [];
+    const missingFields: string[] = [];
     requiredFields.forEach((field) => {
-      const current = (updates as any)[field] ?? (currentProfile as any)[field];
+      const current = (setupValues as any)[field] ?? (currentProfile as any)[field];
       if (!current || String(current).trim() === '') {
-        (updates as any)[field] = 'NIL';
-        filled.push(field);
+        missingFields.push(field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
       }
     });
-    setSetupValues(updates);
-    if (filled.length > 0) {
-      toast({ title: 'Filled', description: `Set "NIL" for: ${filled.join(', ')}` });
-    } else {
-      toast({ title: 'All set', description: 'No empty required fields detected.' });
-    }
+    return missingFields;
   };
 
   const updateHrEditValue = (field: string, value: string) => {
@@ -665,9 +677,7 @@ export default function ProfileWithApproval() {
                 Complete Your Profile Setup
               </h3>
               <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                Please complete your profile setup by filling in all required information. 
-                Once completed, any future changes will require manager approval for security and compliance.
-                Use "NIL" for fields that are not applicable to you.
+                {t('completeProfileDescription') || 'Please complete your profile setup by filling in ALL required information including ID, Passport, and Visa documents. Once completed, any future changes will require manager approval for security and compliance.'}
               </p>
             </div>
           </div>
@@ -681,10 +691,10 @@ export default function ProfileWithApproval() {
           </h1>
           <p className="text-muted-foreground">
             {isManager 
-              ? 'Manage staff profiles and approve changes' 
+              ? t('manageStaffProfiles') || 'Manage staff profiles and approve changes' 
               : isProfileIncomplete 
-                ? 'Complete your initial profile setup - all fields are required'
-                : 'View your personal information and submit change requests for approval'
+                ? t('completeInitialSetup') || 'Complete your initial profile setup - all fields are required'
+                : t('viewProfileInfo') || 'View your personal information and submit change requests for approval'
             }
           </p>
         </div>
@@ -742,19 +752,16 @@ export default function ProfileWithApproval() {
                     </Button>
                   ) : (
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={fillNilForEmptyRequired}>
-                        Fill NIL
-                      </Button>
                       <Button 
                         onClick={handleCompleteSetup} 
                         disabled={saving}
                         className="flex items-center gap-2"
                       >
                         <Save className="h-4 w-4" />
-                        {saving ? 'Saving...' : 'Complete Setup'}
+                        {saving ? (t('saving') || 'Saving...') : (t('completeSetup') || 'Complete Setup')}
                       </Button>
                       <Button variant="outline" onClick={handleSetupCancel}>
-                        Cancel
+                        {t('cancel') || 'Cancel'}
                       </Button>
                     </div>
                   )}
@@ -1253,7 +1260,6 @@ export default function ProfileWithApproval() {
                       <SelectItem value="married">{t('married') || 'Married'}</SelectItem>
                       <SelectItem value="divorced">{t('divorced') || 'Divorced'}</SelectItem>
                       <SelectItem value="widowed">{t('widowed') || 'Widowed'}</SelectItem>
-                      <SelectItem value="NIL">NIL</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
