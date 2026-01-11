@@ -15,8 +15,8 @@ export interface StripeTier {
 export const STRIPE_TIERS: Record<string, StripeTier> = {
   trial: {
     name: 'Trial',
-    product_id: 'prod_TRIAL_REPLACE_ME', // Replace with your Trial product ID
-    price_id: 'price_TRIAL_REPLACE_ME',   // Replace with your Trial price ID
+    product_id: 'prod_TlqN0QHdfIlsjQ',
+    price_id: 'price_1SolhBAps9VxfrKB6tYdeYUu',
     price: 0,
     maxEmployees: 2,
     trialMonths: 6,
@@ -24,24 +24,24 @@ export const STRIPE_TIERS: Record<string, StripeTier> = {
   },
   se: {
     name: 'SE',
-    product_id: 'prod_SE_REPLACE_ME',     // Replace with your SE product ID
-    price_id: 'price_SE_REPLACE_ME',       // Replace with your SE price ID
+    product_id: 'prod_TlqQydsaUCkfK7',
+    price_id: 'price_1Solk5Aps9VxfrKBFdAKRto3',
     price: 28,
     maxEmployees: 9,
     dbTier: 'mini',
   },
   sme: {
     name: 'SME',
-    product_id: 'prod_SME_REPLACE_ME',    // Replace with your SME product ID
-    price_id: 'price_SME_REPLACE_ME',      // Replace with your SME price ID
+    product_id: 'prod_TlqU0gOIx2mdRH',
+    price_id: 'price_1SoInlAps9VxfrKBKSR5TU1d',
     price: 88,
     maxEmployees: 50,
     dbTier: 'sme',
   },
   enterprise: {
     name: 'Enterprise',
-    product_id: 'prod_ENT_REPLACE_ME',    // Replace with your Enterprise product ID
-    price_id: 'price_ENT_REPLACE_ME',      // Replace with your Enterprise price ID
+    product_id: 'prod_TlqVG1jRPUZ4oD',
+    price_id: 'price_1SoloLAps9VxfrKBXZDEl21Z',
     price: 168,
     maxEmployees: 100,
     dbTier: 'enterprise',
