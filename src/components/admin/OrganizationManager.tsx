@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { InviteEmployeeDialog } from './InviteEmployeeDialog';
 import { Building2, Users, Crown, TrendingUp, Loader2, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { STRIPE_TIERS } from '@/lib/stripeTiers';
 
 export function OrganizationManager() {
   const { t } = useLanguage();
@@ -232,9 +233,12 @@ export function OrganizationManager() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {organization.subscription_tier === 'free' && (
                 <div className="border rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold">{t('miniTier')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('miniTierDescription')}</p>
-                  <p className="text-lg font-bold">1-5 {t('employeesCount')}</p>
+                  <h4 className="font-semibold">{t('seTier') || 'SE'}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {t('seTierDescription') || `For small teams: 1 admin + up to ${STRIPE_TIERS.se.maxEmployees} employees`}
+                  </p>
+                  <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.se.price}/month)</p>
+                  <p className="text-lg font-bold">1-{STRIPE_TIERS.se.maxEmployees} {t('employeesCount')}</p>
                   <Button onClick={() => handleUpgrade('mini')} className="w-full">
                     {t('upgrade')}
                   </Button>
@@ -243,8 +247,11 @@ export function OrganizationManager() {
               {(organization.subscription_tier === 'free' || organization.subscription_tier === 'mini') && (
                 <div className="border rounded-lg p-4 space-y-3">
                   <h4 className="font-semibold">{t('smeTier')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('smeTierDescription')}</p>
-                  <p className="text-lg font-bold">6-20 {t('employeesCount')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t('smeTierDescription') || `For growing teams: 1 admin + up to ${STRIPE_TIERS.sme.maxEmployees} employees`}
+                  </p>
+                  <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.sme.price}/month)</p>
+                  <p className="text-lg font-bold">{STRIPE_TIERS.se.maxEmployees + 1}-{STRIPE_TIERS.sme.maxEmployees} {t('employeesCount')}</p>
                   <Button onClick={() => handleUpgrade('sme')} className="w-full">
                     {t('upgrade')}
                   </Button>
@@ -252,8 +259,11 @@ export function OrganizationManager() {
               )}
               <div className="border rounded-lg p-4 space-y-3">
                 <h4 className="font-semibold">{t('enterpriseTier')}</h4>
-                <p className="text-sm text-muted-foreground">{t('enterpriseTierDescription')}</p>
-                <p className="text-lg font-bold">21-50 {t('employeesCount')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('enterpriseTierDescription') || `For large teams: 1 admin + ${STRIPE_TIERS.sme.maxEmployees + 1}-${STRIPE_TIERS.enterprise.maxEmployees} employees`}
+                </p>
+                <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.enterprise.price}/month)</p>
+                <p className="text-lg font-bold">{STRIPE_TIERS.sme.maxEmployees + 1}-{STRIPE_TIERS.enterprise.maxEmployees} {t('employeesCount')}</p>
                 <Button onClick={() => handleUpgrade('enterprise')} className="w-full">
                   {t('upgrade')}
                 </Button>
