@@ -13,6 +13,15 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+// Map Stripe product IDs to database tiers and max employees
+// IMPORTANT: Keep these in sync with src/lib/stripeTiers.ts
+const PRODUCT_TO_TIER: Record<string, { dbTier: string; maxEmployees: number }> = {
+  'prod_TlqN0QHdflIsjQ': { dbTier: 'free', maxEmployees: 2 },      // Trial
+  'prod_TlqQydsaUCkfK7': { dbTier: 'mini', maxEmployees: 9 },      // SE
+  'prod_TlqU0gOIx2mdRH': { dbTier: 'sme', maxEmployees: 50 },      // SME
+  'prod_TlqVG1jRPUZ4oD': { dbTier: 'enterprise', maxEmployees: 100 }, // Enterprise
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -120,6 +129,49 @@ serve(async (req) => {
         productId,
         endDate: subscriptionEnd 
       });
+
+      // Sync subscription tier to organization database
+      if (productId && PRODUCT_TO_TIER[productId]) {
+        const tierInfo = PRODUCT_TO_TIER[productId];
+        logStep("Syncing tier to database", { productId, tierInfo });
+
+        // Find user's organization (where they are owner)
+        const { data: orgData, error: orgError } = await supabaseClient
+          .from('organizations')
+          .select('id, subscription_tier, max_employees')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+
+        if (orgError) {
+          logStep("Error fetching organization", { error: orgError.message });
+        } else if (orgData) {
+          // Only update if tier has changed
+          if (orgData.subscription_tier !== tierInfo.dbTier || orgData.max_employees !== tierInfo.maxEmployees) {
+            const { error: updateError } = await supabaseClient
+              .from('organizations')
+              .update({
+                subscription_tier: tierInfo.dbTier,
+                max_employees: tierInfo.maxEmployees,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', orgData.id);
+
+            if (updateError) {
+              logStep("Error updating organization tier", { error: updateError.message });
+            } else {
+              logStep("Organization tier updated successfully", { 
+                orgId: orgData.id, 
+                newTier: tierInfo.dbTier,
+                newMaxEmployees: tierInfo.maxEmployees
+              });
+            }
+          } else {
+            logStep("Organization tier already up to date");
+          }
+        } else {
+          logStep("No organization found for user");
+        }
+      }
     } else {
       logStep("No active subscription found");
     }
