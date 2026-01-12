@@ -15,8 +15,8 @@ export interface StripeTier {
 export const STRIPE_TIERS: Record<string, StripeTier> = {
   trial: {
     name: 'Trial',
-    product_id: 'prod_TlqN0QHdfIlsjQ',
-    price_id: 'price_1SolhBAps9VxfrKB6tYdeYUu',
+    product_id: 'prod_TlqN0QHdflIsjQ',
+    price_id: 'price_1SoIhBAps9VxfrKB6tYdeYUu',
     price: 0,
     maxEmployees: 2,
     trialMonths: 6,
@@ -25,7 +25,7 @@ export const STRIPE_TIERS: Record<string, StripeTier> = {
   se: {
     name: 'SE',
     product_id: 'prod_TlqQydsaUCkfK7',
-    price_id: 'price_1Solk5Aps9VxfrKBFdAKRto3',
+    price_id: 'price_1SoIk5Aps9VxfrKBFdAKRto3',
     price: 28,
     maxEmployees: 9,
     dbTier: 'mini',
@@ -33,7 +33,7 @@ export const STRIPE_TIERS: Record<string, StripeTier> = {
   sme: {
     name: 'SME',
     product_id: 'prod_TlqU0gOIx2mdRH',
-    price_id: 'price_1SoInlAps9VxfrKBKSR5TU1d',
+    price_id: 'price_1SoInIAps9VxfrKBKSR5TU1d',
     price: 88,
     maxEmployees: 50,
     dbTier: 'sme',
@@ -41,7 +41,7 @@ export const STRIPE_TIERS: Record<string, StripeTier> = {
   enterprise: {
     name: 'Enterprise',
     product_id: 'prod_TlqVG1jRPUZ4oD',
-    price_id: 'price_1SoloLAps9VxfrKBXZDEl21Z',
+    price_id: 'price_1SoIoLAps9VxfrKBXZDEl21Z',
     price: 168,
     maxEmployees: 100,
     dbTier: 'enterprise',
