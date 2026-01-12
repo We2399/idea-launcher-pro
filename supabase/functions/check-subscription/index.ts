@@ -91,8 +91,20 @@ serve(async (req) => {
 
     if (hasSubscription) {
       const subscription = allSubs[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       subscriptionStatus = subscription.status;
+      
+      // Safely handle the date conversion
+      if (subscription.current_period_end && typeof subscription.current_period_end === 'number') {
+        try {
+          subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        } catch (dateError) {
+          logStep("Error parsing subscription end date", { 
+            current_period_end: subscription.current_period_end,
+            error: String(dateError)
+          });
+          subscriptionEnd = null;
+        }
+      }
       
       // Get product ID from the subscription
       if (subscription.items.data.length > 0) {
