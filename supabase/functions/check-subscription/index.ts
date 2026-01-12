@@ -173,7 +173,38 @@ serve(async (req) => {
         }
       }
     } else {
-      logStep("No active subscription found");
+      logStep("No active subscription found - resetting to Trial tier");
+      
+      // Reset organization to Trial/free tier when no subscription
+      const { data: orgData, error: orgError } = await supabaseClient
+        .from('organizations')
+        .select('id, subscription_tier, max_employees')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (orgError) {
+        logStep("Error fetching organization", { error: orgError.message });
+      } else if (orgData) {
+        // Reset to Trial tier if not already
+        if (orgData.subscription_tier !== 'free' || orgData.max_employees !== 2) {
+          const { error: updateError } = await supabaseClient
+            .from('organizations')
+            .update({
+              subscription_tier: 'free',
+              max_employees: 2,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', orgData.id);
+
+          if (updateError) {
+            logStep("Error resetting organization to Trial", { error: updateError.message });
+          } else {
+            logStep("Organization reset to Trial tier", { orgId: orgData.id });
+          }
+        } else {
+          logStep("Organization already at Trial tier");
+        }
+      }
     }
 
     return new Response(JSON.stringify({
