@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InviteEmployeeDialog } from './InviteEmployeeDialog';
+import { UpgradeTierDialog } from './UpgradeTierDialog';
 import { Building2, Users, Crown, TrendingUp, Loader2, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { STRIPE_TIERS } from '@/lib/stripeTiers';
@@ -16,6 +17,7 @@ export function OrganizationManager() {
   const [orgName, setOrgName] = useState('');
   const [orgType, setOrgType] = useState<'individual' | 'company'>('company');
   const [creating, setCreating] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const { 
     organization, 
     members, 
@@ -24,7 +26,6 @@ export function OrganizationManager() {
     employeeCount, 
     canAddMoreEmployees,
     createOrganization,
-    upgradeTier,
     refetch 
   } = useOrganization();
 
@@ -56,20 +57,8 @@ export function OrganizationManager() {
     }
   };
 
-  const handleUpgrade = async (tier: 'mini' | 'sme' | 'enterprise') => {
-    const success = await upgradeTier(tier);
-    if (success) {
-      toast({
-        title: t('success'),
-        description: t('subscriptionUpgraded'),
-      });
-    } else {
-      toast({
-        title: t('error'),
-        description: t('upgradeFailed'),
-        variant: 'destructive',
-      });
-    }
+  const handleOpenUpgradeDialog = () => {
+    setUpgradeDialogOpen(true);
   };
 
   if (loading) {
@@ -230,47 +219,25 @@ export function OrganizationManager() {
             <CardDescription>{t('upgradePlanDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {organization.subscription_tier === 'free' && (
-                <div className="border rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold">{t('seTier') || 'SE'}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {t('seTierDescription') || `For small teams: 1 admin + up to ${STRIPE_TIERS.se.maxEmployees} employees`}
-                  </p>
-                  <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.se.price}/month)</p>
-                  <p className="text-lg font-bold">1-{STRIPE_TIERS.se.maxEmployees} {t('employeesCount')}</p>
-                  <Button onClick={() => handleUpgrade('mini')} className="w-full">
-                    {t('upgrade')}
-                  </Button>
-                </div>
-              )}
-              {(organization.subscription_tier === 'free' || organization.subscription_tier === 'mini') && (
-                <div className="border rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold">{t('smeTier')}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {t('smeTierDescription') || `For growing teams: 1 admin + up to ${STRIPE_TIERS.sme.maxEmployees} employees`}
-                  </p>
-                  <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.sme.price}/month)</p>
-                  <p className="text-lg font-bold">{STRIPE_TIERS.se.maxEmployees + 1}-{STRIPE_TIERS.sme.maxEmployees} {t('employeesCount')}</p>
-                  <Button onClick={() => handleUpgrade('sme')} className="w-full">
-                    {t('upgrade')}
-                  </Button>
-                </div>
-              )}
-              <div className="border rounded-lg p-4 space-y-3">
-                <h4 className="font-semibold">{t('enterpriseTier')}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {t('enterpriseTierDescription') || `For large teams: 1 admin + ${STRIPE_TIERS.sme.maxEmployees + 1}-${STRIPE_TIERS.enterprise.maxEmployees} employees`}
-                </p>
-                <p className="text-sm text-muted-foreground">(${STRIPE_TIERS.enterprise.price}/month)</p>
-                <p className="text-lg font-bold">{STRIPE_TIERS.sme.maxEmployees + 1}-{STRIPE_TIERS.enterprise.maxEmployees} {t('employeesCount')}</p>
-                <Button onClick={() => handleUpgrade('enterprise')} className="w-full">
-                  {t('upgrade')}
-                </Button>
-              </div>
-            </div>
+            <Button onClick={handleOpenUpgradeDialog} className="w-full">
+              <Crown className="h-4 w-4 mr-2" />
+              {t('viewUpgradeOptions') || 'View Upgrade Options'}
+            </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Upgrade Dialog */}
+      {organization && (
+        <UpgradeTierDialog
+          open={upgradeDialogOpen}
+          onOpenChange={setUpgradeDialogOpen}
+          currentTier={organization.subscription_tier}
+          currentMax={organization.max_employees}
+          employeeCount={employeeCount}
+          organizationId={organization.id}
+          onUpgradeSuccess={refetch}
+        />
       )}
 
       {/* Members List */}
