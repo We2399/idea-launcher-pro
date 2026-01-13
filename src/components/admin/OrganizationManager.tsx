@@ -8,9 +8,10 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InviteEmployeeDialog } from './InviteEmployeeDialog';
 import { UpgradeTierDialog } from './UpgradeTierDialog';
-import { Building2, Users, Crown, TrendingUp, Loader2, Plus } from 'lucide-react';
+import { Building2, Users, Crown, TrendingUp, Loader2, Plus, Settings, ExternalLink } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { STRIPE_TIERS } from '@/lib/stripeTiers';
+import { supabase } from '@/integrations/supabase/client';
 
 export function OrganizationManager() {
   const { t } = useLanguage();
@@ -18,6 +19,7 @@ export function OrganizationManager() {
   const [orgType, setOrgType] = useState<'individual' | 'company'>('company');
   const [creating, setCreating] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const { 
     organization, 
     members, 
@@ -28,6 +30,30 @@ export function OrganizationManager() {
     createOrganization,
     refetch 
   } = useOrganization();
+
+  const handleManageSubscription = async () => {
+    setOpeningPortal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No portal URL returned');
+      }
+    } catch (error: any) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: t('error'),
+        description: error.message || t('failedToOpenPortal'),
+        variant: 'destructive',
+      });
+    } finally {
+      setOpeningPortal(false);
+    }
+  };
 
   const handleCreateOrganization = async () => {
     if (!orgName.trim()) {
@@ -207,6 +233,40 @@ export function OrganizationManager() {
           </CardHeader>
           <CardContent>
             <InviteEmployeeDialog onInviteSent={refetch} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Manage Subscription */}
+      {isOwner && organization.subscription_tier !== 'free' && (
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              {t('manageSubscription') || 'Manage Subscription'}
+            </CardTitle>
+            <CardDescription>
+              {t('manageSubscriptionDescription') || 'Upgrade, downgrade, or cancel your subscription through the Stripe Customer Portal'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleManageSubscription} 
+              variant="default"
+              size="lg"
+              className="w-full"
+              disabled={openingPortal}
+            >
+              {openingPortal ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <ExternalLink className="h-4 w-4 mr-2" />
+              )}
+              {t('openCustomerPortal') || 'Open Customer Portal'}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              {t('customerPortalHint') || 'Manage payment methods, view invoices, and change your plan'}
+            </p>
           </CardContent>
         </Card>
       )}
