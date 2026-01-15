@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { CalendarIcon, Plus, Trash2, Globe, Upload, Download, FileText, AlertCircle } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, Globe, Upload, Download, FileText, AlertCircle, ArrowUp } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -25,7 +25,7 @@ interface PublicHoliday {
   is_recurring: boolean;
 }
 
-const countries = [
+const defaultCountries = [
   { code: 'US', name: 'United States' },
   { code: 'GB', name: 'United Kingdom' },
   { code: 'CA', name: 'Canada' },
@@ -45,6 +45,31 @@ const countries = [
   { code: 'TH', name: 'Thailand' },
 ];
 
+// Get stored country order from localStorage
+const getStoredCountryOrder = (): typeof defaultCountries => {
+  try {
+    const stored = localStorage.getItem('publicHolidays_countryOrder');
+    if (stored) {
+      const codes = JSON.parse(stored) as string[];
+      // Rebuild countries array in stored order
+      const ordered = codes
+        .map(code => defaultCountries.find(c => c.code === code))
+        .filter(Boolean) as typeof defaultCountries;
+      // Add any new countries not in stored list
+      const remaining = defaultCountries.filter(c => !codes.includes(c.code));
+      return [...ordered, ...remaining];
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return defaultCountries;
+};
+
+// Save country order to localStorage
+const saveCountryOrder = (countries: typeof defaultCountries) => {
+  localStorage.setItem('publicHolidays_countryOrder', JSON.stringify(countries.map(c => c.code)));
+};
+
 export function PublicHolidaysManager() {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -55,7 +80,22 @@ export function PublicHolidaysManager() {
   const [selectedCountry, setSelectedCountry] = useState<string>('US');
   const [importing, setImporting] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; date: string; isValid: boolean; error?: string }>>([]);
+  const [countries, setCountries] = useState(getStoredCountryOrder);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Move a country to the top of the list
+  const moveCountryToTop = (countryCode: string) => {
+    const country = countries.find(c => c.code === countryCode);
+    if (!country || countries[0]?.code === countryCode) return;
+    
+    const newOrder = [country, ...countries.filter(c => c.code !== countryCode)];
+    setCountries(newOrder);
+    saveCountryOrder(newOrder);
+    toast({
+      title: t('success'),
+      description: `${country.name} moved to top`
+    });
+  };
   
   // Form state
   const [formData, setFormData] = useState({
@@ -283,7 +323,7 @@ export function PublicHolidaysManager() {
     reader.readAsText(file);
   };
 
-  // Import holidays from preview
+  // Import holidays from preview - REPLACES existing holidays for this year/country
   const handleImport = async () => {
     const validItems = importPreview.filter(item => item.isValid);
     
@@ -299,6 +339,16 @@ export function PublicHolidaysManager() {
     setImporting(true);
     
     try {
+      // First, delete all existing holidays for this year and country
+      const { error: deleteError } = await supabase
+        .from('public_holidays')
+        .delete()
+        .eq('year', selectedYear)
+        .eq('country_code', selectedCountry);
+
+      if (deleteError) throw deleteError;
+
+      // Then insert the new holidays
       const holidaysToInsert = validItems.map(item => {
         const { date } = parseDate(item.date);
         return {
@@ -319,7 +369,7 @@ export function PublicHolidaysManager() {
 
       toast({
         title: t('success'),
-        description: `Successfully imported ${validItems.length} holidays`
+        description: `Replaced with ${validItems.length} holidays for ${selectedCountry} ${selectedYear}`
       });
 
       setImportPreview([]);
@@ -400,20 +450,31 @@ Christmas Day,${selectedYear}-12-25`;
               </Select>
             </div>
             
-            <div>
-              <label className="text-sm font-medium mb-2 block">{t('country')}</label>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map(country => (
-                    <SelectItem key={country.code} value={country.code}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-end gap-2">
+              <div>
+                <label className="text-sm font-medium mb-2 block">{t('country')}</label>
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => moveCountryToTop(selectedCountry)}
+                disabled={countries[0]?.code === selectedCountry}
+                title="Move country to top of list"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
             </div>
             
             <div className="flex-1 flex items-end gap-2 flex-wrap">
@@ -484,7 +545,8 @@ Christmas Day,${selectedYear}-12-25`;
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Supported date formats: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, DD-MM-YYYY, DD.MM.YYYY
+                    Importing will <strong>replace all existing holidays</strong> for {selectedCountry} {selectedYear}. 
+                    Supported formats: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY
                   </AlertDescription>
                 </Alert>
                 
