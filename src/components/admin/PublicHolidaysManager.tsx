@@ -162,13 +162,26 @@ export function PublicHolidaysManager() {
     }
   };
 
-  // Parse CSV file
+  // Parse CSV file - handles both "Name, Date" and "Date, Name" column orders
   const parseCSV = (text: string): Array<{ name: string; date: string }> => {
     const lines = text.trim().split('\n');
     const results: Array<{ name: string; date: string }> = [];
     
-    // Skip header row if it looks like a header
-    const startIndex = lines[0]?.toLowerCase().includes('name') || lines[0]?.toLowerCase().includes('date') ? 1 : 0;
+    // Detect if first row is header
+    const firstLine = lines[0]?.toLowerCase() || '';
+    const isHeader = firstLine.includes('name') || firstLine.includes('date') || 
+                     firstLine.includes('holiday') || firstLine.includes('日期') || 
+                     firstLine.includes('名稱') || firstLine.includes('假期');
+    const startIndex = isHeader ? 1 : 0;
+    
+    // Check column order from header if present (default: assume first column could be date)
+    let dateFirst = false;
+    if (isHeader) {
+      const separator = firstLine.includes(';') ? ';' : ',';
+      const headerParts = firstLine.split(separator).map(p => p.trim().toLowerCase());
+      // If first column contains date-related words, date is first
+      dateFirst = headerParts[0]?.includes('date') || headerParts[0]?.includes('日期');
+    }
     
     for (let i = startIndex; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -179,10 +192,33 @@ export function PublicHolidaysManager() {
       const parts = line.split(separator).map(p => p.trim().replace(/^["']|["']$/g, ''));
       
       if (parts.length >= 2) {
-        results.push({
-          name: parts[0],
-          date: parts[1]
-        });
+        // Auto-detect column order by checking which part looks like a date
+        // Date patterns: YYYY-MM-DD, DD/MM/YYYY, etc.
+        const datePattern = /^(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{4})$/;
+        const firstIsDate = datePattern.test(parts[0]);
+        const secondIsDate = datePattern.test(parts[1]);
+        
+        let name: string, date: string;
+        
+        if (firstIsDate && !secondIsDate) {
+          // First column is date
+          date = parts[0];
+          name = parts[1];
+        } else if (secondIsDate && !firstIsDate) {
+          // Second column is date
+          name = parts[0];
+          date = parts[1];
+        } else if (dateFirst) {
+          // Use header detection
+          date = parts[0];
+          name = parts[1];
+        } else {
+          // Default: assume Name, Date order
+          name = parts[0];
+          date = parts[1];
+        }
+        
+        results.push({ name, date });
       }
     }
     
