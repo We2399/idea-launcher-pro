@@ -70,6 +70,22 @@ const saveCountryOrder = (countries: typeof defaultCountries) => {
   localStorage.setItem('publicHolidays_countryOrder', JSON.stringify(countries.map(c => c.code)));
 };
 
+// Get stored selected country from localStorage
+const getStoredSelectedCountry = (): string => {
+  try {
+    const stored = localStorage.getItem('publicHolidays_selectedCountry');
+    if (stored) return stored;
+  } catch {
+    // Ignore errors
+  }
+  return 'US';
+};
+
+// Save selected country to localStorage
+const saveSelectedCountry = (countryCode: string) => {
+  localStorage.setItem('publicHolidays_selectedCountry', countryCode);
+};
+
 export function PublicHolidaysManager() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
@@ -77,7 +93,7 @@ export function PublicHolidaysManager() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedCountry, setSelectedCountry] = useState<string>('US');
+  const [selectedCountry, setSelectedCountry] = useState<string>(getStoredSelectedCountry);
   const [importing, setImporting] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; date: string; isValid: boolean; error?: string }>>([]);
@@ -538,7 +554,7 @@ Christmas Day,${selectedYear}-12-25`;
             <div className="flex items-end gap-2">
               <div>
                 <label className="text-sm font-medium mb-2 block">{t('country')}</label>
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <Select value={selectedCountry} onValueChange={(value) => { setSelectedCountry(value); saveSelectedCountry(value); }}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
