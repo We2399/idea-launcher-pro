@@ -124,7 +124,9 @@ export function PublicHolidaysManager() {
   const fetchHolidays = async () => {
     try {
       const dbLanguage = getDbLanguageCode(language);
-      const { data, error } = await supabase
+      
+      // First try to get holidays in user's language
+      let { data, error } = await supabase
         .from('public_holidays')
         .select('*')
         .eq('year', selectedYear)
@@ -133,6 +135,21 @@ export function PublicHolidaysManager() {
         .order('date');
 
       if (error) throw error;
+
+      // Fallback to English if no holidays found in user's language
+      if ((!data || data.length === 0) && dbLanguage !== 'en') {
+        const fallbackResult = await supabase
+          .from('public_holidays')
+          .select('*')
+          .eq('year', selectedYear)
+          .eq('country_code', selectedCountry)
+          .eq('language_code', 'en')
+          .order('date');
+        
+        if (!fallbackResult.error && fallbackResult.data && fallbackResult.data.length > 0) {
+          data = fallbackResult.data;
+        }
+      }
 
       setHolidays(data || []);
     } catch (error: any) {
