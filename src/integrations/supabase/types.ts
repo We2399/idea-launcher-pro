@@ -1069,7 +1069,9 @@ export type Database = {
           date: string
           id: string
           is_recurring: boolean
+          language_code: string | null
           name: string
+          source_import_id: string | null
           updated_at: string
           year: number
         }
@@ -1080,7 +1082,9 @@ export type Database = {
           date: string
           id?: string
           is_recurring?: boolean
+          language_code?: string | null
           name: string
+          source_import_id?: string | null
           updated_at?: string
           year: number
         }
@@ -1091,7 +1095,9 @@ export type Database = {
           date?: string
           id?: string
           is_recurring?: boolean
+          language_code?: string | null
           name?: string
+          source_import_id?: string | null
           updated_at?: string
           year?: number
         }

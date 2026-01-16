@@ -72,16 +72,28 @@ const saveCountryOrder = (countries: typeof defaultCountries) => {
 
 export function PublicHolidaysManager() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [holidays, setHolidays] = useState<PublicHoliday[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedCountry, setSelectedCountry] = useState<string>('US');
   const [importing, setImporting] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [importPreview, setImportPreview] = useState<Array<{ name: string; date: string; isValid: boolean; error?: string }>>([]);
   const [countries, setCountries] = useState(getStoredCountryOrder);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Map language code to database language code
+  const getDbLanguageCode = (lang: string): string => {
+    const mapping: Record<string, string> = {
+      'en': 'en',
+      'zh-TW': 'zh-TW',
+      'zh-CN': 'zh-CN',
+      'id': 'id'
+    };
+    return mapping[lang] || 'en';
+  };
 
   // Move a country to the top of the list
   const moveCountryToTop = (countryCode: string) => {
@@ -107,15 +119,17 @@ export function PublicHolidaysManager() {
 
   useEffect(() => {
     fetchHolidays();
-  }, [selectedYear, selectedCountry]);
+  }, [selectedYear, selectedCountry, language]);
 
   const fetchHolidays = async () => {
     try {
+      const dbLanguage = getDbLanguageCode(language);
       const { data, error } = await supabase
         .from('public_holidays')
         .select('*')
         .eq('year', selectedYear)
         .eq('country_code', selectedCountry)
+        .eq('language_code', dbLanguage)
         .order('date');
 
       if (error) throw error;
@@ -323,7 +337,31 @@ export function PublicHolidaysManager() {
     reader.readAsText(file);
   };
 
-  // Import holidays from preview - REPLACES existing holidays for this year/country
+  // Translate holidays using AI
+  const translateHolidays = async (holidays: Array<{ name: string; date: string }>, sourceLanguage: string) => {
+    try {
+      const response = await supabase.functions.invoke('translate-holidays', {
+        body: { holidays, sourceLanguage }
+      });
+      
+      if (response.error) throw response.error;
+      return response.data.holidays;
+    } catch (error) {
+      console.error('Translation failed:', error);
+      // Return original holidays with same name for all languages as fallback
+      return holidays.map(h => ({
+        ...h,
+        translations: {
+          en: h.name,
+          'zh-TW': h.name,
+          'zh-CN': h.name,
+          id: h.name
+        }
+      }));
+    }
+  };
+
+  // Import holidays from preview - REPLACES existing holidays for this year/country (all languages)
   const handleImport = async () => {
     const validItems = importPreview.filter(item => item.isValid);
     
@@ -337,9 +375,30 @@ export function PublicHolidaysManager() {
     }
 
     setImporting(true);
+    setTranslating(true);
     
     try {
-      // First, delete all existing holidays for this year and country
+      // Detect source language based on current UI language
+      const sourceLanguage = getDbLanguageCode(language);
+      
+      // Translate holidays to all 4 languages
+      toast({
+        title: t('translating') || 'Translating...',
+        description: t('translatingHolidays') || 'Auto-translating holidays to all languages...'
+      });
+      
+      const translatedHolidays = await translateHolidays(
+        validItems.map(item => ({ name: item.name, date: item.date })),
+        sourceLanguage
+      );
+      
+      setTranslating(false);
+
+      // Generate a unique source_import_id to link all translations
+      const sourceImportId = crypto.randomUUID();
+      const allLanguages = ['en', 'zh-TW', 'zh-CN', 'id'];
+
+      // Delete existing holidays for this year and country (ALL languages)
       const { error: deleteError } = await supabase
         .from('public_holidays')
         .delete()
@@ -348,28 +407,36 @@ export function PublicHolidaysManager() {
 
       if (deleteError) throw deleteError;
 
-      // Then insert the new holidays
-      const holidaysToInsert = validItems.map(item => {
-        const { date } = parseDate(item.date);
-        return {
-          name: item.name,
-          date: format(date!, 'yyyy-MM-dd'),
-          country_code: selectedCountry,
-          year: selectedYear,
-          is_recurring: false,
-          created_by: user?.id
-        };
+      // Build holiday records for all 4 languages
+      const allHolidaysToInsert: any[] = [];
+      
+      translatedHolidays.forEach((holiday: any) => {
+        const { date: parsedDate } = parseDate(holiday.date);
+        
+        allLanguages.forEach(lang => {
+          const translatedName = holiday.translations?.[lang] || holiday.name;
+          allHolidaysToInsert.push({
+            name: translatedName,
+            date: format(parsedDate!, 'yyyy-MM-dd'),
+            country_code: selectedCountry,
+            year: selectedYear,
+            is_recurring: false,
+            created_by: user?.id,
+            language_code: lang,
+            source_import_id: sourceImportId
+          });
+        });
       });
 
       const { error } = await supabase
         .from('public_holidays')
-        .insert(holidaysToInsert);
+        .insert(allHolidaysToInsert);
 
       if (error) throw error;
 
       toast({
         title: t('success'),
-        description: `Replaced with ${validItems.length} holidays for ${selectedCountry} ${selectedYear}`
+        description: `${t('importedHolidaysAllLanguages') || `Imported ${validItems.length} holidays for ${selectedCountry} ${selectedYear} in all 4 languages`}`
       });
 
       setImportPreview([]);
@@ -385,6 +452,7 @@ export function PublicHolidaysManager() {
       });
     } finally {
       setImporting(false);
+      setTranslating(false);
     }
   };
 
