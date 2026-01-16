@@ -849,6 +849,9 @@ const translations = {
     importSuccess: 'Successfully imported',
     holidays: 'holidays',
     pleaseSelectDate: 'Select date',
+    translating: 'Translating...',
+    translatingHolidays: 'Auto-translating holidays to all languages...',
+    importedHolidaysAllLanguages: 'Imported holidays in all 4 languages',
     
     // Avatar upload
     pleaseSelectImage: 'Please select an image file',
@@ -1686,6 +1689,9 @@ const translations = {
     importSuccess: '成功匯入',
     holidays: '個假期',
     pleaseSelectDate: '選擇日期',
+    translating: '翻譯中...',
+    translatingHolidays: '正在自動翻譯假期至所有語言...',
+    importedHolidaysAllLanguages: '已匯入假期至所有 4 種語言',
     
     // Avatar upload
     pleaseSelectImage: '請選擇圖片檔案',
@@ -2443,6 +2449,9 @@ const translations = {
     importSuccess: '成功导入',
     holidays: '个假期',
     pleaseSelectDate: '选择日期',
+    translating: '翻译中...',
+    translatingHolidays: '正在自动翻译假期至所有语言...',
+    importedHolidaysAllLanguages: '已导入假期至所有 4 种语言',
     
     // Avatar upload
     pleaseSelectImage: '请选择图片文件',
@@ -3199,6 +3208,9 @@ const translations = {
     importSuccess: 'Berhasil mengimpor',
     holidays: 'hari libur',
     pleaseSelectDate: 'Pilih tanggal',
+    translating: 'Menerjemahkan...',
+    translatingHolidays: 'Menerjemahkan otomatis hari libur ke semua bahasa...',
+    importedHolidaysAllLanguages: 'Hari libur diimpor ke semua 4 bahasa',
     
     // Avatar upload
     pleaseSelectImage: 'Silakan pilih file gambar',
