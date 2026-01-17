@@ -864,7 +864,11 @@ export default function ProfileWithApproval() {
                                 <Input
                                   value={newValue}
                                   onChange={(e) => setNewValue(e.target.value)}
-                                  placeholder={t('enterNewValue')}
+                                  placeholder={
+                                    selectedField === 'date_of_birth' 
+                                      ? 'YYYY-MM-DD (e.g., 1990-01-15)' 
+                                      : t('enterNewValue')
+                                  }
                                 />
                               )}
                             </div>

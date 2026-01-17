@@ -303,7 +303,9 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
     );
   }
 
-  // For admins, link to profile page with hash to scroll to change requests section
+  // For admins, when there are requests visible in the card, don't navigate - let them act here
+  // When no requests or they want to see more, link to profile page
+  const shouldNavigate = userRole === 'employee' || requests.length === 0;
   const linkPath = userRole === 'employee' ? '/profile' : '/profile#change-requests';
   
   const cardContent = (
@@ -428,13 +430,21 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
     </CardContent>
   );
   
+  const cardElement = (
+    <Card className="card-professional animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
+      {cardContent}
+    </Card>
+  );
+  
   return (
     <>
-      <Link to={linkPath}>
-        <Card className="card-professional animate-slide-up hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
-          {cardContent}
-        </Card>
-      </Link>
+      {shouldNavigate ? (
+        <Link to={linkPath}>
+          {cardElement}
+        </Link>
+      ) : (
+        cardElement
+      )}
       
       {/* Reject Reason Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
