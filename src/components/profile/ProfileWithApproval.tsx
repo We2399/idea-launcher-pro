@@ -1093,20 +1093,26 @@ export default function ProfileWithApproval() {
               <div className="space-y-2">
                 <Label>{t('dateOfBirth')}</Label>
                 {(canUserEditDirectly && setupMode) || (canHrAdminEdit && hrEditMode) ? (
-                  <Input
-                    type="date"
-                    value={
-                      canUserEditDirectly && setupMode 
-                        ? (setupValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
-                        : (hrEditValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
-                    }
-                    onChange={(e) => 
-                      canUserEditDirectly && setupMode
-                        ? updateSetupValue('date_of_birth', e.target.value)
-                        : updateHrEditValue('date_of_birth', e.target.value)
-                    }
-                    className="flex items-center gap-2"
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      type="date"
+                      value={
+                        canUserEditDirectly && setupMode 
+                          ? (setupValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
+                          : (hrEditValues.date_of_birth ?? currentProfile.date_of_birth ?? '')
+                      }
+                      onChange={(e) => 
+                        canUserEditDirectly && setupMode
+                          ? updateSetupValue('date_of_birth', e.target.value)
+                          : updateHrEditValue('date_of_birth', e.target.value)
+                      }
+                      className="flex items-center gap-2"
+                    />
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {t('dateFormatHint') || 'Format: YYYY-MM-DD (e.g., 1990-01-15)'}
+                    </p>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
