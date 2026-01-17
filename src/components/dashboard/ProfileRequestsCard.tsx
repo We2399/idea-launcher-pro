@@ -126,43 +126,66 @@ export function ProfileRequestsCard({ stats, loading, onRefresh }: ProfileReques
   
   // Helper to parse various date formats
   const parseDateValue = (value: string): string | null => {
-    // First try direct parsing
-    let date = new Date(value);
+    const trimmed = value.trim();
     
-    // If invalid, try parsing common formats
-    if (isNaN(date.getTime())) {
-      // Try parsing "Jan 20, 1991" format
-      const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-      const match = value.toLowerCase().match(/^(\w+)\s+(\d{1,2}),?\s+(\d{4})$/);
-      if (match) {
-        const monthIndex = monthNames.findIndex(m => match[1].startsWith(m));
-        if (monthIndex !== -1) {
-          date = new Date(parseInt(match[3]), monthIndex, parseInt(match[2]));
+    // If already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    
+    // Try space-separated: "30 01 1991" or "01 30 1991"
+    const spaceParts = trimmed.split(/\s+/);
+    if (spaceParts.length === 3) {
+      const [p1, p2, p3] = spaceParts.map(p => parseInt(p));
+      // DD MM YYYY (most common)
+      if (p1 >= 1 && p1 <= 31 && p2 >= 1 && p2 <= 12 && p3 >= 1900 && p3 <= 2100) {
+        const date = new Date(p3, p2 - 1, p1);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0];
         }
       }
     }
     
-    // If still invalid, try DD/MM/YYYY or MM/DD/YYYY
-    if (isNaN(date.getTime())) {
-      const parts = value.split(/[\/\-\.]/);
-      if (parts.length === 3) {
-        // Try DD/MM/YYYY first (more common internationally)
-        const [p1, p2, p3] = parts.map(p => parseInt(p));
-        if (p1 <= 31 && p2 <= 12 && p3 >= 1900) {
-          date = new Date(p3, p2 - 1, p1);
-        } else if (p1 <= 12 && p2 <= 31 && p3 >= 1900) {
-          // MM/DD/YYYY
-          date = new Date(p3, p1 - 1, p2);
+    // Try parsing "Jan 20, 1991" format
+    const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const match = trimmed.toLowerCase().match(/^(\w+)\s+(\d{1,2}),?\s+(\d{4})$/);
+    if (match) {
+      const monthIndex = monthNames.findIndex(m => match[1].startsWith(m));
+      if (monthIndex !== -1) {
+        const date = new Date(parseInt(match[3]), monthIndex, parseInt(match[2]));
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0];
         }
       }
     }
     
-    if (isNaN(date.getTime())) {
-      return null;
+    // Try DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+    const delimParts = trimmed.split(/[\/\-\.]/);
+    if (delimParts.length === 3) {
+      const [p1, p2, p3] = delimParts.map(p => parseInt(p));
+      // DD/MM/YYYY (international)
+      if (p1 >= 1 && p1 <= 31 && p2 >= 1 && p2 <= 12 && p3 >= 1900 && p3 <= 2100) {
+        const date = new Date(p3, p2 - 1, p1);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0];
+        }
+      }
+      // MM/DD/YYYY (US)
+      if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31 && p3 >= 1900 && p3 <= 2100) {
+        const date = new Date(p3, p1 - 1, p2);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0];
+        }
+      }
     }
     
-    // Format as YYYY-MM-DD for database
-    return date.toISOString().split('T')[0];
+    // Try native Date parsing as last resort
+    const date = new Date(trimmed);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+    
+    return null;
   };
   
   const handleApprove = async (e: React.MouseEvent, request: ProfileChangeRequest) => {
