@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,9 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { InviteEmployeeDialog } from '@/components/admin/InviteEmployeeDialog';
 import { useOrganization } from '@/hooks/useOrganization';
-import { Users, Search, Filter, UserCheck, UserX, Crown, Shield, User, UserPlus } from 'lucide-react';
+import { Users, Search, Filter, UserCheck, UserX, Crown, Shield, User, UserPlus, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
 interface Employee {
   id: string;
   user_id: string;
@@ -43,6 +43,7 @@ interface Employee {
 }
 
 export default function Employees() {
+  const navigate = useNavigate();
   const { userRole } = useAuth();
   const { t } = useLanguage();
   const { organization, isOwner, canAddMoreEmployees, refetch: refetchOrg } = useOrganization();
@@ -55,6 +56,9 @@ export default function Employees() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
 
+  const handleViewProfile = (userId: string) => {
+    navigate(`/profile?user=${userId}`);
+  };
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -324,13 +328,23 @@ export default function Employees() {
                     <div className="font-medium">{getTotalLeaveBalance(employee)} days</div>
                   </div>
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="w-full" onClick={() => setSelectedEmployee(employee)}>
-                      View Details
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="default" 
+                    className="flex-1 flex items-center gap-1"
+                    onClick={() => handleViewProfile(employee.user_id)}
+                  >
+                    <Eye className="h-3 w-3" />
+                    {t('viewProfile') || 'View Profile'}
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelectedEmployee(employee)}>
+                        {t('viewDetails') || 'View Details'}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>Employee Details</DialogTitle>
                     </DialogHeader>
@@ -381,9 +395,10 @@ export default function Employees() {
                           </div>
                         )}
                       </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardContent>
             </Card>
           );
