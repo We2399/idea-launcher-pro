@@ -146,7 +146,7 @@ export default function ProfileWithApproval() {
     if (user) {
       fetchProfile();
       fetchChangeRequests();
-      if (isManager) {
+      if (isManager || isAdministrator) {
         fetchAllProfiles();
       }
     }
@@ -159,9 +159,11 @@ export default function ProfileWithApproval() {
     }
   }, [effectiveUserId]);
 
+  // Refresh change requests when viewing different employee
   useEffect(() => {
     if (viewingUserId) {
       fetchLeaveBalances();
+      fetchChangeRequests();
     }
   }, [viewingUserId]);
 
@@ -289,9 +291,12 @@ export default function ProfileWithApproval() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      // If not manager/HR admin, only fetch own requests
-      if (!isManager) {
+      // If not manager/HR admin/Administrator, only fetch own requests
+      if (!isManager && !isAdministrator) {
         query = query.eq('user_id', user?.id);
+      } else if ((isManager || isAdministrator) && viewingUserId && viewingUserId !== user?.id) {
+        // When viewing a specific employee's profile, filter to their requests
+        query = query.eq('user_id', viewingUserId);
       }
 
       const { data, error } = await query;
@@ -473,23 +478,64 @@ export default function ProfileWithApproval() {
     try {
       const currentValue = currentProfile[selectedField as keyof Profile] || '';
 
-      const { error } = await supabase
-        .from('profile_change_requests')
-        .insert({
-          user_id: currentProfile.user_id,
-          requested_by: user?.id,
-          field_name: selectedField,
-          current_value: String(currentValue),
-          new_value: newValue,
-          status: 'pending'
+      // If user is Administrator or HR Admin, directly apply the change without approval
+      if (isAdministrator || isHrAdmin) {
+        // Directly update the profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            [selectedField]: newValue,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', currentProfile.user_id);
+
+        if (updateError) throw updateError;
+
+        // Also create a record for audit purposes with auto-approved status
+        await supabase
+          .from('profile_change_requests')
+          .insert({
+            user_id: currentProfile.user_id,
+            requested_by: user?.id,
+            field_name: selectedField,
+            current_value: String(currentValue),
+            new_value: newValue,
+            status: 'approved',
+            approved_by: user?.id,
+            approved_at: new Date().toISOString()
+          });
+
+        toast({
+          title: t('success') || "Success",
+          description: t('profileUpdatedDirectly') || "Profile updated successfully"
         });
 
-      if (error) throw error;
+        // Refresh the profile
+        if (effectiveUserId !== user?.id) {
+          fetchSelectedProfile(effectiveUserId!);
+        } else {
+          fetchProfile();
+        }
+      } else {
+        // Regular employee - create pending request
+        const { error } = await supabase
+          .from('profile_change_requests')
+          .insert({
+            user_id: currentProfile.user_id,
+            requested_by: user?.id,
+            field_name: selectedField,
+            current_value: String(currentValue),
+            new_value: newValue,
+            status: 'pending'
+          });
 
-      toast({
-        title: "Success",
-        description: "Profile change request submitted for approval"
-      });
+        if (error) throw error;
+
+        toast({
+          title: t('success') || "Success",
+          description: t('changeRequestSubmitted') || "Profile change request submitted for approval"
+        });
+      }
 
       setShowChangeDialog(false);
       setSelectedField('');
@@ -497,8 +543,8 @@ export default function ProfileWithApproval() {
       fetchChangeRequests();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to submit change request",
+        title: t('error') || "Error",
+        description: error.message || t('failedToSubmitRequest') || "Failed to submit change request",
         variant: "destructive"
       });
     }
@@ -1550,56 +1596,76 @@ export default function ProfileWithApproval() {
       {changeRequests.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('profileChanges')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              {t('profileChanges')}
+              {(isManager || isAdministrator) && viewingUserId && viewingUserId !== user?.id && currentProfile && (
+                <Badge variant="outline" className="ml-2">
+                  {currentProfile.first_name} {currentProfile.last_name}
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {changeRequests.map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <div className="space-y-1">
-                    <div className="font-medium text-sm">
-                      {request.field_name.replace('_', ' ').toUpperCase()}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      From: "{request.current_value}" → To: "{request.new_value}"
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(request.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={
-                      request.status === 'approved' ? 'default' : 
-                      request.status === 'rejected' ? 'destructive' : 'outline'
-                    }>
-                      {request.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                      {request.status === 'approved' && <Check className="h-3 w-3 mr-1" />}
-                      {request.status === 'rejected' && <X className="h-3 w-3 mr-1" />}
-                      {request.status}
-                    </Badge>
-                    {isManager && request.status === 'pending' && (
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          onClick={() => approveChangeRequest(request.id)}
-                        >
-                          <Check className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const reason = prompt('Reason for rejection:');
-                            if (reason) rejectChangeRequest(request.id, reason);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+              {changeRequests.map((request) => {
+                // Find employee name for this request
+                const employeeProfile = allProfiles.find(p => p.user_id === request.user_id);
+                const employeeName = employeeProfile 
+                  ? `${employeeProfile.first_name || ''} ${employeeProfile.last_name || ''}`.trim()
+                  : '';
+                
+                return (
+                  <div key={request.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                    <div className="space-y-1">
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {request.field_name.replace(/_/g, ' ').toUpperCase()}
+                        {(isManager || isAdministrator) && employeeName && !viewingUserId && (
+                          <Badge variant="secondary" className="text-xs">
+                            {employeeName}
+                          </Badge>
+                        )}
                       </div>
-                    )}
+                      <div className="text-xs text-muted-foreground">
+                        From: "{request.current_value}" → To: "{request.new_value}"
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(request.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={
+                        request.status === 'approved' ? 'default' : 
+                        request.status === 'rejected' ? 'destructive' : 'outline'
+                      }>
+                        {request.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                        {request.status === 'approved' && <Check className="h-3 w-3 mr-1" />}
+                        {request.status === 'rejected' && <X className="h-3 w-3 mr-1" />}
+                        {request.status}
+                      </Badge>
+                      {(isManager || isAdministrator) && request.status === 'pending' && (
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            onClick={() => approveChangeRequest(request.id)}
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const reason = prompt('Reason for rejection:');
+                              if (reason) rejectChangeRequest(request.id, reason);
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
