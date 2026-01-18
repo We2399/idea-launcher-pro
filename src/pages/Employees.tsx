@@ -25,6 +25,19 @@ interface Employee {
   position: string;
   manager_id?: string;
   created_at: string;
+  // Extended profile fields
+  phone_number?: string;
+  date_of_birth?: string;
+  id_number?: string;
+  passport_number?: string;
+  visa_number?: string;
+  home_address?: string;
+  marital_status?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  base_monthly_salary?: number;
+  salary_currency?: string;
+  cash_balance?: number;
   user_roles?: {
     role: string;
   }[] | null;
@@ -349,38 +362,117 @@ export default function Employees() {
                       <DialogTitle>Employee Details</DialogTitle>
                     </DialogHeader>
                     {selectedEmployee && (
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                            <p className="text-sm">{selectedEmployee.first_name} {selectedEmployee.last_name}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Employee ID</label>
-                            <p className="text-sm">{selectedEmployee.employee_id}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Email</label>
-                            <p className="text-sm">{selectedEmployee.email}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Department</label>
-                            <p className="text-sm">{selectedEmployee.department}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Position</label>
-                            <p className="text-sm">{selectedEmployee.position}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Role</label>
-                            <Badge variant={getRoleColor(selectedEmployee.user_roles?.[0]?.role || 'employee')}>
-                              {getRoleDisplayName(selectedEmployee.user_roles?.[0]?.role || 'employee')}
-                            </Badge>
+                      <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+                        {/* Basic Information */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Basic Information</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                              <p className="text-sm">{selectedEmployee.first_name} {selectedEmployee.last_name}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Employee ID</label>
+                              <p className="text-sm">{selectedEmployee.employee_id || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Email</label>
+                              <p className="text-sm">{selectedEmployee.email || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
+                              <p className="text-sm">{selectedEmployee.phone_number || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Date of Birth</label>
+                              <p className="text-sm">{selectedEmployee.date_of_birth || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Marital Status</label>
+                              <p className="text-sm capitalize">{selectedEmployee.marital_status || '-'}</p>
+                            </div>
+                            <div className="col-span-2">
+                              <label className="text-sm font-medium text-muted-foreground">Home Address</label>
+                              <p className="text-sm">{selectedEmployee.home_address || '-'}</p>
+                            </div>
                           </div>
                         </div>
+
+                        {/* Employment Details */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Employment Details</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Department</label>
+                              <p className="text-sm">{selectedEmployee.department || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Position</label>
+                              <p className="text-sm">{selectedEmployee.position || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Role</label>
+                              <Badge variant={getRoleColor(selectedEmployee.user_roles?.[0]?.role || 'employee')}>
+                                {getRoleDisplayName(selectedEmployee.user_roles?.[0]?.role || 'employee')}
+                              </Badge>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Base Monthly Salary</label>
+                              <p className="text-sm">
+                                {selectedEmployee.base_monthly_salary 
+                                  ? `${selectedEmployee.salary_currency || 'USD'} ${selectedEmployee.base_monthly_salary.toLocaleString()}`
+                                  : '-'}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Cash Balance</label>
+                              <p className="text-sm">
+                                {selectedEmployee.cash_balance !== undefined && selectedEmployee.cash_balance !== null
+                                  ? `${selectedEmployee.salary_currency || 'USD'} ${selectedEmployee.cash_balance.toLocaleString()}`
+                                  : '-'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Identity Documents */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Identity Documents</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">ID Number</label>
+                              <p className="text-sm">{selectedEmployee.id_number || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Passport Number</label>
+                              <p className="text-sm">{selectedEmployee.passport_number || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Visa Number</label>
+                              <p className="text-sm">{selectedEmployee.visa_number || '-'}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Emergency Contact */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Emergency Contact</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Contact Name</label>
+                              <p className="text-sm">{selectedEmployee.emergency_contact_name || '-'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Contact Phone</label>
+                              <p className="text-sm">{selectedEmployee.emergency_contact_phone || '-'}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Leave Balances */}
                         {selectedEmployee.leave_balances && selectedEmployee.leave_balances.length > 0 && (
                           <div>
-                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Leave Balances</label>
+                            <h4 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Leave Balances</h4>
                             <div className="space-y-2">
                               {selectedEmployee.leave_balances.map((balance, index) => (
                                 <div key={index} className="flex justify-between items-center p-2 border border-border rounded">
