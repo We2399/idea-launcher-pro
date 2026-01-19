@@ -11,7 +11,8 @@ import {
   CheckSquare,
   DollarSign,
   Wallet,
-  MessageCircle
+  MessageCircle,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,6 +40,7 @@ const getPersonalItems = (t: (key: string) => string) => [
   { title: t('payrollManagement'), url: '/payroll', icon: Wallet },
   { title: t('chat'), url: '/chat', icon: MessageCircle },
   { title: t('profile'), url: '/profile', icon: User },
+  { title: t('helpCenter'), url: '/help', icon: HelpCircle },
 ];
 
 const getManagementItems = (t: (key: string) => string) => [
