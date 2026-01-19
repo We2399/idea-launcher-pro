@@ -27,6 +27,7 @@ import StorageCentre from './pages/StorageCentre';
 import Payroll from './pages/Payroll';
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
+import Help from './pages/Help';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
@@ -64,6 +65,7 @@ const App = () => {
                                 <Route path="/payroll" element={<Payroll />} />
                                 <Route path="/notifications" element={<Notifications />} />
                                 <Route path="/chat" element={<Chat />} />
+                                <Route path="/help" element={<Help />} />
                                 <Route path="/profile" element={<ProfileWithApproval />} />
                                 <Route path="/employees" element={
                                   <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
