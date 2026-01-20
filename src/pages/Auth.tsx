@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2, User, Users, ArrowLeft } from 'lucide-react';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
 import { toast } from 'sonner';
+import { Home, Briefcase } from 'lucide-react';
 
 type UserType = 'employer' | 'employee' | null;
 type OrgType = 'individual' | 'company';
 type AuthMode = 'signin' | 'signup';
+type IndustryType = 'household' | 'business' | null;
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
@@ -26,6 +28,7 @@ const Auth = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<UserType>(inviteCode ? 'employee' : null);
+  const [industryType, setIndustryType] = useState<IndustryType>(null);
   const [orgType, setOrgType] = useState<OrgType>('individual');
   const [formData, setFormData] = useState({
     email: '',
@@ -188,6 +191,7 @@ const Auth = () => {
         metadata.role = 'hr_admin';
         metadata.organization_name = formData.organizationName.trim();
         metadata.organization_type = orgType;
+        metadata.industry_type = industryType || 'household';
       } else {
         metadata.role = 'employee';
         metadata.invitation_code = formData.invitationCode;
@@ -257,11 +261,56 @@ const Auth = () => {
     </div>
   );
 
-  const renderEmployerForm = () => (
-    <div className="space-y-4">
+  const renderIndustrySelection = () => (
+    <div className="space-y-5">
       <button
         type="button"
         onClick={() => setUserType(null)}
+        className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+      >
+        <ArrowLeft className="w-4 h-4" /> {t('back')}
+      </button>
+
+      <p className="text-center text-muted-foreground">{t('selectIndustryType')}</p>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          type="button"
+          onClick={() => setIndustryType('household')}
+          className="flex flex-col items-center p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30"
+        >
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+            <Home className="h-7 w-7 text-primary" />
+          </div>
+          <span className="font-semibold text-sm">{t('householdIndustry')}</span>
+          <span className="text-xs text-muted-foreground text-center mt-1">{t('householdIndustryDesc')}</span>
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => setIndustryType('business')}
+          className="flex flex-col items-center p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30"
+        >
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+            <Briefcase className="h-7 w-7 text-primary" />
+          </div>
+          <span className="font-semibold text-sm">{t('businessIndustry')}</span>
+          <span className="text-xs text-muted-foreground text-center mt-1">{t('businessIndustryDesc')}</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderEmployerForm = () => {
+    // Dynamic terminology based on industry type
+    const employeeTerm = industryType === 'business' ? t('staffTerm') : t('helperTerm');
+    const oneFreeTerm = industryType === 'business' ? t('oneStaffFree') : t('oneHelperFree');
+    
+    return (
+    <div className="space-y-4">
+      <button
+        type="button"
+        onClick={() => setIndustryType(null)}
         className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
       >
         <ArrowLeft className="w-4 h-4" /> {t('back')}
@@ -282,7 +331,7 @@ const Auth = () => {
               <User className="h-5 w-5 text-primary" />
             </div>
             <p className="font-medium text-sm">{t('individualEmployer')}</p>
-            <p className="text-xs text-muted-foreground">{t('oneHelperFree')}</p>
+            <p className="text-xs text-muted-foreground">{oneFreeTerm}</p>
           </button>
           
           <button
@@ -404,6 +453,7 @@ const Auth = () => {
       </Button>
     </div>
   );
+  };
 
   const renderEmployeeForm = () => (
     <div className="space-y-4">
@@ -689,6 +739,7 @@ const Auth = () => {
                 onClick={() => {
                   setAuthMode('signin');
                   setUserType(null);
+                  setIndustryType(null);
                 }}
                 className="p-2 rounded-full bg-card hover:bg-muted transition-colors"
               >
@@ -702,6 +753,7 @@ const Auth = () => {
                 <form onSubmit={handleSignUp}>
                   {isFirstUser ? renderFirstUserForm() : (
                     userType === null ? renderUserTypeSelection() :
+                    userType === 'employer' && industryType === null ? renderIndustrySelection() :
                     userType === 'employer' ? renderEmployerForm() :
                     renderEmployeeForm()
                   )}
