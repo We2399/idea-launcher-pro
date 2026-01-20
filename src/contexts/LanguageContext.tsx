@@ -975,6 +975,34 @@ const translations = {
     helpFAQ3A: 'Go to your Profile page, scroll to the Documents section, and click "Upload Document" to add files.',
     helpFAQ4Q: 'Who can see my personal information?',
     helpFAQ4A: 'Only HR Admin and Administrator roles can view full employee details. Other employees can only see basic contact information.',
+    
+    // Industry Selection (Multi-Industry Support)
+    selectIndustryType: 'What type of organization?',
+    householdIndustry: 'Household / Domestic',
+    householdIndustryDesc: 'Managing domestic helpers at home',
+    businessIndustry: 'Business / Company',
+    businessIndustryDesc: 'Managing employees in your business',
+    
+    // Dynamic Terminology - Household
+    helperTerm: 'Helper',
+    helpersTerm: 'Helpers',
+    employerTerm: 'Employer',
+    employersTerm: 'Employers',
+    inviteHelper: 'Invite Helper',
+    manageHelpers: 'Manage Helpers',
+    helperDescription: 'Join as domestic helper',
+    householdEmployerDescription: 'Hire and manage domestic helpers',
+    
+    // Dynamic Terminology - Business
+    staffTerm: 'Employee',
+    staffMembersTerm: 'Employees',
+    managerTerm: 'Manager',
+    managersTerm: 'Managers',
+    inviteStaff: 'Invite Employee',
+    manageStaff: 'Manage Employees',
+    staffDescription: 'Join as staff member',
+    businessEmployerDescription: 'Hire and manage your team',
+    oneStaffFree: 'One employee - Free forever',
   },
   'zh-TW': {
     // Navigation
@@ -1930,6 +1958,34 @@ const translations = {
     helpFAQ3A: '前往您的個人資料頁面，滾動到文件區域，點擊「上傳文件」添加檔案。',
     helpFAQ4Q: '誰可以看到我的個人資訊？',
     helpFAQ4A: '只有 HR 管理員和系統管理員可以查看完整的員工詳情。其他員工只能看到基本聯絡資訊。',
+    
+    // Industry Selection (Multi-Industry Support)
+    selectIndustryType: '選擇組織類型',
+    householdIndustry: '家庭 / 家政',
+    householdIndustryDesc: '管理家庭幫傭',
+    businessIndustry: '企業 / 公司',
+    businessIndustryDesc: '管理您的員工團隊',
+    
+    // Dynamic Terminology - Household
+    helperTerm: '幫傭',
+    helpersTerm: '幫傭們',
+    employerTerm: '雇主',
+    employersTerm: '雇主們',
+    inviteHelper: '邀請幫傭',
+    manageHelpers: '管理幫傭',
+    helperDescription: '以家庭幫傭身份加入',
+    householdEmployerDescription: '僱用和管理家庭幫傭',
+    
+    // Dynamic Terminology - Business
+    staffTerm: '員工',
+    staffMembersTerm: '員工們',
+    managerTerm: '經理',
+    managersTerm: '經理們',
+    inviteStaff: '邀請員工',
+    manageStaff: '管理員工',
+    staffDescription: '以員工身份加入',
+    businessEmployerDescription: '僱用和管理您的團隊',
+    oneStaffFree: '一位員工 - 永久免費',
   },
   'zh-CN': {
     // Navigation
@@ -2805,6 +2861,34 @@ const translations = {
     helpFAQ3A: '前往您的个人资料页面，滚动到文件区域，点击「上传文件」添加文件。',
     helpFAQ4Q: '谁可以看到我的个人信息？',
     helpFAQ4A: '只有 HR 管理员和系统管理员可以查看完整的员工详情。其他员工只能看到基本联系信息。',
+    
+    // Industry Selection (Multi-Industry Support)
+    selectIndustryType: '选择组织类型',
+    householdIndustry: '家庭 / 家政',
+    householdIndustryDesc: '管理家庭帮佣',
+    businessIndustry: '企业 / 公司',
+    businessIndustryDesc: '管理您的员工团队',
+    
+    // Dynamic Terminology - Household
+    helperTerm: '帮佣',
+    helpersTerm: '帮佣们',
+    employerTerm: '雇主',
+    employersTerm: '雇主们',
+    inviteHelper: '邀请帮佣',
+    manageHelpers: '管理帮佣',
+    helperDescription: '以家庭帮佣身份加入',
+    householdEmployerDescription: '雇用和管理家庭帮佣',
+    
+    // Dynamic Terminology - Business
+    staffTerm: '员工',
+    staffMembersTerm: '员工们',
+    managerTerm: '经理',
+    managersTerm: '经理们',
+    inviteStaff: '邀请员工',
+    manageStaff: '管理员工',
+    staffDescription: '以员工身份加入',
+    businessEmployerDescription: '雇用和管理您的团队',
+    oneStaffFree: '一位员工 - 永久免费',
   },
   id: {
     // Navigation
@@ -3679,6 +3763,34 @@ const translations = {
     helpFAQ3A: 'Buka halaman Profil Anda, gulir ke bagian Dokumen, dan klik "Unggah Dokumen" untuk menambahkan file.',
     helpFAQ4Q: 'Siapa yang dapat melihat informasi pribadi saya?',
     helpFAQ4A: 'Hanya HR Admin dan Administrator yang dapat melihat detail lengkap karyawan. Karyawan lain hanya dapat melihat informasi kontak dasar.',
+    
+    // Industry Selection (Multi-Industry Support)
+    selectIndustryType: 'Pilih jenis organisasi',
+    householdIndustry: 'Rumah Tangga / Domestik',
+    householdIndustryDesc: 'Mengelola pembantu rumah tangga',
+    businessIndustry: 'Bisnis / Perusahaan',
+    businessIndustryDesc: 'Mengelola karyawan bisnis Anda',
+    
+    // Dynamic Terminology - Household
+    helperTerm: 'Pembantu',
+    helpersTerm: 'Pembantu-pembantu',
+    employerTerm: 'Majikan',
+    employersTerm: 'Majikan-majikan',
+    inviteHelper: 'Undang Pembantu',
+    manageHelpers: 'Kelola Pembantu',
+    helperDescription: 'Bergabung sebagai pembantu rumah tangga',
+    householdEmployerDescription: 'Mempekerjakan dan mengelola pembantu rumah tangga',
+    
+    // Dynamic Terminology - Business
+    staffTerm: 'Karyawan',
+    staffMembersTerm: 'Karyawan-karyawan',
+    managerTerm: 'Manajer',
+    managersTerm: 'Manajer-manajer',
+    inviteStaff: 'Undang Karyawan',
+    manageStaff: 'Kelola Karyawan',
+    staffDescription: 'Bergabung sebagai anggota staf',
+    businessEmployerDescription: 'Mempekerjakan dan mengelola tim Anda',
+    oneStaffFree: 'Satu karyawan - Gratis selamanya',
   }
 };
 

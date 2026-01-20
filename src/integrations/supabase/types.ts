@@ -659,6 +659,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          industry_type: string | null
           max_employees: number
           name: string
           organization_type: Database["public"]["Enums"]["organization_type"]
@@ -669,6 +670,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          industry_type?: string | null
           max_employees?: number
           name: string
           organization_type?: Database["public"]["Enums"]["organization_type"]
@@ -679,6 +681,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          industry_type?: string | null
           max_employees?: number
           name?: string
           organization_type?: Database["public"]["Enums"]["organization_type"]
