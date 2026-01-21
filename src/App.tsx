@@ -8,6 +8,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ImpersonationProvider } from '@/contexts/ImpersonationContext';
+import { IndustryProvider } from '@/contexts/IndustryContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
@@ -50,6 +51,7 @@ const App = () => {
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/*" element={
                     <ProtectedRoute>
+                      <IndustryProvider>
                       <SidebarProvider defaultOpen={false}>
                         <div className="min-h-screen flex w-full">
                           <AppSidebar />
@@ -94,6 +96,7 @@ const App = () => {
                           </div>
                         </div>
                       </SidebarProvider>
+                      </IndustryProvider>
                     </ProtectedRoute>
                   } />
                 </Routes>
