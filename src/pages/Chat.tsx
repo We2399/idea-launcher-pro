@@ -71,9 +71,9 @@ const Chat = () => {
 
       const userIds = usersWithRoles.map(u => u.user_id);
 
-      // Get profiles for these users
+      // Get profiles for these users using the secure chat view
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_chat_view')
         .select('user_id, first_name, last_name')
         .in('user_id', userIds);
 

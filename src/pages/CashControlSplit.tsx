@@ -14,6 +14,7 @@ import { Plus, DollarSign, Receipt, Check, X, Upload, Camera } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslationHelpers } from '@/lib/translations';
+import { ReceiptLink } from '@/components/storage/ReceiptLink';
 
 interface CashTransaction {
   id: string;
@@ -161,18 +162,17 @@ const CashControl = () => {
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('receipts')
-        .getPublicUrl(fileName);
-
-      setReportData({ ...reportData, receipt_url: publicUrl });
+      // Store the file path instead of public URL (bucket is now private)
+      // We'll generate signed URLs when displaying receipts
+      const filePath = `receipts/${fileName}`;
+      setReportData({ ...reportData, receipt_url: filePath });
 
       toast({
         title: t('success'),
         description: t('receiptUploadSuccess'),
       });
 
-      return publicUrl;
+      return filePath;
     } catch (error: any) {
       toast({
         title: t('error'),
@@ -739,16 +739,12 @@ const CashControl = () => {
                         </div>
                       </div>
                       {transaction.receipt_url && (
-                        <div className="col-span-2">
-                          <a 
-                            href={transaction.receipt_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline text-xs flex items-center gap-1"
-                          >
-                            <Receipt className="h-3 w-3" />
-                            {t('receipt')}
-                          </a>
+                        <div className="col-span-2 flex items-center gap-1 text-xs">
+                          <Receipt className="h-3 w-3 text-primary" />
+                          <ReceiptLink 
+                            receiptUrl={transaction.receipt_url} 
+                            className="text-primary hover:underline text-xs"
+                          />
                         </div>
                       )}
                     </div>
@@ -825,15 +821,13 @@ const CashControl = () => {
                       {transaction.receipt_url && (
                         <>
                           <span>•</span>
-                          <a 
-                            href={transaction.receipt_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline flex items-center gap-1"
-                          >
-                            <Receipt className="h-3 w-3" />
-                            {t('receipt')}
-                          </a>
+                          <span className="flex items-center gap-1">
+                            <Receipt className="h-3 w-3 text-primary" />
+                            <ReceiptLink 
+                              receiptUrl={transaction.receipt_url} 
+                              className="text-primary hover:underline"
+                            />
+                          </span>
                         </>
                       )}
                     </div>

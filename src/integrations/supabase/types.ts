@@ -351,6 +351,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "employee_recurring_allowances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       employee_work_schedules: {
@@ -493,6 +500,13 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "fk_leave_balances_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "leave_balances_leave_type_id_fkey"
             columns: ["leave_type_id"]
             isOneToOne: false
@@ -571,6 +585,13 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "fk_leave_requests_approved_by"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "fk_leave_requests_leave_type_id"
             columns: ["leave_type_id"]
             isOneToOne: false
@@ -582,6 +603,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fk_leave_requests_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
             referencedColumns: ["user_id"]
           },
           {
@@ -866,6 +894,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "payroll_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       profile_change_requests: {
@@ -1049,10 +1084,24 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "fk_profiles_manager_id"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "profiles_manager_id_fkey"
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_chat_view"
             referencedColumns: ["user_id"]
           },
           {
@@ -1240,7 +1289,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_chat_view: {
+        Row: {
+          first_name: string | null
+          last_name: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_replacement: {
