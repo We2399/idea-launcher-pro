@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus, DollarSign, Calendar, User, Check, X, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslationHelpers } from '@/lib/translations';
+import { ReceiptLink } from '@/components/storage/ReceiptLink';
 
 interface CashTransaction {
   id: string;
@@ -185,19 +186,17 @@ const CashControl = () => {
 
       if (error) throw error;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('receipts')
-        .getPublicUrl(fileName);
-
-      setFormData({ ...formData, receipt_url: publicUrl });
+      // Store the file path instead of public URL (bucket is now private)
+      // We'll generate signed URLs when displaying receipts
+      const filePath = `receipts/${fileName}`;
+      setFormData({ ...formData, receipt_url: filePath });
 
       toast({
         title: t('success'),
         description: t('receiptUploadSuccess'),
       });
 
-      return publicUrl;
+      return filePath;
     } catch (error: any) {
       toast({
         title: t('error'),
@@ -664,14 +663,7 @@ const CashControl = () => {
                     </div>
                     <Badge variant="outline">{translateCategory(transaction.category)}</Badge>
                     {transaction.receipt_url && (
-                      <a 
-                        href={transaction.receipt_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {t('receipt')}
-                      </a>
+                      <ReceiptLink receiptUrl={transaction.receipt_url} />
                     )}
                   </div>
                   {canApprove && transaction.status === 'pending' && transaction.employee_id !== user?.id && (
