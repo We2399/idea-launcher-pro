@@ -65,6 +65,43 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
+// Sanitize CSS identifier to prevent injection attacks
+const sanitizeCssIdentifier = (value: string): string => {
+  // Only allow alphanumeric characters, hyphens, and underscores
+  return value.replace(/[^a-zA-Z0-9_-]/g, '')
+}
+
+// Validate and sanitize CSS color value
+const sanitizeCssColor = (color: string): string | null => {
+  if (!color) return null
+  
+  // Allow hex colors
+  if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(color)) return color
+  
+  // Allow rgb/rgba colors
+  if (/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+))?\s*\)$/.test(color)) return color
+  
+  // Allow hsl/hsla colors
+  if (/^hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%?\s*,\s*\d{1,3}%?\s*(,\s*(0|1|0?\.\d+))?\s*\)$/.test(color)) return color
+  
+  // Allow CSS color keywords (common ones)
+  const colorKeywords = ['transparent', 'currentcolor', 'inherit', 'initial', 'unset',
+    'black', 'white', 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 'pink', 
+    'gray', 'grey', 'brown', 'cyan', 'magenta', 'navy', 'teal', 'olive', 'maroon',
+    'silver', 'lime', 'aqua', 'fuchsia']
+  if (colorKeywords.includes(color.toLowerCase())) return color
+  
+  // Allow CSS variable references (e.g., var(--primary))
+  if (/^var\(--[a-zA-Z0-9_-]+\)$/.test(color)) return color
+  
+  // Allow hsl with spaces (tailwind format like "221.2 83.2% 53.3%")
+  if (/^\d{1,3}(\.\d+)?\s+\d{1,3}(\.\d+)?%?\s+\d{1,3}(\.\d+)?%?$/.test(color)) {
+    return `hsl(${color})`
+  }
+  
+  return null
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
@@ -74,25 +111,31 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // Sanitize the chart ID
+  const sanitizedId = sanitizeCssIdentifier(id)
+
+  // Generate CSS with sanitized values
+  const cssContent = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const sanitizedPrefix = theme === 'dark' ? '.dark' : ''
+      const colorVars = colorConfig
+        .map(([key, itemConfig]) => {
+          const rawColor = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color
+          const sanitizedColor = rawColor ? sanitizeCssColor(rawColor) : null
+          const sanitizedKey = sanitizeCssIdentifier(key)
+          return sanitizedColor ? `  --color-${sanitizedKey}: ${sanitizedColor};` : null
+        })
+        .filter(Boolean)
+        .join('\n')
+      
+      return `${sanitizedPrefix} [data-chart=${sanitizedId}] {\n${colorVars}\n}`
+    })
+    .join('\n')
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
+        __html: cssContent,
       }}
     />
   )
