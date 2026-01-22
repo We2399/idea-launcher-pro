@@ -19,7 +19,7 @@ interface UpgradeTierDialogProps {
 }
 
 const tierOptions = [
-  { tier: 'trial' as const, key: 'trial', employees: 2, price: '$0/month', trialNote: '6-month free trial' },
+  { tier: 'trial' as const, key: 'trial', employees: 2, price: '$0/month', trialNote: '3-month free trial' },
   { tier: 'se' as const, key: 'se', employees: 9, price: '$28/month' },
   { tier: 'sme' as const, key: 'sme', employees: 50, price: '$88/month' },
   { tier: 'enterprise' as const, key: 'enterprise', employees: 100, price: '$168/month' },

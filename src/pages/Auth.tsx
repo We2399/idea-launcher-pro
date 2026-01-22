@@ -284,6 +284,7 @@ const Auth = () => {
           </div>
           <span className="font-semibold text-sm">{t('householdIndustry')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('householdIndustryDesc')}</span>
+          <span className="text-xs text-primary font-medium mt-2">{t('appNameLine1')} {t('appNameLine2')}</span>
         </button>
         
         <button
@@ -296,6 +297,7 @@ const Auth = () => {
           </div>
           <span className="font-semibold text-sm">{t('businessIndustry')}</span>
           <span className="text-xs text-muted-foreground text-center mt-1">{t('businessIndustryDesc')}</span>
+          <span className="text-xs text-primary font-medium mt-2">{t('appNameLine1Business')}</span>
         </button>
       </div>
     </div>
@@ -665,13 +667,13 @@ const Auth = () => {
         {/* Sign In View */}
         {authMode === 'signin' && (
           <div className="space-y-6 animate-fade-in">
-            {/* Logo/Branding Section */}
+            {/* Logo/Branding Section - Default to Household branding on login */}
             <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
               <div className="flex justify-center mb-4">
                 <img src={jiejieLadyIcon} alt="Jie Jie" className="w-20 h-20 rounded-full object-cover" />
               </div>
               <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
-              <p className="text-lg opacity-90">{t('appNameLine2')}</p>
+              {t('appNameLine2') && <p className="text-lg opacity-90">{t('appNameLine2')}</p>}
             </div>
 
             {/* Sign In Form */}

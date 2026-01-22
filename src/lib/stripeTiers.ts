@@ -19,7 +19,7 @@ export const STRIPE_TIERS: Record<string, StripeTier> = {
     price_id: 'price_1SoIhBAps9VxfrKB6tYdeYUu',
     price: 0,
     maxEmployees: 2,
-    trialMonths: 6,
+    trialMonths: 3,
     dbTier: 'free',
   },
   se: {
