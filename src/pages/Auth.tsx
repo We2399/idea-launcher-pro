@@ -29,6 +29,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<UserType>(inviteCode ? 'employee' : null);
   const [industryType, setIndustryType] = useState<IndustryType>(null);
+  const [landingIndustry, setLandingIndustry] = useState<IndustryType>(null);
   const [orgType, setOrgType] = useState<OrgType>('individual');
   const [formData, setFormData] = useState({
     email: '',
@@ -661,19 +662,112 @@ const Auth = () => {
     </div>
   );
 
+  // Get branding based on selected landing industry
+
+  // Get branding based on selected landing industry
+  const getBranding = () => {
+    if (landingIndustry === 'business') {
+      return {
+        line1: t('appNameLine1Business'),
+        line2: t('appNameLine2Business'),
+      };
+    }
+    return {
+      line1: t('appNameLine1'),
+      line2: t('appNameLine2'),
+    };
+  };
+
+  const branding = getBranding();
+
+  // Render the industry-first landing page
+  const renderIndustryLanding = () => (
+    <div className="space-y-6 animate-fade-in">
+      {/* Neutral Welcome Header */}
+      <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
+        <h1 className="text-2xl font-bold mb-2">{t('industryWelcome')}</h1>
+        <p className="text-sm opacity-90">{t('industrySubtitle')}</p>
+      </div>
+
+      {/* Industry Selection */}
+      <Card className="rounded-3xl shadow-card border-0">
+        <CardContent className="p-6 space-y-5">
+          <p className="text-center text-muted-foreground font-medium">{t('imLookingFor')}</p>
+          
+          <div className="grid grid-cols-1 gap-4">
+            <button
+              type="button"
+              onClick={() => setLandingIndustry('household')}
+              className="flex items-center gap-4 p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30 text-left"
+            >
+              <div className="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <Home className="h-7 w-7 text-accent" />
+              </div>
+              <div className="flex-1">
+                <span className="font-semibold text-base block">{t('helperManagement')}</span>
+                <span className="text-xs text-muted-foreground">{t('helperManagementDesc')}</span>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm font-medium text-primary">{t('appNameLine1')}</span>
+                  <span className="text-sm text-primary/80">{t('appNameLine2')}</span>
+                </div>
+              </div>
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setLandingIndustry('business')}
+              className="flex items-center gap-4 p-5 border-2 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all bg-muted/30 text-left"
+            >
+              <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <Briefcase className="h-7 w-7 text-primary" />
+              </div>
+              <div className="flex-1">
+                <span className="font-semibold text-base block">{t('businessHR')}</span>
+                <span className="text-xs text-muted-foreground">{t('businessHRDesc')}</span>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm font-medium text-primary">{t('appNameLine1Business')}</span>
+                  {t('appNameLine2Business') && <span className="text-sm text-primary/80">{t('appNameLine2Business')}</span>}
+                </div>
+              </div>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="min-h-screen safe-area-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        {/* Sign In View */}
-        {authMode === 'signin' && (
+        {/* Industry-First Landing Page */}
+        {authMode === 'signin' && landingIndustry === null && renderIndustryLanding()}
+
+        {/* Sign In View - After industry selection */}
+        {authMode === 'signin' && landingIndustry !== null && (
           <div className="space-y-6 animate-fade-in">
-            {/* Logo/Branding Section - Default to Household branding on login */}
+            {/* Logo/Branding Section - Dynamic based on selected industry */}
             <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
-              <div className="flex justify-center mb-4">
-                <img src={jiejieLadyIcon} alt="Jie Jie" className="w-20 h-20 rounded-full object-cover" />
-              </div>
-              <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
-              {t('appNameLine2') && <p className="text-lg opacity-90">{t('appNameLine2')}</p>}
+              <button
+                type="button"
+                onClick={() => setLandingIndustry(null)}
+                className="absolute top-4 left-4 p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              {landingIndustry === 'household' && (
+                <div className="flex justify-center mb-4">
+                  <img src={jiejieLadyIcon} alt="Jie Jie" className="w-20 h-20 rounded-full object-cover" />
+                </div>
+              )}
+              {landingIndustry === 'business' && (
+                <div className="flex justify-center mb-4">
+                  <div className="w-20 h-20 bg-primary-foreground/10 rounded-full flex items-center justify-center">
+                    <Briefcase className="w-10 h-10" />
+                  </div>
+                </div>
+              )}
+              <h1 className="text-2xl font-bold mb-1">{branding.line1}</h1>
+              {branding.line2 && <p className="text-lg opacity-90">{branding.line2}</p>}
             </div>
 
             {/* Sign In Form */}
@@ -723,10 +817,26 @@ const Auth = () => {
             <div className="text-center space-y-2">
               <p className="text-muted-foreground text-sm">{t('dontHaveAccount')}</p>
               <button 
-                onClick={() => setAuthMode('signup')}
+                onClick={() => {
+                  setAuthMode('signup');
+                  // Pre-set the industry type for signup based on landing selection
+                  if (landingIndustry) {
+                    setIndustryType(landingIndustry);
+                  }
+                }}
                 className="text-primary font-semibold hover:underline"
               >
                 {t('signUpHere')}
+              </button>
+            </div>
+
+            {/* Switch Industry Link */}
+            <div className="text-center">
+              <button 
+                onClick={() => setLandingIndustry(null)}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {t('back')} ← {t('imLookingFor')}
               </button>
             </div>
           </div>
