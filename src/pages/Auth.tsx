@@ -611,51 +611,69 @@ const Auth = () => {
   );
 
   return (
-    <div className="min-h-screen safe-area-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen safe-area-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/50 p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-20 -left-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl animate-float" />
+      <div className="absolute bottom-20 -right-20 w-80 h-80 rounded-full bg-accent/10 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/2 left-1/4 w-40 h-40 rounded-full bg-primary/3 blur-2xl" />
+      
+      <div className="w-full max-w-sm relative z-10">
         {/* Sign In View */}
         {authMode === 'signin' && (
           <div className="space-y-6 animate-fade-in">
-            {/* Logo/Branding Section - Jie Jie branding */}
-            <div className="bg-primary rounded-3xl p-8 text-center text-primary-foreground shadow-elevated">
-              <div className="flex justify-center mb-4">
-                <img src={jiejieLadyIcon} alt="Jie Jie" className="w-20 h-20 rounded-full object-cover" />
+            {/* Logo/Branding Section - Jie Jie branding with enhanced styling */}
+            <div className="relative bg-gradient-to-br from-primary via-primary to-primary/90 rounded-3xl p-8 text-center text-primary-foreground shadow-elevated overflow-hidden">
+              {/* Decorative circles */}
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2" />
+              
+              <div className="relative">
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-white/20 blur-md scale-110" />
+                    <img 
+                      src={jiejieLadyIcon} 
+                      alt="Jie Jie" 
+                      className="relative w-20 h-20 rounded-full object-cover ring-4 ring-white/30 shadow-lg" 
+                    />
+                  </div>
+                </div>
+                <h1 className="text-2xl font-bold mb-1 tracking-tight">{t('appNameLine1')}</h1>
+                <p className="text-lg opacity-90 font-medium">{t('appNameLine2')}</p>
               </div>
-              <h1 className="text-2xl font-bold mb-1">{t('appNameLine1')}</h1>
-              <p className="text-lg opacity-90">{t('appNameLine2')}</p>
             </div>
 
-            {/* Sign In Form */}
-            <Card className="rounded-3xl shadow-card border-0">
+            {/* Sign In Form with glass effect */}
+            <Card variant="glass" className="rounded-3xl border-white/30 shadow-elevated">
               <CardContent className="p-6 space-y-4">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-muted-foreground text-sm">{t('email')}</Label>
+                    <Label htmlFor="signin-email" className="text-muted-foreground text-sm font-medium">{t('email')}</Label>
                     <Input
                       id="signin-email"
                       type="email"
                       placeholder={t('enterEmail')}
                       value={formData.email}
                       onChange={(e) => updateFormData('email', e.target.value)}
-                      className="rounded-xl border-border bg-muted/50 h-12"
+                      className="rounded-xl border-border/50 bg-background/60 h-12 shadow-sm focus:shadow-md transition-shadow"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-muted-foreground text-sm">{t('password')}</Label>
+                    <Label htmlFor="signin-password" className="text-muted-foreground text-sm font-medium">{t('password')}</Label>
                     <Input
                       id="signin-password"
                       type="password"
                       placeholder={t('enterPassword')}
                       value={formData.password}
                       onChange={(e) => updateFormData('password', e.target.value)}
-                      className="rounded-xl border-border bg-muted/50 h-12"
+                      className="rounded-xl border-border/50 bg-background/60 h-12 shadow-sm focus:shadow-md transition-shadow"
                       required
                     />
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base shadow-md" 
+                    className="w-full h-12 rounded-xl bg-gradient-to-r from-accent to-accent/90 hover:from-accent/95 hover:to-accent/85 text-accent-foreground font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5" 
                     disabled={isLoading}
                   >
                     {isLoading ? t('signingIn') : t('signIn')}
@@ -663,17 +681,17 @@ const Auth = () => {
                 </form>
 
                 <div className="flex justify-center pt-2">
-                  <Link to="/reset-password" className="text-sm text-primary hover:underline">{t('forgotPassword')}</Link>
+                  <Link to="/reset-password" className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">{t('forgotPassword')}</Link>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Sign Up Link */}
-            <div className="text-center space-y-2">
+            {/* Sign Up Link with enhanced styling */}
+            <div className="text-center space-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <p className="text-muted-foreground text-sm">{t('dontHaveAccount')}</p>
               <button 
                 onClick={() => setAuthMode('signup')}
-                className="text-primary font-semibold hover:underline"
+                className="text-primary font-semibold hover:text-primary/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-center"
               >
                 {t('signUpHere')}
               </button>
@@ -691,14 +709,14 @@ const Auth = () => {
                   setAuthMode('signin');
                   setUserType(null);
                 }}
-                className="p-2 rounded-full bg-card hover:bg-muted transition-colors"
+                className="p-2 rounded-full bg-card/80 hover:bg-card shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <h1 className="text-xl font-bold">{t('signUp')}</h1>
+              <h1 className="text-xl font-bold tracking-tight">{t('signUp')}</h1>
             </div>
 
-            <Card className="rounded-3xl shadow-card border-0">
+            <Card variant="glass" className="rounded-3xl border-white/30 shadow-elevated">
               <CardContent className="p-6">
                 <form onSubmit={handleSignUp}>
                   {isFirstUser ? renderFirstUserForm() : (
@@ -715,7 +733,7 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">{t('alreadyHaveAccount')}</p>
               <button 
                 onClick={() => setAuthMode('signin')}
-                className="text-primary font-semibold hover:underline"
+                className="text-primary font-semibold hover:text-primary/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-center"
               >
                 {t('signInHere')}
               </button>
