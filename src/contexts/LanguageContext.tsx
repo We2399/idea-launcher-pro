@@ -56,6 +56,13 @@ const translations = {
     
     // Dashboard
     welcomeBack: 'Welcome Back!',
+    loginTagline: 'Your trusted partner for household management',
+    loginSubtagline: 'Simplify your home care with our comprehensive platform for managing household helpers.',
+    featureCare: 'Care Management',
+    featureSecurity: 'Secure & Private',
+    featureHome: 'Home Organization',
+    trustedBy: 'Trusted by families',
+    createAccountSubtitle: 'Create your account',
     dashboardSubtitle: "Manage your leave requests and stay updated with your team's schedule",
     pendingRequests: 'Pending Requests',
     totalRequests: 'Total Requests',
@@ -1053,6 +1060,13 @@ const translations = {
     
     // Dashboard
     welcomeBack: '歡迎回來！',
+    loginTagline: '您值得信賴的家務管理夥伴',
+    loginSubtagline: '透過我們的全方位平台，輕鬆管理您的家務幫手。',
+    featureCare: '照護管理',
+    featureSecurity: '安全私密',
+    featureHome: '家庭組織',
+    trustedBy: '受家庭信賴',
+    createAccountSubtitle: '建立您的帳戶',
     dashboardSubtitle: '管理您的請假申請並掌握團隊行程',
     pendingRequests: '待審核申請',
     totalRequests: '總申請數',
@@ -2048,6 +2062,13 @@ const translations = {
     
     // Dashboard
     welcomeBack: '欢迎回来！',
+    loginTagline: '您值得信赖的家务管理伙伴',
+    loginSubtagline: '通过我们的全方位平台，轻松管理您的家务帮手。',
+    featureCare: '照护管理',
+    featureSecurity: '安全私密',
+    featureHome: '家庭组织',
+    trustedBy: '受家庭信赖',
+    createAccountSubtitle: '创建您的账户',
     dashboardSubtitle: '管理您的请假申请并掌握团队日程',
     pendingRequests: '待审核申请',
     totalRequests: '总申请数',
@@ -2962,6 +2983,13 @@ const translations = {
     
     // Dashboard
     welcomeBack: 'Selamat datang kembali!',
+    loginTagline: 'Mitra terpercaya Anda untuk pengelolaan rumah tangga',
+    loginSubtagline: 'Sederhanakan perawatan rumah Anda dengan platform lengkap untuk mengelola pembantu rumah tangga.',
+    featureCare: 'Manajemen Perawatan',
+    featureSecurity: 'Aman & Privat',
+    featureHome: 'Organisasi Rumah',
+    trustedBy: 'Dipercaya oleh keluarga',
+    createAccountSubtitle: 'Buat akun Anda',
     dashboardSubtitle: 'Kelola permintaan cuti dan pantau jadwal tim Anda',
     pendingRequests: 'Permintaan Tertunda',
     totalRequests: 'Total Permintaan',
