@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2, User, Users, ArrowLeft, Shield, Heart, Home, Sparkles, Star, CheckCircle2 } from 'lucide-react';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
 import { toast } from 'sonner';
+import { WelcomeSlides } from '@/components/onboarding/WelcomeSlides';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 type UserType = 'employer' | 'employee' | null;
 type OrgType = 'individual' | 'company';
@@ -21,8 +23,10 @@ const Auth = () => {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get('invite');
+  const { hasCompletedWelcome, completeWelcome } = useOnboarding();
   
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
+  const [showWelcomeSlides, setShowWelcomeSlides] = useState(!hasCompletedWelcome);
   
   const [isLoading, setIsLoading] = useState(false);
   const [userType, setUserType] = useState<UserType>(inviteCode ? 'employee' : null);
@@ -42,6 +46,11 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFirstUser, setIsFirstUser] = useState(false);
   const [invitationDetails, setInvitationDetails] = useState<any>(null);
+
+  const handleWelcomeComplete = () => {
+    completeWelcome();
+    setShowWelcomeSlides(false);
+  };
 
   // Check if this is the first user registration
   useEffect(() => {
@@ -129,6 +138,11 @@ const Auth = () => {
   // Redirect if already authenticated
   if (!loading && user) {
     return <Navigate to="/" replace />;
+  }
+
+  // Show welcome slides for first-time visitors
+  if (showWelcomeSlides) {
+    return <WelcomeSlides onComplete={handleWelcomeComplete} />;
   }
 
   if (loading) {
