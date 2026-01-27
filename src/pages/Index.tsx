@@ -25,6 +25,8 @@ import { PayrollCard } from '@/components/dashboard/PayrollCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FeatureTour } from '@/components/onboarding/FeatureTour';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 const Index = () => {
   const { user, userRole } = useAuth();
@@ -35,6 +37,7 @@ const Index = () => {
   const taskCounts = useTaskStatusCounts();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const { hasCompletedFeatureTour, completeFeatureTour } = useOnboarding();
   
   // Show impersonation indicator for administrators
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
@@ -179,10 +182,21 @@ const Index = () => {
 
   // Show mobile dashboard on mobile devices
   if (isMobile) {
-    return <MobileDashboard />;
+    return (
+      <>
+        <MobileDashboard />
+        {!hasCompletedFeatureTour && (
+          <FeatureTour onComplete={completeFeatureTour} />
+        )}
+      </>
+    );
   }
 
   return (
+    <>
+      {!hasCompletedFeatureTour && (
+        <FeatureTour onComplete={completeFeatureTour} />
+      )}
     <div 
       ref={scrollableRef}
       className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8 relative overflow-y-auto"
@@ -348,6 +362,7 @@ const Index = () => {
         loading={stats.loading}
       />
     </div>
+    </>
   );
 };
 
