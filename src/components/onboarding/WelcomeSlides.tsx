@@ -18,50 +18,50 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'welcome',
       icon: Heart,
-      image: 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80',
       title: t('welcomeSlideTitle'),
       subtitle: t('welcomeSlideSubtitle'),
-      color: 'from-hermes/80 to-hermes-dark/90',
+      color: 'from-hermes/60 to-hermes-dark/70',
     },
     {
       id: 'calendar',
       icon: Calendar,
-      image: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&auto=format&fit=crop&q=80',
       title: t('calendarSlideTitle'),
       subtitle: t('calendarSlideSubtitle'),
-      color: 'from-primary/80 to-primary/90',
+      color: 'from-primary/60 to-primary/70',
     },
     {
       id: 'documents',
       icon: FileText,
-      image: 'https://images.unsplash.com/photo-1568234928966-359c35dd8327?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=800&auto=format&fit=crop&q=80',
       title: t('documentsSlideTitle'),
       subtitle: t('documentsSlideSubtitle'),
-      color: 'from-accent/80 to-accent/90',
+      color: 'from-accent/60 to-accent/70',
     },
     {
       id: 'chat',
       icon: MessageCircle,
-      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80',
       title: t('chatSlideTitle'),
       subtitle: t('chatSlideSubtitle'),
-      color: 'from-hermes/80 to-hermes-dark/90',
+      color: 'from-hermes/60 to-hermes-dark/70',
     },
     {
       id: 'payroll',
       icon: Wallet,
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&auto=format&fit=crop&q=80',
       title: t('payrollSlideTitle'),
       subtitle: t('payrollSlideSubtitle'),
-      color: 'from-primary/80 to-primary/90',
+      color: 'from-primary/60 to-primary/70',
     },
     {
       id: 'security',
       icon: Shield,
-      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=800&auto=format&fit=crop&q=80',
       title: t('securitySlideTitle'),
       subtitle: t('securitySlideSubtitle'),
-      color: 'from-accent/80 to-accent/90',
+      color: 'from-accent/60 to-accent/70',
     },
   ];
 
@@ -136,10 +136,10 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
         {/* Main Content - Bottom Section */}
         <div className="mt-auto">
           {/* Glassmorphism Card */}
-          <div className="mx-4 mb-6 p-6 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl animate-fade-in">
+          <div className="mx-4 mb-6 p-6 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl animate-fade-in">
             {/* Icon */}
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/30">
+              <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20">
                 <Icon className="w-8 h-8 text-white" />
               </div>
             </div>
