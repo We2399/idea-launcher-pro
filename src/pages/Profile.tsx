@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
-import { useLocation } from 'react-router-dom';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, UserCog, Check, X, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, UserCog, Check, X, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useTranslationHelpers } from '@/lib/translations';
 import { format } from 'date-fns';
@@ -78,6 +79,8 @@ export default function Profile() {
   const { impersonatedUserId, isImpersonating } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType } = useTranslationHelpers();
+  const { resetOnboarding } = useOnboarding();
+  const navigate = useNavigate();
   
   // Use impersonated user ID if active, otherwise use logged-in user
   const effectiveUserId = impersonatedUserId || user?.id;
@@ -635,6 +638,37 @@ export default function Profile() {
             </CardContent>
           </Card>
         )}
+
+        {/* Replay Onboarding Card - visible to all users */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5" />
+              {t('replayOnboarding') || 'Replay Onboarding'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t('replayOnboardingDescription') || 'Watch the welcome slides and feature tour again'}
+            </p>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                resetOnboarding();
+                toast({
+                  title: t('success'),
+                  description: t('replayOnboardingSuccess') || 'Onboarding reset! You will see the welcome slides on your next login.'
+                });
+                // Navigate to auth page to show the slides
+                navigate('/auth');
+              }}
+              className="w-full"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {t('replayWelcomeSlides') || 'Replay Welcome Slides'}
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Leave Balances */}
         <Card>
