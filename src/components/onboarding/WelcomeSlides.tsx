@@ -18,7 +18,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'welcome',
       icon: Heart,
-      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80',
       title: t('welcomeSlideTitle'),
       subtitle: t('welcomeSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -26,7 +26,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'calendar',
       icon: Calendar,
-      image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
       title: t('calendarSlideTitle'),
       subtitle: t('calendarSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -34,7 +34,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'documents',
       icon: FileText,
-      image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80',
       title: t('documentsSlideTitle'),
       subtitle: t('documentsSlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
@@ -42,7 +42,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'chat',
       icon: MessageCircle,
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&auto=format&fit=crop&q=80',
       title: t('chatSlideTitle'),
       subtitle: t('chatSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -50,7 +50,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'payroll',
       icon: Wallet,
-      image: 'https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80',
       title: t('payrollSlideTitle'),
       subtitle: t('payrollSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -58,7 +58,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'security',
       icon: Shield,
-      image: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
       title: t('securitySlideTitle'),
       subtitle: t('securitySlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
