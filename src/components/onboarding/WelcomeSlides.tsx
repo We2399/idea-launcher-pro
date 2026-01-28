@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Calendar, FileText, MessageCircle, Wallet, Shield, Heart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
+import onboardingWelcome from '@/assets/onboarding-welcome.png';
+import onboardingDocuments from '@/assets/onboarding-documents.png';
+import onboardingChat from '@/assets/onboarding-chat.png';
+import onboardingPayroll from '@/assets/onboarding-payroll.png';
+import onboardingSecurity from '@/assets/onboarding-security.png';
 
 interface WelcomeSlidesProps {
   onComplete: () => void;
@@ -18,7 +23,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'welcome',
       icon: Heart,
-      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&auto=format&fit=crop&q=80',
+      image: onboardingWelcome,
       title: t('welcomeSlideTitle'),
       subtitle: t('welcomeSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -26,7 +31,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'calendar',
       icon: Calendar,
-      image: 'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&auto=format&fit=crop&q=80',
+      image: onboardingWelcome,
       title: t('calendarSlideTitle'),
       subtitle: t('calendarSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -34,7 +39,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'documents',
       icon: FileText,
-      image: 'https://images.unsplash.com/photo-1611432579699-484f7990b127?w=800&auto=format&fit=crop&q=80',
+      image: onboardingDocuments,
       title: t('documentsSlideTitle'),
       subtitle: t('documentsSlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
@@ -42,7 +47,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'chat',
       icon: MessageCircle,
-      image: 'https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?w=800&auto=format&fit=crop&q=80',
+      image: onboardingChat,
       title: t('chatSlideTitle'),
       subtitle: t('chatSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -50,7 +55,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'payroll',
       icon: Wallet,
-      image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=800&auto=format&fit=crop&q=80',
+      image: onboardingPayroll,
       title: t('payrollSlideTitle'),
       subtitle: t('payrollSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -58,7 +63,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'security',
       icon: Shield,
-      image: 'https://images.unsplash.com/photo-1607748862156-7c548e7e98f4?w=800&auto=format&fit=crop&q=80',
+      image: onboardingSecurity,
       title: t('securitySlideTitle'),
       subtitle: t('securitySlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
