@@ -13,10 +13,12 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText, Lock, Eye, EyeOff, Upload } from 'lucide-react';
+import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, Clock, Check, X, Phone, MapPin, Heart, FileText, Lock, Eye, EyeOff, Upload, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import DocumentManager from './DocumentManager';
 import AvatarUpload from './AvatarUpload';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -85,6 +87,8 @@ export default function ProfileWithApproval() {
   const { impersonatedUserId, isImpersonating } = useImpersonation();
   const { t, language } = useLanguage();
   const { translateLeaveType } = useTranslationHelpers();
+  const { resetOnboarding } = useOnboarding();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalance[]>([]);
   const [changeRequests, setChangeRequests] = useState<ProfileChangeRequest[]>([]);
@@ -1670,6 +1674,36 @@ export default function ProfileWithApproval() {
           </CardContent>
         </Card>
       )}
+
+      {/* Replay Onboarding Card - visible to all users */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RefreshCw className="h-5 w-5" />
+            {t('replayOnboarding') || 'Replay Onboarding'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t('replayOnboardingDescription') || 'Watch the welcome slides and feature tour again'}
+          </p>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              resetOnboarding();
+              toast({
+                title: t('success'),
+                description: t('replayOnboardingSuccess') || 'Onboarding reset! You will see the welcome slides on your next login.'
+              });
+              navigate('/auth');
+            }}
+            className="w-full"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {t('replayWelcomeSlides') || 'Replay Welcome Slides'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
