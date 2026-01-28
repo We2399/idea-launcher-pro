@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft, Calendar, FileText, MessageCircle, Wallet, Shield, Heart } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ClipboardList, FileText, MessageCircle, Wallet, Shield, Heart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
 import onboardingWelcome from '@/assets/onboarding-welcome.png';
@@ -8,6 +8,7 @@ import onboardingDocuments from '@/assets/onboarding-documents.png';
 import onboardingChat from '@/assets/onboarding-chat.png';
 import onboardingPayroll from '@/assets/onboarding-payroll.png';
 import onboardingSecurity from '@/assets/onboarding-security.png';
+import onboardingTasks from '@/assets/onboarding-tasks.png';
 
 interface WelcomeSlidesProps {
   onComplete: () => void;
@@ -29,11 +30,11 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
       color: 'from-hermes/60 to-hermes-dark/70',
     },
     {
-      id: 'calendar',
-      icon: Calendar,
-      image: onboardingWelcome,
-      title: t('calendarSlideTitle'),
-      subtitle: t('calendarSlideSubtitle'),
+      id: 'tasks',
+      icon: ClipboardList,
+      image: onboardingTasks,
+      title: t('tasksSlideTitle'),
+      subtitle: t('tasksSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
     },
     {
