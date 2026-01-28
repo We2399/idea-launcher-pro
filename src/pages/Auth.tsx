@@ -642,12 +642,16 @@ const Auth = () => {
     </div>
   );
 
-  // Feature highlights for the left panel
+  // Feature highlights for the left panel - now clickable to show slides
   const features = [
-    { icon: Heart, label: t('featureCare') || 'Care Management', color: 'text-rose-500' },
-    { icon: Shield, label: t('featureSecurity') || 'Secure & Private', color: 'text-primary' },
-    { icon: Home, label: t('featureHome') || 'Home Organization', color: 'text-amber-500' },
+    { icon: Heart, label: t('featureCare') || 'Care Management', color: 'text-rose-500', slideIndex: 0 },
+    { icon: Shield, label: t('featureSecurity') || 'Secure & Private', color: 'text-primary', slideIndex: 5 },
+    { icon: Home, label: t('featureHome') || 'Home Organization', color: 'text-amber-500', slideIndex: 1 },
   ];
+
+  const handleFeatureClick = () => {
+    setShowWelcomeSlides(true);
+  };
 
   return (
     <div className="min-h-screen safe-area-screen flex flex-col lg:flex-row bg-gradient-to-br from-primary/5 via-background to-accent/5 relative overflow-hidden">
@@ -700,18 +704,19 @@ const Auth = () => {
             {t('loginSubtagline') || 'Simplify your home care with our comprehensive platform for managing household helpers.'}
           </p>
 
-          {/* Feature list */}
+          {/* Feature list - clickable to show all slides */}
           <div className="space-y-4">
             {features.map((feature, index) => (
-              <div 
+              <button 
                 key={index}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-card/60 backdrop-blur-sm border border-border/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group"
+                onClick={handleFeatureClick}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl bg-card/60 backdrop-blur-sm border border-border/50 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group cursor-pointer text-left"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-background to-muted flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform`}>
                   <feature.icon className={`w-6 h-6 ${feature.color}`} />
                 </div>
                 <span className="font-medium text-foreground">{feature.label}</span>
-              </div>
+              </button>
             ))}
           </div>
 
