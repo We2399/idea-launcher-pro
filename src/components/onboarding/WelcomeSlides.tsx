@@ -18,7 +18,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'welcome',
       icon: Heart,
-      image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&auto=format&fit=crop&q=80',
       title: t('welcomeSlideTitle'),
       subtitle: t('welcomeSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -26,7 +26,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'calendar',
       icon: Calendar,
-      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&auto=format&fit=crop&q=80',
       title: t('calendarSlideTitle'),
       subtitle: t('calendarSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -34,7 +34,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'documents',
       icon: FileText,
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1611432579699-484f7990b127?w=800&auto=format&fit=crop&q=80',
       title: t('documentsSlideTitle'),
       subtitle: t('documentsSlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
@@ -42,7 +42,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'chat',
       icon: MessageCircle,
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?w=800&auto=format&fit=crop&q=80',
       title: t('chatSlideTitle'),
       subtitle: t('chatSlideSubtitle'),
       color: 'from-hermes/60 to-hermes-dark/70',
@@ -50,7 +50,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'payroll',
       icon: Wallet,
-      image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=800&auto=format&fit=crop&q=80',
       title: t('payrollSlideTitle'),
       subtitle: t('payrollSlideSubtitle'),
       color: 'from-primary/60 to-primary/70',
@@ -58,7 +58,7 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
     {
       id: 'security',
       icon: Shield,
-      image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1607748862156-7c548e7e98f4?w=800&auto=format&fit=crop&q=80',
       title: t('securitySlideTitle'),
       subtitle: t('securitySlideSubtitle'),
       color: 'from-accent/60 to-accent/70',
@@ -121,12 +121,12 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
         {currentSlide === 0 && (
           <div className="flex justify-center mt-8 animate-fade-in">
             <div className="relative">
-              <div className="absolute -inset-3 bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-lg animate-pulse" />
-              <div className="relative w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm p-2 ring-2 ring-white/30 shadow-2xl">
+              <div className="absolute -inset-4 bg-gradient-to-br from-hermes/40 to-hermes-dark/30 rounded-full blur-xl animate-pulse" />
+              <div className="relative w-24 h-24 rounded-full overflow-hidden ring-3 ring-white/40 shadow-2xl">
                 <img
                   src={jiejieLadyIcon}
                   alt={brandName}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover scale-110"
                 />
               </div>
             </div>
