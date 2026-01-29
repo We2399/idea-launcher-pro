@@ -94,13 +94,18 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-background">
-      {/* Background Image with Gradient Overlay */}
+      {/* Background - Solid gradient for welcome slide, image for others */}
       <div className="absolute inset-0">
-        <img
-          src={currentSlideData.image}
-          alt=""
-          className="w-full h-full object-cover transition-opacity duration-500"
-        />
+        {currentSlide === 0 ? (
+          /* Solid gradient background for welcome slide - icon only */
+          <div className="w-full h-full bg-gradient-to-br from-hermes via-hermes-dark to-hermes" />
+        ) : (
+          <img
+            src={currentSlideData.image}
+            alt=""
+            className="w-full h-full object-cover transition-opacity duration-500"
+          />
+        )}
         <div className={`absolute inset-0 bg-gradient-to-t ${currentSlideData.color}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
@@ -123,12 +128,12 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
           </Button>
         </div>
 
-        {/* Logo on first slide - single icon only */}
+        {/* Logo on first slide - single centered icon only */}
         {currentSlide === 0 && (
           <div className="flex-1 flex items-center justify-center animate-fade-in">
             <div className="relative">
-              <div className="absolute -inset-6 bg-gradient-to-br from-hermes/50 to-hermes-dark/40 rounded-full blur-2xl animate-pulse" />
-              <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/50 shadow-2xl">
+              <div className="absolute -inset-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-3xl animate-pulse" />
+              <div className="relative w-40 h-40 rounded-full overflow-hidden ring-4 ring-white/60 shadow-2xl">
                 <img
                   src={jiejieLadyIcon}
                   alt={brandName}
