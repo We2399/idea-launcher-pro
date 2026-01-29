@@ -123,12 +123,12 @@ export function WelcomeSlides({ onComplete }: WelcomeSlidesProps) {
           </Button>
         </div>
 
-        {/* Logo on first slide */}
+        {/* Logo on first slide - single icon only */}
         {currentSlide === 0 && (
-          <div className="flex justify-center mt-8 animate-fade-in">
+          <div className="flex-1 flex items-center justify-center animate-fade-in">
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-br from-hermes/40 to-hermes-dark/30 rounded-full blur-xl animate-pulse" />
-              <div className="relative w-24 h-24 rounded-full overflow-hidden ring-3 ring-white/40 shadow-2xl">
+              <div className="absolute -inset-6 bg-gradient-to-br from-hermes/50 to-hermes-dark/40 rounded-full blur-2xl animate-pulse" />
+              <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/50 shadow-2xl">
                 <img
                   src={jiejieLadyIcon}
                   alt={brandName}
