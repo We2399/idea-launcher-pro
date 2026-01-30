@@ -1029,7 +1029,7 @@ const translations = {
     helpFAQ3Q: 'How do I upload documents?',
     helpFAQ3A: 'Go to your Profile page, scroll to the Documents section, and click "Upload Document" to add files.',
     helpFAQ4Q: 'Who can see my personal information?',
-    helpFAQ4A: 'Only HR Admin and Administrator roles can view full employee details. Other employees can only see basic contact information.',
+    helpFAQ4A: 'Only HR Admin and Administrator roles can view full employee details. Other employees can only see their own information.',
     
     // Contact Us
     contactUs: 'Contact Us',
@@ -2072,7 +2072,7 @@ const translations = {
     helpFAQ3Q: '如何上傳文件？',
     helpFAQ3A: '前往您的個人資料頁面，滾動到文件區域，點擊「上傳文件」添加檔案。',
     helpFAQ4Q: '誰可以看到我的個人資訊？',
-    helpFAQ4A: '只有 HR 管理員和系統管理員可以查看完整的員工詳情。其他員工只能看到基本聯絡資訊。',
+    helpFAQ4A: '只有 HR 管理員和系統管理員可以查看完整的員工詳情。其他員工只能查看自己的資訊。',
     
     // Contact Us
     contactUs: '聯絡我們',
@@ -3035,7 +3035,7 @@ const translations = {
     helpFAQ3Q: '如何上传文件？',
     helpFAQ3A: '前往您的个人资料页面，滚动到文件区域，点击「上传文件」添加文件。',
     helpFAQ4Q: '谁可以看到我的个人信息？',
-    helpFAQ4A: '只有 HR 管理员和系统管理员可以查看完整的员工详情。其他员工只能看到基本联系信息。',
+    helpFAQ4A: '只有 HR 管理员和系统管理员可以查看完整的员工详情。其他员工只能查看自己的信息。',
     
     // Contact Us
     contactUs: '联系我们',
@@ -3997,7 +3997,7 @@ const translations = {
     helpFAQ3Q: 'Bagaimana cara mengunggah dokumen?',
     helpFAQ3A: 'Buka halaman Profil Anda, gulir ke bagian Dokumen, dan klik "Unggah Dokumen" untuk menambahkan file.',
     helpFAQ4Q: 'Siapa yang dapat melihat informasi pribadi saya?',
-    helpFAQ4A: 'Hanya HR Admin dan Administrator yang dapat melihat detail lengkap karyawan. Karyawan lain hanya dapat melihat informasi kontak dasar.',
+    helpFAQ4A: 'Hanya HR Admin dan Administrator yang dapat melihat detail lengkap karyawan. Karyawan lain hanya dapat melihat informasi mereka sendiri.',
     
     // Contact Us
     contactUs: 'Hubungi Kami',
