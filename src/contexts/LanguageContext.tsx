@@ -1031,6 +1031,11 @@ const translations = {
     helpFAQ4Q: 'Who can see my personal information?',
     helpFAQ4A: 'Only HR Admin and Administrator roles can view full employee details. Other employees can only see basic contact information.',
     
+    // Contact Us
+    contactUs: 'Contact Us',
+    contactUsDesc: 'Have questions, feedback, or found a bug? We\'d love to hear from you.',
+    contactUsEmail: 'Send us an email and we\'ll get back to you as soon as possible.',
+    
     // Industry Selection (Multi-Industry Support)
     selectIndustryType: 'What type of organization?',
     householdIndustry: 'Household / Domestic',
@@ -2069,6 +2074,11 @@ const translations = {
     helpFAQ4Q: '誰可以看到我的個人資訊？',
     helpFAQ4A: '只有 HR 管理員和系統管理員可以查看完整的員工詳情。其他員工只能看到基本聯絡資訊。',
     
+    // Contact Us
+    contactUs: '聯絡我們',
+    contactUsDesc: '有問題、回饋或發現錯誤？我們很樂意聽取您的意見。',
+    contactUsEmail: '發送電子郵件給我們，我們會盡快回覆您。',
+    
     // Industry Selection (Multi-Industry Support)
     selectIndustryType: '選擇組織類型',
     householdIndustry: '家庭 / 家政',
@@ -3027,6 +3037,11 @@ const translations = {
     helpFAQ4Q: '谁可以看到我的个人信息？',
     helpFAQ4A: '只有 HR 管理员和系统管理员可以查看完整的员工详情。其他员工只能看到基本联系信息。',
     
+    // Contact Us
+    contactUs: '联系我们',
+    contactUsDesc: '有问题、反馈或发现错误？我们很乐意听取您的意见。',
+    contactUsEmail: '发送电子邮件给我们，我们会尽快回复您。',
+    
     // Industry Selection (Multi-Industry Support)
     selectIndustryType: '选择组织类型',
     householdIndustry: '家庭 / 家政',
@@ -3983,6 +3998,11 @@ const translations = {
     helpFAQ3A: 'Buka halaman Profil Anda, gulir ke bagian Dokumen, dan klik "Unggah Dokumen" untuk menambahkan file.',
     helpFAQ4Q: 'Siapa yang dapat melihat informasi pribadi saya?',
     helpFAQ4A: 'Hanya HR Admin dan Administrator yang dapat melihat detail lengkap karyawan. Karyawan lain hanya dapat melihat informasi kontak dasar.',
+    
+    // Contact Us
+    contactUs: 'Hubungi Kami',
+    contactUsDesc: 'Punya pertanyaan, masukan, atau menemukan bug? Kami ingin mendengar dari Anda.',
+    contactUsEmail: 'Kirim email kepada kami dan kami akan membalas sesegera mungkin.',
     
     // Industry Selection (Multi-Industry Support)
     selectIndustryType: 'Pilih jenis organisasi',
