@@ -364,6 +364,29 @@ export default function Help() {
           </Accordion>
         </CardContent>
       </Card>
+
+      {/* Contact Us */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-primary" />
+            {t('contactUs')}
+          </CardTitle>
+          <CardDescription>{t('contactUsDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <p className="text-sm text-muted-foreground">{t('contactUsEmail')}</p>
+            <a 
+              href="mailto:orefratello@yahoo.com" 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-sm"
+            >
+              <MessageCircle className="h-4 w-4" />
+              orefratello@yahoo.com
+            </a>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
