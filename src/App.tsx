@@ -29,6 +29,7 @@ import Payroll from './pages/Payroll';
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
 import Help from './pages/Help';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 // New enhanced components
 import CalendarWithColors from './components/calendar/CalendarWithColors';
 import ProfileWithApproval from './components/profile/ProfileWithApproval';
@@ -49,6 +50,7 @@ const App = () => {
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/*" element={
                     <ProtectedRoute>
                       <IndustryProvider>
