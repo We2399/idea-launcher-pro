@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardCounts } from '@/hooks/useDashboardCounts';
 import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
 import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
-import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User, Search, Sparkles, Heart, Star } from 'lucide-react';
+import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User, Search, Sparkles, Star } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
@@ -206,7 +206,8 @@ export function MobileDashboard() {
           <Star className="h-3 w-3 text-white/20" />
         </div>
         
-        <div className="flex items-center justify-between relative z-10">
+        {/* Top row: Brand + Language switcher */}
+        <div className="flex items-center justify-between relative z-10 mb-3">
           <div className="flex items-center gap-3">
             {/* Jie Jie Lady Icon with glow */}
             <div className="relative">
@@ -222,90 +223,83 @@ export function MobileDashboard() {
               <p className="text-white/70 text-xs">{t('appNameLine2')}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher variant="pills" />
-            {isAdmin ? (
-              <Dialog open={impersonationOpen} onOpenChange={setImpersonationOpen}>
-                <DialogTrigger asChild>
-                  <button className="flex items-center gap-2 card-glass rounded-full px-2 py-1 hover:bg-white/30 transition-all duration-300 hover:scale-105">
-                    <Avatar className="h-6 w-6 ring-2 ring-white/30 shadow-sm">
-                      <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                      <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
-                        {getInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-primary-foreground font-medium pr-1">
-                      {t('employerView')}
-                    </span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto card-glass border-white/20">
-                  <DialogHeader>
-                    <DialogTitle className="text-gradient">{t('switchView') || 'Switch View'}</DialogTitle>
-                    <DialogDescription>
-                      {t('selectEmployeeToView') || 'Select an employee to view the system as them'}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder={t('searchEmployees') || 'Search employees...'}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-background/50 border-border/50"
-                      />
-                    </div>
-                    <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-                      {loadingEmployees ? (
-                        <div className="flex items-center justify-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-                        </div>
-                      ) : filteredEmployees.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          {searchQuery ? (t('noEmployeesFound') || 'No employees found') : (t('noEmployees') || 'No employees')}
-                        </p>
-                      ) : (
-                        filteredEmployees.map((employee) => (
-                          <div
-                            key={employee.user_id}
-                            className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-accent/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
-                            onClick={() => handleImpersonate(employee)}
-                          >
-                            <Avatar className="h-9 w-9 ring-2 ring-primary/20">
-                              <AvatarFallback className="bg-primary/10 text-primary">
-                                {getEmployeeInitials(employee.first_name, employee.last_name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {employee.first_name} {employee.last_name}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate">{employee.position}</p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ) : (
-              <Link to="/profile">
-                <div className="flex items-center gap-2 card-glass rounded-full px-2 py-1 hover:bg-white/30 transition-all duration-300 hover:scale-105">
-                  <Avatar className="h-6 w-6 ring-2 ring-white/30 shadow-sm">
-                    <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                    <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs text-primary-foreground font-medium pr-1 max-w-[60px] truncate">
-                    {userName || t('profile')}
+          <LanguageSwitcher variant="pills" />
+        </div>
+        
+        {/* Second row: User avatar + Employer View button (separated) */}
+        <div className="flex items-center justify-end gap-2 relative z-10">
+          {/* User Profile Avatar */}
+          <Link to="/profile">
+            <Avatar className="h-8 w-8 ring-2 ring-white/40 shadow-lg hover:scale-110 transition-transform">
+              <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+              <AvatarFallback className="bg-white/30 text-primary-foreground text-sm font-medium">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+          
+          {/* Employer View button - only for admin */}
+          {isAdmin && (
+            <Dialog open={impersonationOpen} onOpenChange={setImpersonationOpen}>
+              <DialogTrigger asChild>
+                <button className="card-glass rounded-full px-3 py-1.5 hover:bg-white/30 transition-all duration-300 hover:scale-105">
+                  <span className="text-xs text-primary-foreground font-medium">
+                    {t('employerView')}
                   </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto card-glass border-white/20">
+                <DialogHeader>
+                  <DialogTitle className="text-gradient">{t('switchView') || 'Switch View'}</DialogTitle>
+                  <DialogDescription>
+                    {t('selectEmployeeToView') || 'Select an employee to view the system as them'}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 mt-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder={t('searchEmployees') || 'Search employees...'}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-background/50 border-border/50"
+                    />
+                  </div>
+                  <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+                    {loadingEmployees ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                      </div>
+                    ) : filteredEmployees.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        {searchQuery ? (t('noEmployeesFound') || 'No employees found') : (t('noEmployees') || 'No employees')}
+                      </p>
+                    ) : (
+                      filteredEmployees.map((employee) => (
+                        <div
+                          key={employee.user_id}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-accent/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                          onClick={() => handleImpersonate(employee)}
+                        >
+                          <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                            <AvatarFallback className="bg-primary/10 text-primary">
+                              {getEmployeeInitials(employee.first_name, employee.last_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {employee.first_name} {employee.last_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">{employee.position}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </Link>
-            )}
-          </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
@@ -318,10 +312,6 @@ export function MobileDashboard() {
           
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Heart className="h-4 w-4 text-hermes animate-pulse-soft" />
-                <span className="text-xs text-muted-foreground font-medium">{t('welcomeBack')}</span>
-              </div>
               <h2 className="text-xl font-bold text-foreground">
                 {getGreeting()}, <span className="text-gradient">{getDisplayName()}</span>!
               </h2>
