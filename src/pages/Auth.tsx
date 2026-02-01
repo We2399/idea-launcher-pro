@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Navigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -754,6 +755,11 @@ const Auth = () => {
           {/* Sign In View */}
           {authMode === 'signin' && (
             <div className="space-y-6 animate-fade-in">
+              {/* Language Switcher for mobile */}
+              <div className="lg:hidden flex justify-center">
+                <LanguageSwitcher variant="pills" />
+              </div>
+              
               {/* Header Card with brand colors */}
               <div className="relative bg-gradient-to-br from-primary via-primary to-primary/90 rounded-3xl p-8 text-center text-primary-foreground shadow-2xl overflow-hidden">
                 {/* Decorative elements */}
@@ -774,7 +780,6 @@ const Auth = () => {
                   </div>
                   <h1 className="text-2xl font-bold mb-1 tracking-tight">{t('appNameLine1')}</h1>
                   <p className="text-lg opacity-90 font-medium">{t('appNameLine2')}</p>
-                  <p className="text-sm opacity-75 mt-2">{t('welcomeBack') || 'Welcome back'}</p>
                 </div>
               </div>
 
