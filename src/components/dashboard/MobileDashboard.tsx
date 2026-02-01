@@ -302,9 +302,12 @@ export function MobileDashboard() {
           )}
         </div>
       </div>
+      
+      {/* White separator line */}
+      <div className="h-1 w-full bg-white/80 shadow-sm" />
 
       {/* Content */}
-      <div className="px-4 -mt-4 space-y-4 relative z-10">
+      <div className="px-4 mt-4 space-y-4 relative z-10">
         {/* Greeting Card with glass effect and illustration */}
         <div className="card-glass rounded-2xl p-5 shadow-lg border border-white/20 relative overflow-hidden">
           {/* Decorative gradient blob */}
