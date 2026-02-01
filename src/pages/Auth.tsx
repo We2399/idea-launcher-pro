@@ -740,18 +740,6 @@ const Auth = () => {
       {/* Right Panel - Auth forms */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
-          {/* Mobile logo (shown only on mobile) */}
-          <div className="lg:hidden flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/30 to-accent/30 blur-lg scale-110" />
-              <img 
-                src={jiejieLadyIcon} 
-                alt="Jie Jie" 
-                className="relative w-16 h-16 rounded-2xl object-cover ring-4 ring-white/50 shadow-xl" 
-              />
-            </div>
-          </div>
-
           {/* Sign In View */}
           {authMode === 'signin' && (
             <div className="space-y-6 animate-fade-in">
