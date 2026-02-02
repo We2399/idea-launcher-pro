@@ -102,29 +102,29 @@ export function Header() {
 
   return (
     <div className="relative">
-      {/* Impersonation Banner */}
+      {/* Impersonation Banner - Fixed at top, high z-index */}
       {isImpersonating && impersonatedProfile && (
-        <Alert className="rounded-none border-x-0 border-t-0 bg-orange-100 border-orange-400">
-          <UserCog className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="flex items-center justify-between">
-            <span className="text-orange-900 font-medium">
-              Viewing as: {impersonatedProfile.first_name} {impersonatedProfile.last_name}
+        <Alert className="fixed top-0 left-0 right-0 z-[100] rounded-none border-x-0 border-t-0 bg-amber-100 border-amber-400 shadow-md">
+          <UserCog className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
+            <span className="text-amber-900 font-medium text-sm">
+              {t('viewingAs') || 'Viewing as'}: {impersonatedProfile.first_name} {impersonatedProfile.last_name}
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={endImpersonation}
-              className="text-orange-900 hover:text-orange-950 hover:bg-orange-200"
+              className="text-amber-900 hover:text-amber-950 hover:bg-amber-200 gap-1"
             >
-              <X className="h-4 w-4 mr-1" />
-              End Impersonation
+              <X className="h-4 w-4" />
+              {t('endImpersonation') || 'End Impersonation'}
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Desktop Header - Horizontal Layout */}
-      <header className="safe-area-header sticky top-0 z-40 hidden md:flex border-b border-border bg-background items-center justify-between px-4 min-h-16">
+      {/* Desktop Header - Horizontal Layout - Add top margin when impersonating */}
+      <header className={`safe-area-header sticky z-40 hidden md:flex border-b border-border bg-background items-center justify-between px-4 min-h-16 ${isImpersonating ? 'top-[52px]' : 'top-0'}`}>
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <SidebarTrigger className="h-8 w-8 p-1" />
           <h1 className="text-xl font-semibold text-foreground truncate">
@@ -172,8 +172,8 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile Header - Vertical Stacked Layout */}
-      <header className="safe-area-header sticky top-0 z-40 md:hidden border-b border-border bg-background">
+      {/* Mobile Header - Vertical Stacked Layout - Add top margin when impersonating */}
+      <header className={`safe-area-header sticky z-40 md:hidden border-b border-border bg-background ${isImpersonating ? 'top-[52px]' : 'top-0'}`}>
         {/* Top Row: Sidebar + Title */}
         <div className="flex items-center gap-2 px-2 py-2">
           <SidebarTrigger className="h-8 w-8 p-1 flex-shrink-0" />

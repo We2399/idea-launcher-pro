@@ -17,6 +17,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePendingDocumentsCount } from '@/hooks/usePendingDocumentsCount';
+import { usePendingPayrollCount } from '@/hooks/usePendingPayrollCount';
 import { Badge } from '@/components/ui/badge';
 import {
   Sidebar,
@@ -58,6 +59,7 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const { data: pendingCount } = usePendingDocumentsCount();
+  const { data: pendingPayrollCount } = usePendingPayrollCount();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -116,7 +118,11 @@ export function AppSidebar() {
             <SidebarMenu className="space-y-1 px-2">
               {navigationItems.map((item) => {
                 const isStorageCentre = item.url === '/storage-centre';
-                const showBadge = isStorageCentre && pendingCount && pendingCount > 0 && (userRole === 'administrator' || userRole === 'hr_admin');
+                const isPayroll = item.url === '/payroll';
+                const showDocBadge = isStorageCentre && pendingCount && pendingCount > 0 && (userRole === 'administrator' || userRole === 'hr_admin');
+                const showPayrollBadge = isPayroll && pendingPayrollCount && pendingPayrollCount > 0 && userRole === 'administrator';
+                const showBadge = showDocBadge || showPayrollBadge;
+                const badgeCount = showDocBadge ? pendingCount : pendingPayrollCount;
                 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -140,19 +146,19 @@ export function AppSidebar() {
                             {showBadge && (
                               <div className="flex items-center gap-2">
                                 <span className="relative inline-flex h-2.5 w-2.5">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive/60"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+                                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${showPayrollBadge ? 'bg-amber-500/60' : 'bg-destructive/60'}`}></span>
+                                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${showPayrollBadge ? 'bg-amber-500' : 'bg-destructive'}`}></span>
                                 </span>
-                                <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
-                                  {pendingCount}
+                                <Badge variant={showPayrollBadge ? "secondary" : "destructive"} className={`h-5 min-w-5 px-1.5 text-xs ${showPayrollBadge ? 'bg-amber-500 text-white' : ''}`}>
+                                  {badgeCount}
                                 </Badge>
                               </div>
                             )}
                           </div>
                         )}
                         {collapsed && showBadge && (
-                          <Badge variant="destructive" className="h-4 w-4 p-0 text-[10px] flex items-center justify-center absolute -top-1 -right-1">
-                            {pendingCount > 9 ? '9+' : pendingCount}
+                          <Badge variant={showPayrollBadge ? "secondary" : "destructive"} className={`h-4 w-4 p-0 text-[10px] flex items-center justify-center absolute -top-1 -right-1 ${showPayrollBadge ? 'bg-amber-500 text-white' : ''}`}>
+                            {badgeCount && badgeCount > 9 ? '9+' : badgeCount}
                           </Badge>
                         )}
                       </NavLink>

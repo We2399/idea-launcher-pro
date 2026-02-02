@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmployeePayrollView } from '@/components/payroll/EmployeePayrollView';
 import { HRPayrollView } from '@/components/payroll/HRPayrollView';
 import { AdminPayrollView } from '@/components/payroll/AdminPayrollView';
+import { PayrollReportsView } from '@/components/payroll/PayrollReportsView';
 
 export default function Payroll() {
   const { userRole } = useAuth();
@@ -38,6 +39,7 @@ export default function Payroll() {
             )}
             <TabsTrigger value="manage">{t('managePayroll')}</TabsTrigger>
             <TabsTrigger value="history">{t('payrollHistory')}</TabsTrigger>
+            <TabsTrigger value="reports">{t('reports') || 'Reports'}</TabsTrigger>
           </TabsList>
 
           {isAdmin && (
@@ -52,6 +54,10 @@ export default function Payroll() {
 
           <TabsContent value="history">
             <HRPayrollView showHistoryOnly />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <PayrollReportsView />
           </TabsContent>
         </Tabs>
       )}
