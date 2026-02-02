@@ -1171,7 +1171,14 @@ export default function ProfileWithApproval() {
                   <div className="flex items-center gap-2 p-2 border border-border rounded">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
-                      {currentProfile.date_of_birth ? new Date(currentProfile.date_of_birth).toLocaleDateString() : t('notProvided')}
+                      {currentProfile.date_of_birth 
+                        ? (() => {
+                            // Parse YYYY-MM-DD string without timezone conversion
+                            const [year, month, day] = currentProfile.date_of_birth.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString();
+                          })()
+                        : t('notProvided')}
                     </span>
                   </div>
                 )}
