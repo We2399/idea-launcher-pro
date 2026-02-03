@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
-import { ImpersonationProvider } from '@/contexts/ImpersonationContext';
+import { ImpersonationProvider, useImpersonation } from '@/contexts/ImpersonationContext';
 import { IndustryProvider } from '@/contexts/IndustryContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
@@ -38,6 +38,59 @@ import ResetPassword from './pages/ResetPassword';
 
 const queryClient = new QueryClient();
 
+// Separate component to use impersonation hook inside the provider
+function MainAppLayout() {
+  const { isImpersonating } = useImpersonation();
+  
+  return (
+    <SidebarProvider defaultOpen={false}>
+      {/* Add top padding when impersonation banner is visible */}
+      <div className={`min-h-screen flex w-full ${isImpersonating ? 'pt-[52px]' : ''}`}>
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="safe-area-main flex-1 p-4 md:p-6 lg:p-8 pb-20 md:pb-8">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/requests" element={<Requests />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/cash-control" element={<CashControl />} />
+              <Route path="/payroll" element={<Payroll />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/profile" element={<ProfileWithApproval />} />
+              <Route path="/employees" element={
+                <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
+                  <Employees />
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                  <Reports />
+                </ProtectedRoute>
+              } />
+              <Route path="/storage-centre" element={
+                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                  <StorageCentre />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          <MobileBottomNav />
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 // App component with all providers
 const App = () => {
   return (
@@ -54,50 +107,7 @@ const App = () => {
                   <Route path="/*" element={
                     <ProtectedRoute>
                       <IndustryProvider>
-                      <SidebarProvider defaultOpen={false}>
-                        <div className="min-h-screen flex w-full">
-                          <AppSidebar />
-                          <div className="flex-1 flex flex-col">
-                            <Header />
-                            <main className="safe-area-main flex-1 p-4 md:p-6 lg:p-8 pb-20 md:pb-8">
-                              <Routes>
-                                <Route path="/" element={<Index />} />
-                                <Route path="/requests" element={<Requests />} />
-                                <Route path="/calendar" element={<Calendar />} />
-                                <Route path="/tasks" element={<Tasks />} />
-                                <Route path="/cash-control" element={<CashControl />} />
-                                <Route path="/payroll" element={<Payroll />} />
-                                <Route path="/notifications" element={<Notifications />} />
-                                <Route path="/chat" element={<Chat />} />
-                                <Route path="/help" element={<Help />} />
-                                <Route path="/profile" element={<ProfileWithApproval />} />
-                                <Route path="/employees" element={
-                                  <ProtectedRoute requiredRole={['manager', 'hr_admin', 'administrator']}>
-                                    <Employees />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/reports" element={
-                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
-                                    <Reports />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/storage-centre" element={
-                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
-                                    <StorageCentre />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="/settings" element={
-                                  <ProtectedRoute requiredRole={['hr_admin', 'administrator']}>
-                                    <Settings />
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="*" element={<NotFound />} />
-                              </Routes>
-                            </main>
-                            <MobileBottomNav />
-                          </div>
-                        </div>
-                      </SidebarProvider>
+                        <MainAppLayout />
                       </IndustryProvider>
                     </ProtectedRoute>
                   } />
