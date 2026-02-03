@@ -1173,10 +1173,21 @@ export default function ProfileWithApproval() {
                     <span className={!currentProfile.date_of_birth ? "text-muted-foreground italic" : ""}>
                       {currentProfile.date_of_birth 
                         ? (() => {
-                            // Parse YYYY-MM-DD string without timezone conversion
-                            const [year, month, day] = currentProfile.date_of_birth.split('-').map(Number);
-                            const date = new Date(year, month - 1, day);
-                            return date.toLocaleDateString();
+                            try {
+                              // Parse YYYY-MM-DD string without timezone conversion
+                              const parts = currentProfile.date_of_birth.split('-');
+                              if (parts.length === 3) {
+                                const [year, month, day] = parts.map(Number);
+                                if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                                  const date = new Date(year, month - 1, day);
+                                  return date.toLocaleDateString();
+                                }
+                              }
+                              // Fallback: display raw value if parsing fails
+                              return currentProfile.date_of_birth;
+                            } catch {
+                              return currentProfile.date_of_birth;
+                            }
                           })()
                         : t('notProvided')}
                     </span>
