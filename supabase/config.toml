@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.customer-portal]
 verify_jwt = false
+
+[functions.translate-holidays]
+verify_jwt = false
+
+[functions.send-push-notification]
+verify_jwt = false
