@@ -13,6 +13,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Requests from './pages/Requests';
@@ -41,6 +42,9 @@ const queryClient = new QueryClient();
 // Separate component to use impersonation hook inside the provider
 function MainAppLayout() {
   const { isImpersonating } = useImpersonation();
+  
+  // Initialize push notifications for native mobile platforms
+  usePushNotifications();
   
   return (
     <SidebarProvider defaultOpen={false}>

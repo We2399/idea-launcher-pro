@@ -254,6 +254,35 @@ const Chat = () => {
       // Immediately refresh messages to show sent message
       queryClient.invalidateQueries({ queryKey: ['chat-messages', user.id, selectedContact.user_id] });
       queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
+      
+      // Send push notification to the recipient
+      try {
+        // Get sender's name for the notification
+        const { data: senderProfile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        const senderName = senderProfile 
+          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || 'Someone'
+          : 'Someone';
+        
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: selectedContact.user_id,
+            title: `${t('newMessage')} from ${senderName}`,
+            body: messageContent.length > 100 ? messageContent.substring(0, 100) + '...' : messageContent,
+            data: {
+              type: 'chat_message',
+              senderId: user.id,
+            },
+          },
+        });
+      } catch (pushError) {
+        // Don't block the message send if push notification fails
+        console.log('Push notification failed (non-critical):', pushError);
+      }
     }
     
     setSending(false);
