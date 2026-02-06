@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useChatNotificationSound } from '@/hooks/useChatNotificationSound';
+import { toast } from '@/hooks/use-toast';
 
 export const useUnreadMessagesCount = () => {
   const { user } = useAuth();
@@ -11,8 +13,10 @@ export const useUnreadMessagesCount = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { playNotificationSound } = useChatNotificationSound();
   const previousCountRef = useRef<number>(0);
+  const location = useLocation();
 
   const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
+  const isOnChatPage = location.pathname === '/chat';
 
   const fetchUnreadCount = async () => {
     if (!targetUserId) {
@@ -63,11 +67,40 @@ export const useUnreadMessagesCount = () => {
           schema: 'public',
           table: 'chat_messages',
         },
-        (payload) => {
-          const newMessage = payload.new as { receiver_id: string; read_at: string | null };
-          // Play sound only when a new unread message is for this user
+        async (payload) => {
+          const newMessage = payload.new as { 
+            receiver_id: string; 
+            read_at: string | null;
+            sender_id: string;
+            content: string;
+          };
+          
+          // Only notify when a new unread message is for this user
           if (newMessage.receiver_id === targetUserId && !newMessage.read_at) {
             playNotificationSound();
+            
+            // Show toast notification only when NOT on chat page
+            if (!isOnChatPage) {
+              // Fetch sender name for the toast
+              const { data: senderProfile } = await supabase
+                .from('profiles')
+                .select('first_name, last_name')
+                .eq('user_id', newMessage.sender_id)
+                .single();
+              
+              const senderName = senderProfile 
+                ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || 'Someone'
+                : 'Someone';
+              
+              const previewText = newMessage.content.length > 50 
+                ? newMessage.content.substring(0, 50) + '...' 
+                : newMessage.content;
+              
+              toast({
+                title: `💬 New message from ${senderName}`,
+                description: previewText,
+              });
+            }
           }
           fetchUnreadCount();
         }
@@ -88,7 +121,7 @@ export const useUnreadMessagesCount = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [targetUserId, playNotificationSound]);
+  }, [targetUserId, playNotificationSound, isOnChatPage]);
 
   return { unreadCount, isLoading, refetch: fetchUnreadCount };
 };
