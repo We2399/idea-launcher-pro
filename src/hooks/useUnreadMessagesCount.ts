@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,9 +14,32 @@ export const useUnreadMessagesCount = () => {
   const { playNotificationSound } = useChatNotificationSound();
   const previousCountRef = useRef<number>(0);
   const location = useLocation();
+  const preferencesRef = useRef({ chat_sound_enabled: true, chat_toast_enabled: true });
 
   const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
   const isOnChatPage = location.pathname === '/chat';
+
+  // Fetch user preferences
+  const fetchPreferences = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('chat_sound_enabled, chat_toast_enabled')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (data) {
+        preferencesRef.current = {
+          chat_sound_enabled: data.chat_sound_enabled,
+          chat_toast_enabled: data.chat_toast_enabled,
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+    }
+  }, [user?.id]);
 
   const fetchUnreadCount = async () => {
     if (!targetUserId) {
@@ -46,13 +69,14 @@ export const useUnreadMessagesCount = () => {
   };
 
   useEffect(() => {
+    fetchPreferences();
     fetchUnreadCount();
 
     // Refetch every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000);
 
     return () => clearInterval(interval);
-  }, [targetUserId]);
+  }, [targetUserId, fetchPreferences]);
 
   // Real-time subscription for new messages
   useEffect(() => {
@@ -77,10 +101,16 @@ export const useUnreadMessagesCount = () => {
           
           // Only notify when a new unread message is for this user
           if (newMessage.receiver_id === targetUserId && !newMessage.read_at) {
-            playNotificationSound();
+            // Re-fetch preferences to ensure we have latest settings
+            await fetchPreferences();
             
-            // Show toast notification only when NOT on chat page
-            if (!isOnChatPage) {
+            // Play sound if enabled
+            if (preferencesRef.current.chat_sound_enabled) {
+              playNotificationSound();
+            }
+            
+            // Show toast notification only when NOT on chat page and if enabled
+            if (!isOnChatPage && preferencesRef.current.chat_toast_enabled) {
               // Fetch sender name for the toast
               const { data: senderProfile } = await supabase
                 .from('profiles')
@@ -121,7 +151,7 @@ export const useUnreadMessagesCount = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [targetUserId, playNotificationSound, isOnChatPage]);
+  }, [targetUserId, playNotificationSound, isOnChatPage, fetchPreferences]);
 
   return { unreadCount, isLoading, refetch: fetchUnreadCount };
 };
