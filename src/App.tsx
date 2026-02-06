@@ -14,6 +14,7 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Requests from './pages/Requests';
@@ -45,6 +46,9 @@ function MainAppLayout() {
   
   // Initialize push notifications for native mobile platforms
   usePushNotifications();
+  
+  // Initialize global chat notification sound listener (plays on all pages)
+  useUnreadMessagesCount();
   
   return (
     <SidebarProvider defaultOpen={false}>
