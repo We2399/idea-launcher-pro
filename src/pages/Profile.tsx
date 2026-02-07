@@ -19,7 +19,6 @@ import { useTranslationHelpers } from '@/lib/translations';
 import { format } from 'date-fns';
 import { getDateLocale, getLocalizedDateFormat } from '@/lib/dateLocale';
 import { ImpersonationPanel } from '@/components/admin/ImpersonationPanel';
-import { NotificationPreferences } from '@/components/settings/NotificationPreferences';
 
 interface Profile {
   id: string;
@@ -638,11 +637,6 @@ export default function Profile() {
               </Button>
             </CardContent>
           </Card>
-        )}
-
-        {/* Notification Preferences - Only show for own profile */}
-        {!isImpersonating && (
-          <NotificationPreferences />
         )}
 
         {/* Replay Onboarding Card - visible to all users */}

@@ -1293,33 +1293,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_preferences: {
-        Row: {
-          chat_sound_enabled: boolean
-          chat_toast_enabled: boolean
-          created_at: string
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          chat_sound_enabled?: boolean
-          chat_toast_enabled?: boolean
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          chat_sound_enabled?: boolean
-          chat_toast_enabled?: boolean
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string
