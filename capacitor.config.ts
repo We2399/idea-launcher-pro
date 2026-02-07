@@ -15,14 +15,14 @@ const config: CapacitorConfig = {
   // - No "Waiting to reconnect" messages
   // - Fast and reliable for production & testing
   
-  // To enable live reload from Lovable (for development only):
-  // Uncomment the server block below:
-  /*
+  // Live reload enabled for development - loads from Lovable preview
   server: {
     url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=3',
     cleartext: true
   },
-  */
+  
+  // To switch to local/offline mode (for production):
+  // Comment out the server block above
   
   plugins: {
     SplashScreen: {
