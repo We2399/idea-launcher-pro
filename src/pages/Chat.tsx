@@ -176,13 +176,15 @@ const Chat = () => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
           queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
           
-          // Show toast notification and play sound for incoming messages (not from self)
+          // For incoming messages not from the currently selected contact, show toast
+          // (sound is handled by useUnreadMessagesCount global hook when NOT viewing that contact's chat)
           if (newMessage.sender_id !== user.id) {
-            // Play notification sound
-            playNotificationSound();
-            
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
+            
+            // Only play sound and show toast if the message is from a DIFFERENT contact
+            // (if viewing conversation with sender, no need for notification)
             if (!isFromSelectedContact) {
+              playNotificationSound();
               toast({
                 title: t('newMessage'),
                 description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
