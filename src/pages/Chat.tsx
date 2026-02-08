@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,11 @@ interface Contact {
   last_message_time?: string;
 }
 
+interface UserPreferences {
+  chat_sound_enabled: boolean;
+  chat_toast_enabled: boolean;
+}
+
 const Chat = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
@@ -40,6 +45,34 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const preferencesRef = useRef<UserPreferences>({ chat_sound_enabled: true, chat_toast_enabled: true });
+
+  // Fetch user preferences for notifications
+  const fetchPreferences = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('chat_sound_enabled, chat_toast_enabled')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (data) {
+        preferencesRef.current = {
+          chat_sound_enabled: data.chat_sound_enabled ?? true,
+          chat_toast_enabled: data.chat_toast_enabled ?? true,
+        };
+      }
+    } catch (error) {
+      console.log('Could not fetch user preferences:', error);
+    }
+  }, [user?.id]);
+
+  // Load preferences on mount
+  useEffect(() => {
+    fetchPreferences();
+  }, [fetchPreferences]);
 
   // Fetch available contacts based on role
   const { data: contacts = [], isLoading: loadingContacts } = useQuery({
@@ -176,19 +209,24 @@ const Chat = () => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
           queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
           
-          // For incoming messages not from the currently selected contact, show toast
-          // (sound is handled by useUnreadMessagesCount global hook when NOT viewing that contact's chat)
+          // For incoming messages, show notifications based on preferences
           if (newMessage.sender_id !== user.id) {
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
             
             // Only play sound and show toast if the message is from a DIFFERENT contact
             // (if viewing conversation with sender, no need for notification)
             if (!isFromSelectedContact) {
-              playNotificationSound();
-              toast({
-                title: t('newMessage'),
-                description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
-              });
+              // Respect user preferences
+              if (preferencesRef.current.chat_sound_enabled) {
+                playNotificationSound();
+              }
+              
+              if (preferencesRef.current.chat_toast_enabled) {
+                toast({
+                  title: t('newMessage'),
+                  description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
+                });
+              }
             }
           }
         }
