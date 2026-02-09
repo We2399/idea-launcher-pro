@@ -479,6 +479,24 @@ export default function ProfileWithApproval() {
   const handleRequestChange = async () => {
     if (!selectedField || !newValue.trim() || !currentProfile) return;
 
+    // Normalize date_of_birth to YYYY-MM-DD using manual parsing to avoid timezone issues
+    let finalValue = newValue.trim();
+    if (selectedField === 'date_of_birth') {
+      const parts = finalValue.split('-');
+      if (parts.length === 3) {
+        const [year, month, day] = parts.map(Number);
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day) && year > 1900 && year < 2100 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+          finalValue = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        } else {
+          toast({ title: t('error') || 'Error', description: 'Invalid date. Please use the date picker.', variant: 'destructive' });
+          return;
+        }
+      } else {
+        toast({ title: t('error') || 'Error', description: 'Invalid date format. Please use the date picker.', variant: 'destructive' });
+        return;
+      }
+    }
+
     try {
       const currentValue = currentProfile[selectedField as keyof Profile] || '';
 
@@ -488,7 +506,7 @@ export default function ProfileWithApproval() {
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
-            [selectedField]: newValue,
+            [selectedField]: finalValue,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', currentProfile.user_id);
@@ -503,7 +521,7 @@ export default function ProfileWithApproval() {
             requested_by: user?.id,
             field_name: selectedField,
             current_value: String(currentValue),
-            new_value: newValue,
+            new_value: finalValue,
             status: 'approved',
             approved_by: user?.id,
             approved_at: new Date().toISOString()
@@ -529,7 +547,7 @@ export default function ProfileWithApproval() {
             requested_by: user?.id,
             field_name: selectedField,
             current_value: String(currentValue),
-            new_value: newValue,
+            new_value: finalValue,
             status: 'pending'
           });
 
@@ -910,15 +928,17 @@ export default function ProfileWithApproval() {
                                   <SelectItem value="widowed">Widowed</SelectItem>
                                 </SelectContent>
                               </Select>
+                              ) : selectedField === 'date_of_birth' ? (
+                                <Input
+                                  type="date"
+                                  value={newValue}
+                                  onChange={(e) => setNewValue(e.target.value)}
+                                />
                               ) : (
                                 <Input
                                   value={newValue}
                                   onChange={(e) => setNewValue(e.target.value)}
-                                  placeholder={
-                                    selectedField === 'date_of_birth' 
-                                      ? 'YYYY-MM-DD (e.g., 1990-01-15)' 
-                                      : t('enterNewValue')
-                                  }
+                                  placeholder={t('enterNewValue')}
                                 />
                               )}
                             </div>
