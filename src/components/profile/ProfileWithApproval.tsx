@@ -17,6 +17,7 @@ import { User, Mail, Building, Briefcase, Calendar, Save, Crown, Shield, Edit, C
 import { toast } from '@/hooks/use-toast';
 import DocumentManager from './DocumentManager';
 import AvatarUpload from './AvatarUpload';
+import { MissingDocumentsAlert } from './MissingDocumentsAlert';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useNavigate } from 'react-router-dom';
 
@@ -734,6 +735,18 @@ export default function ProfileWithApproval() {
 
   return (
       <div className="space-y-6">
+      {/* Missing Documents Alert for employees */}
+      {!isManager && !isAdministrator && (
+        <MissingDocumentsAlert 
+          onScrollToDocuments={() => {
+            const docSection = document.querySelector('[data-document-manager]');
+            if (docSection) {
+              docSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }}
+        />
+      )}
+
       {isProfileIncomplete && (
         <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
           <div className="flex items-start gap-3">

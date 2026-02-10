@@ -14,6 +14,8 @@ import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
 import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
 import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
 import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
+import { AdminMissingDocumentsCard } from '@/components/dashboard/AdminMissingDocumentsCard';
+import { MissingDocumentsAlert } from '@/components/profile/MissingDocumentsAlert';
 import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDiscussionAlertsCard';
 import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
 import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
@@ -344,6 +346,7 @@ const Index = () => {
        {/* Role-specific alerts */}
        {(userRole === 'administrator' || userRole === 'hr_admin') && (
          <div className="mt-4 space-y-4">
+           <AdminMissingDocumentsCard />
            <StorageCentreAlert />
            <AdminPendingDiscussionsCard />
            <AdminNeedsReplyCard />
@@ -351,6 +354,7 @@ const Index = () => {
        )}
        {userRole === 'employee' && (
          <div className="mt-4 space-y-4">
+           <MissingDocumentsAlert />
            <DocumentIssuesCard />
            <EmployeeDiscussionAlertsCard />
          </div>
