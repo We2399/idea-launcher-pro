@@ -22,6 +22,8 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
+import { MissingDocumentsAlert } from '@/components/profile/MissingDocumentsAlert';
+import { AdminMissingDocumentsCard } from '@/components/dashboard/AdminMissingDocumentsCard';
 
 interface Employee {
   user_id: string;
@@ -328,6 +330,9 @@ export function MobileDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Missing Documents Alerts */}
+        {isAdmin ? <AdminMissingDocumentsCard /> : <MissingDocumentsAlert />}
 
         {/* Stats Cards with glassmorphism */}
         <div className="grid grid-cols-3 gap-3">
