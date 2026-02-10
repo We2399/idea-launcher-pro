@@ -1650,10 +1650,15 @@ export default function ProfileWithApproval() {
           <CardContent>
             <div className="space-y-4">
               {changeRequests.map((request) => {
-                // Find employee name for this request
+                // Find employee name (who the change is for)
                 const employeeProfile = allProfiles.find(p => p.user_id === request.user_id);
                 const employeeName = employeeProfile 
                   ? `${employeeProfile.first_name || ''} ${employeeProfile.last_name || ''}`.trim()
+                  : '';
+                // Find requester name (who submitted the request)
+                const requesterProfile = allProfiles.find(p => p.user_id === request.requested_by);
+                const requesterName = requesterProfile 
+                  ? `${requesterProfile.first_name || ''} ${requesterProfile.last_name || ''}`.trim()
                   : '';
                 
                 return (
@@ -1667,6 +1672,11 @@ export default function ProfileWithApproval() {
                           </Badge>
                         )}
                       </div>
+                      {(isManager || isAdministrator) && requesterName && (
+                        <div className="text-xs text-muted-foreground">
+                          Requested by: {requesterName}
+                        </div>
+                      )}
                       <div className="text-xs text-muted-foreground">
                         From: "{request.current_value}" → To: "{request.new_value}"
                       </div>
