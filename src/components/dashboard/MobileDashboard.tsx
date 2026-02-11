@@ -196,10 +196,10 @@ export function MobileDashboard() {
       {/* Decorative background elements */}
       <div className="absolute top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
       <div className="absolute top-60 -left-32 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-40 right-10 w-48 h-48 bg-hermes/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      <div className="absolute bottom-40 right-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 
       {/* Header with glass effect */}
-      <div className="relative bg-gradient-to-br from-hermes via-hermes to-hermes-dark text-white px-4 pt-3 pb-10 rounded-b-[2rem] shadow-xl">
+      <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 text-white px-4 pt-3 pb-10 rounded-b-[2rem] shadow-xl">
         {/* Decorative sparkles */}
         <div className="absolute top-4 right-20 animate-pulse-soft">
           <Sparkles className="h-4 w-4 text-white/30" />
@@ -375,7 +375,7 @@ export function MobileDashboard() {
             <div className="card-glass rounded-2xl p-3 relative shadow-md border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-active:scale-95">
               {unreadMessages > 0 && (
                 <Badge 
-                  className="absolute -top-1.5 -right-1.5 bg-hermes text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-[10px] shadow-lg animate-bounce-soft"
+                  className="absolute -top-1.5 -right-1.5 bg-destructive text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-[10px] shadow-lg animate-bounce-soft"
                 >
                   {unreadMessages > 99 ? '99+' : unreadMessages}
                 </Badge>
@@ -440,16 +440,16 @@ export function MobileDashboard() {
           <Link to="/chat" className="group block">
             <div className="card-glass rounded-2xl p-4 flex items-center gap-4 shadow-md border border-white/10 transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl group-active:scale-[0.98] relative overflow-hidden">
               {/* Background glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-hermes/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
-              <div className="p-3 rounded-xl bg-gradient-to-br from-hermes/20 to-hermes/10 ring-1 ring-hermes/20 relative z-10">
-                <MessageCircle className="h-6 w-6 text-hermes" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 ring-1 ring-primary/20 relative z-10">
+                <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1 relative z-10">
                 <span className="text-sm font-semibold text-foreground">{t('sendMessage')}</span>
                 <p className="text-xs text-muted-foreground">{t('chatWithTeam') || 'Connect with your team'}</p>
               </div>
-              <Sparkles className="h-5 w-5 text-hermes/40 animate-pulse-soft relative z-10" />
+              <Sparkles className="h-5 w-5 text-primary/40 animate-pulse-soft relative z-10" />
             </div>
           </Link>
         </div>
