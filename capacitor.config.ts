@@ -17,8 +17,9 @@ const config: CapacitorConfig = {
   
   // Live reload enabled for development - loads from Lovable preview
   server: {
-    url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=3',
-    cleartext: true
+    url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=' + Date.now(),
+    cleartext: true,
+    androidScheme: 'https'
   },
   
   // To switch to local/offline mode (for production):
