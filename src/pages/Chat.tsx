@@ -209,24 +209,21 @@ const Chat = () => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
           queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
           
-          // For incoming messages, show notifications based on preferences
+          // For incoming messages, play sound and optionally show toast
           if (newMessage.sender_id !== user.id) {
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
             
-            // Only play sound and show toast if the message is from a DIFFERENT contact
-            // (if viewing conversation with sender, no need for notification)
-            if (!isFromSelectedContact) {
-              // Respect user preferences
-              if (preferencesRef.current.chat_sound_enabled) {
-                playNotificationSound();
-              }
-              
-              if (preferencesRef.current.chat_toast_enabled) {
-                toast({
-                  title: t('newMessage'),
-                  description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
-                });
-              }
+            // Always play sound for incoming messages (even from current contact)
+            if (preferencesRef.current.chat_sound_enabled) {
+              playNotificationSound();
+            }
+            
+            // Only show toast if the message is from a DIFFERENT contact
+            if (!isFromSelectedContact && preferencesRef.current.chat_toast_enabled) {
+              toast({
+                title: t('newMessage'),
+                description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
+              });
             }
           }
         }
@@ -274,6 +271,21 @@ const Chat = () => {
     const messageContent = newMessage.trim();
     setNewMessage(''); // Clear input immediately for better UX
 
+    // Optimistic update: add message to cache immediately
+    const optimisticMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      sender_id: user.id,
+      receiver_id: selectedContact.user_id,
+      content: messageContent,
+      read_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    queryClient.setQueryData<ChatMessage[]>(
+      ['chat-messages', user.id, selectedContact.user_id],
+      (old = []) => [...old, optimisticMessage]
+    );
+
     const { error } = await supabase
       .from('chat_messages')
       .insert({
@@ -285,19 +297,23 @@ const Chat = () => {
     if (error) {
       console.error('Error sending message:', error);
       setNewMessage(messageContent); // Restore message on error
+      // Remove optimistic message
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat-messages', user.id, selectedContact.user_id],
+        (old = []) => old.filter(m => m.id !== optimisticMessage.id)
+      );
       toast({
         title: t('error'),
         description: t('messageSendError'),
         variant: 'destructive',
       });
     } else {
-      // Immediately refresh messages to show sent message
+      // Refetch in background to get the real message ID
       queryClient.invalidateQueries({ queryKey: ['chat-messages', user.id, selectedContact.user_id] });
       queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
       
-      // Send push notification to the recipient
+      // Send push notification in background (don't await)
       try {
-        // Get sender's name for the notification
         const { data: senderProfile } = await supabase
           .from('profiles')
           .select('first_name, last_name')
@@ -313,15 +329,11 @@ const Chat = () => {
             userId: selectedContact.user_id,
             title: `${t('newMessage')} from ${senderName}`,
             body: messageContent.length > 100 ? messageContent.substring(0, 100) + '...' : messageContent,
-            data: {
-              type: 'chat_message',
-              senderId: user.id,
-            },
+            data: { type: 'chat_message', senderId: user.id },
           },
         });
-      } catch (pushError) {
-        // Don't block the message send if push notification fails
-        console.log('Push notification failed (non-critical):', pushError);
+      } catch {
+        // Push notification is non-critical
       }
     }
     
