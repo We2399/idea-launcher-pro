@@ -15,15 +15,15 @@ const config: CapacitorConfig = {
   // - No "Waiting to reconnect" messages
   // - Fast and reliable for production & testing
   
-  // Live reload enabled for development - loads from Lovable preview
-  server: {
-    url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true&v=' + Date.now(),
-    cleartext: true,
-    androidScheme: 'https'
-  },
+  // ✅ LOCAL/OFFLINE MODE (PRODUCTION) - App loads from bundled 'dist' folder
+  // No internet required, no "Not found" errors, always shows latest built version
   
-  // To switch to local/offline mode (for production):
-  // Comment out the server block above
+  // 🔧 DEVELOPMENT ONLY: Uncomment below for live-reload from Lovable preview
+  // server: {
+  //   url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true',
+  //   cleartext: true,
+  //   androidScheme: 'https'
+  // },
   
   plugins: {
     SplashScreen: {
