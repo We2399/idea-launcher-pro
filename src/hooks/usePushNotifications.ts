@@ -67,15 +67,36 @@ export const usePushNotifications = () => {
     try {
       // Dynamic import for Capacitor Push Notifications
       const { PushNotifications } = await import('@capacitor/push-notifications');
+
+      // Check if push notifications are available (requires Firebase on Android)
+      let permStatus;
+      try {
+        permStatus = await PushNotifications.checkPermissions();
+      } catch (checkErr) {
+        console.warn('Push notifications not available on this device (Firebase may not be configured):', checkErr);
+        return;
+      }
+
+      // Request permission if not yet determined
+      if (permStatus.receive === 'prompt' || permStatus.receive === 'prompt-with-rationale') {
+        try {
+          permStatus = await PushNotifications.requestPermissions();
+        } catch (reqErr) {
+          console.warn('Push notification permission request failed:', reqErr);
+          return;
+        }
+      }
       
-      // Request permission
-      const permStatus = await PushNotifications.requestPermissions();
-      
-      if (permStatus.receive === 'granted') {
-        // Register for push notifications
-        await PushNotifications.register();
-      } else {
+      if (permStatus.receive !== 'granted') {
         console.log('Push notification permission denied');
+        return;
+      }
+
+      // Register - this can crash if Firebase is not configured
+      try {
+        await PushNotifications.register();
+      } catch (regErr) {
+        console.warn('Push notification registration failed (Firebase may not be configured):', regErr);
         return;
       }
 
@@ -94,23 +115,20 @@ export const usePushNotifications = () => {
       // Handle notification received while app is in foreground
       PushNotifications.addListener('pushNotificationReceived', (notification) => {
         console.log('Push notification received:', notification);
-        // The app is open, so we don't need to do anything special
-        // The real-time subscription will handle updating the UI
       });
 
       // Handle notification action (user tapped on notification)
       PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
         console.log('Push notification action performed:', notification);
-        // Navigate to the chat or relevant screen
         const data = notification.notification.data;
         if (data?.type === 'chat_message') {
-          // Could navigate to chat here
           window.location.href = '/chat';
         }
       });
 
     } catch (err) {
-      console.error('Failed to initialize push notifications:', err);
+      // Catch-all: never let push notification setup crash the app
+      console.warn('Push notifications unavailable:', err);
     }
   }, [registerToken]);
 
