@@ -18,11 +18,15 @@ const config: CapacitorConfig = {
   // ✅ LOCAL/OFFLINE MODE (PRODUCTION) - App loads from bundled 'dist' folder
   // No internet required, no "Not found" errors, always shows latest built version
   
+  // Use HTTPS scheme so Supabase auth cookies/storage work correctly in the WebView
+  android: {
+    scheme: 'https'
+  },
+  
   // 🔧 DEVELOPMENT ONLY: Uncomment below for live-reload from Lovable preview
   // server: {
   //   url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true',
-  //   cleartext: true,
-  //   androidScheme: 'https'
+  //   cleartext: true
   // },
   
   plugins: {
