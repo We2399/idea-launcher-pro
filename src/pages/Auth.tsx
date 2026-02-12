@@ -161,8 +161,13 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    await signIn(formData.email, formData.password);
-    setIsLoading(false);
+    try {
+      await signIn(formData.email, formData.password);
+    } catch (err) {
+      console.error('Login handler error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
