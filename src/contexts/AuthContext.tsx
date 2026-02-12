@@ -86,30 +86,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch user role when user logs in
-        if (session?.user) {
-          supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .maybeSingle()
-            .then(({ data: roleData, error }) => {
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          // Fetch user role when user logs in
+          if (session?.user) {
+            Promise.resolve(
+              supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .maybeSingle()
+            ).then(({ data: roleData, error }) => {
               if (error) {
                 console.error('Error fetching role:', error);
-                setUserRole('employee'); // Fallback to employee
+                setUserRole('employee');
               } else {
                 setUserRole(roleData?.role ?? 'employee');
               }
+            }).catch((err) => {
+              console.warn('Role fetch failed, defaulting to employee:', err);
+              setUserRole('employee');
             });
-        } else {
-          setUserRole(null);
-          setSubscription(defaultSubscription);
+          } else {
+            setUserRole(null);
+            setSubscription(defaultSubscription);
+          }
+          
+          setLoading(false);
+        } catch (err) {
+          console.warn('Auth state change handler error:', err);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
@@ -117,6 +126,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((err) => {
+      console.warn('getSession failed:', err);
       setLoading(false);
     });
 
@@ -142,33 +154,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session, checkSubscription]);
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: metadata
-      }
-    });
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: metadata
+        }
+      });
 
-    // Role is now handled by the database trigger
-    
-    if (error) {
+      // Role is now handled by the database trigger
+      
+      if (error) {
+        toast({
+          title: "Sign Up Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Please check your email to confirm your account."
+        });
+      }
+      
+      return { error };
+    } catch (err) {
+      console.error('Unexpected sign-up error:', err);
       toast({
         title: "Sign Up Error",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Success",
-        description: "Please check your email to confirm your account."
-      });
+      return { error: err };
     }
-    
-    return { error };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -199,24 +221,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    // Treat missing session as already signed out to avoid noisy toasts
-    if (error && !/Auth session missing/i.test(error.message)) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      // Treat missing session as already signed out to avoid noisy toasts
+      if (error && !/Auth session missing/i.test(error.message)) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      setSubscription(defaultSubscription);
       toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
+        title: "Success",
+        description: "Signed out successfully"
       });
-      return;
+    } catch (err) {
+      console.warn('Sign out error:', err);
+      // Force clear state even on error
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      setSubscription(defaultSubscription);
     }
-    setUser(null);
-    setSession(null);
-    setUserRole(null);
-    setSubscription(defaultSubscription);
-    toast({
-      title: "Success",
-      description: "Signed out successfully"
-    });
   };
 
   const value = {
