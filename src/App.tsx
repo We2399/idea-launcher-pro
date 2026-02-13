@@ -46,7 +46,18 @@ const PageLoader = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Stagger retries to avoid burst of requests on Android WebView
+      retry: 1,
+      retryDelay: 3000,
+      // Don't refetch on window focus on mobile (saves resources)
+      refetchOnWindowFocus: false,
+      staleTime: 30000, // 30s stale time reduces duplicate queries
+    },
+  },
+});
 
 // Staged mounting: delays heavy children to prevent Android WebView crash
 // from 20+ simultaneous Supabase queries + native plugin calls at login
@@ -62,7 +73,7 @@ function useStagedMount(delayMs = 1500) {
 // Separate component to use impersonation hook inside the provider
 function MainAppLayout() {
   const { isImpersonating } = useImpersonation();
-  const ready = useStagedMount(1200);
+  const ready = useStagedMount(1500);
   
   // Only initialize native plugins and realtime subscriptions after staged delay
   // This prevents 20+ concurrent requests from crashing Android WebView

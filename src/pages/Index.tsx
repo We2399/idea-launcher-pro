@@ -1,100 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, FileText, Users, BarChart3, User, Clock, TrendingUp, CheckSquare, DollarSign } from 'lucide-react';
-import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
-import { useDashboardCounts } from '@/hooks/useDashboardCounts';
-import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
-import { LeaveTypeBreakdown } from '@/components/dashboard/LeaveTypeBreakdown';
-import { ProfileRequestsCard } from '@/components/dashboard/ProfileRequestsCard';
-import { StorageCentreAlert } from '@/components/dashboard/StorageCentreAlert';
-import { DocumentIssuesCard } from '@/components/dashboard/DocumentIssuesCard';
-import { AdminMissingDocumentsCard } from '@/components/dashboard/AdminMissingDocumentsCard';
-import { MissingDocumentsAlert } from '@/components/profile/MissingDocumentsAlert';
-import { EmployeeDiscussionAlertsCard } from '@/components/dashboard/EmployeeDiscussionAlertsCard';
-import { AdminPendingDiscussionsCard } from '@/components/dashboard/AdminPendingDiscussionsCard';
-import { AdminNeedsReplyCard } from '@/components/dashboard/AdminNeedsReplyCard';
-import { QuickActions } from '@/components/dashboard/QuickActions';
-import { MobileDashboard } from '@/components/dashboard/MobileDashboard';
-import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { PullToRefreshIndicator } from '@/components/dashboard/PullToRefreshIndicator';
-import { PayrollCard } from '@/components/dashboard/PayrollCard';
-import { useQueryClient } from '@tanstack/react-query';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { Calendar, FileText, Users, BarChart3, User, CheckSquare, DollarSign } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { FeatureTour } from '@/components/onboarding/FeatureTour';
-import { useOnboarding } from '@/hooks/useOnboarding';
+
+// Staged loading: delays heavy component mounting to prevent Android WebView crash
+function useStagedLoad(delayMs: number) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), delayMs);
+    return () => clearTimeout(t);
+  }, [delayMs]);
+  return ready;
+}
+
+const LoadingPlaceholder = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="w-8 h-8 border-3 border-muted border-t-primary rounded-full animate-spin" />
+  </div>
+);
+
+// Lazy-load ALL data-heavy components to prevent simultaneous query storms
+const MobileDashboardLazy = React.lazy(() => 
+  import('@/components/dashboard/MobileDashboard').then(m => ({ default: m.MobileDashboard }))
+);
+const DashboardDataSection = React.lazy(() => import('@/components/dashboard/DashboardDataSection'));
 
 const Index = () => {
   const { user, userRole } = useAuth();
   const { impersonatedUserId } = useImpersonation();
   const { t } = useLanguage();
-  const stats = useEnhancedDashboardStats();
-  const counts = useDashboardCounts();
-  const taskCounts = useTaskStatusCounts();
-  const queryClient = useQueryClient();
   const isMobile = useIsMobile();
-  const { hasCompletedFeatureTour, completeFeatureTour } = useOnboarding();
+
+  // Delay mounting data-heavy sections to let the shell render first
+  const dataReady = useStagedLoad(600);
   
-  // Show impersonation indicator for administrators
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
-
-  // Pull to refresh handler
-  const handleRefresh = async () => {
-    await queryClient.invalidateQueries();
-    // Add a small delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 500));
-  };
-
-  const { scrollableRef, isRefreshing, pullDistance, isPulled } = usePullToRefresh({
-    onRefresh: handleRefresh,
-    threshold: 80,
-  });
-
-  // Helper function to get pending count for each card (excluding tasks)
-  const getPendingCountForCard = (href: string): number => {
-    const isEmployee = userRole === 'employee';
-    
-    switch(href) {
-      case '/requests': 
-        return isEmployee ? counts.pendingLeaveRequests : counts.pendingLeaveApprovals;
-      case '/cash-control': 
-        return isEmployee ? counts.pendingCashRequests : counts.pendingCashApprovals;
-      case '/profile': 
-        return isEmployee 
-          ? counts.pendingProfileChanges + counts.documentsNeedingReply
-          : counts.pendingProfileApprovals;
-      case '/employees': 
-        return counts.pendingDocumentApprovals + counts.discussionsNeedingReply;
-      case '/tasks':
-        return 0; // Handled separately with color-coded badges
-      default: 
-        return 0;
-    }
-  };
-
-  // Helper function to get task badge color and count
-  const getTaskBadge = (): { count: number; bgColor: string } | null => {
-    const { counts } = taskCounts;
-    const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
-    
-    if (total === 0) return null;
-    
-    // Priority: red (new) > amber (in progress) > green (completed but not acknowledged)
-    let bgColor = 'bg-emerald-500';
-    if (counts.pending > 0) {
-      bgColor = 'bg-red-500';
-    } else if (counts.inProgress > 0) {
-      bgColor = 'bg-amber-500';
-    }
-    
-    return { count: total, bgColor };
-  };
 
   if (!user) {
     return (
@@ -104,160 +48,68 @@ const Index = () => {
             <h1 className="text-4xl font-bold tracking-tight">{t('leaveManagementSystem')}</h1>
             <p className="text-xl text-muted-foreground">{t('landingSubtitle')}</p>
           </div>
-          
           <div className="space-y-4">
             <Link to="/auth">
-              <Button size="lg" className="w-full">
-                {t('getStarted')}
-              </Button>
+              <Button size="lg" className="w-full">{t('getStarted')}</Button>
             </Link>
-            
-            <div className="text-sm text-muted-foreground">
-              {t('secureEfficientEasy')}
-            </div>
+            <div className="text-sm text-muted-foreground">{t('secureEfficientEasy')}</div>
           </div>
         </div>
       </div>
     );
   }
 
-  const dashboardCards = [
-    {
-      title: t('leaveRequests'),
-      description: t('manageLeaveRequestsDescription'),
-      icon: FileText,
-      href: '/requests',
-      color: 'from-blue-500/10 to-blue-600/10 border-blue-500/20'
-    },
-    {
-      title: t('calendar'),
-      description: t('dashboardCalendarDescription'),
-      icon: Calendar,
-      href: '/calendar',
-      color: 'from-green-500/10 to-green-600/10 border-green-500/20'
-    },
-    {
-      title: t('profile'),
-      description: t('updatePersonalInfoDescription'),
-      icon: User,
-      href: '/profile',
-      color: 'from-purple-500/10 to-purple-600/10 border-purple-500/20'
-    }
-  ];
-
-  // Add Tasks card for all users
-  dashboardCards.push({
-    title: t('tasks'),
-    description: t('manageTasks'),
-    icon: CheckSquare,
-    href: '/tasks',
-    color: 'from-cyan-500/10 to-cyan-600/10 border-cyan-500/20'
-  });
-
-  // Add Cash Control card for all users
-  dashboardCards.push({
-    title: t('cashControl'),
-    description: t('cashControlDescription'),
-    icon: DollarSign,
-    href: '/cash-control',
-    color: 'from-amber-500/10 to-amber-600/10 border-amber-500/20'
-  });
-
-  // Add management-specific cards for hr_admin and administrator
-  if (userRole === 'hr_admin' || userRole === 'administrator') {
-    dashboardCards.push({
-      title: t('employees'),
-      description: t('manageTeamRequestsDescription'),
-      icon: Users,
-      href: '/employees',
-      color: 'from-orange-500/10 to-orange-600/10 border-orange-500/20'
-    });
-    
-    dashboardCards.push({
-      title: t('reports'),
-      description: t('viewLeaveReportsDescription'),
-      icon: BarChart3,
-      href: '/reports',
-      color: 'from-red-500/10 to-red-600/10 border-red-500/20'
-    });
+  // Mobile: lazy load the entire mobile dashboard
+  if (isMobile) {
+    if (!dataReady) return <LoadingPlaceholder />;
+    return (
+      <Suspense fallback={<LoadingPlaceholder />}>
+        <MobileDashboardLazy />
+      </Suspense>
+    );
   }
 
-  // Show mobile dashboard on mobile devices
-  if (isMobile) {
-    return (
-      <>
-        <MobileDashboard />
-        {!hasCompletedFeatureTour && (
-          <FeatureTour onComplete={completeFeatureTour} />
-        )}
-      </>
+  // Desktop: show static navigation cards immediately, lazy-load stats below
+  const dashboardCards = [
+    { title: t('leaveRequests'), icon: FileText, href: '/requests' },
+    { title: t('calendar'), icon: Calendar, href: '/calendar' },
+    { title: t('profile'), icon: User, href: '/profile' },
+    { title: t('tasks'), icon: CheckSquare, href: '/tasks' },
+    { title: t('cashControl'), icon: DollarSign, href: '/cash-control' },
+  ];
+
+  if (userRole === 'hr_admin' || userRole === 'administrator') {
+    dashboardCards.push(
+      { title: t('employees'), icon: Users, href: '/employees' },
+      { title: t('reports'), icon: BarChart3, href: '/reports' },
     );
   }
 
   return (
-    <>
-      {!hasCompletedFeatureTour && (
-        <FeatureTour onComplete={completeFeatureTour} />
-      )}
-    <div 
-      ref={scrollableRef}
-      className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8 relative overflow-y-auto"
-    >
-      <PullToRefreshIndicator 
-        isRefreshing={isRefreshing}
-        pullDistance={pullDistance}
-        threshold={80}
-      />
-      <div className="flex items-start justify-between gap-3 md:block text-center md:text-left">
-        <div className="flex-1 space-y-2">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {userRole === 'administrator' 
-              ? (isImpersonating ? `Dashboard - Viewing Employee Data` : 'Administrator Dashboard')
-              : t('welcomeBack')}
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            {userRole === 'administrator' 
-              ? (isImpersonating 
-                  ? 'Managing selected employee\'s information and requests' 
-                  : 'System-wide management and settings')
-              : t('dashboardSubtitle')}
-          </p>
-        </div>
-        {/* Extra notification access on mobile so it\'s always visible */}
-        <div className="md:hidden flex items-center justify-end mt-1">
-          <NotificationBell />
-        </div>
+    <div className="min-h-screen safe-area-screen px-4 md:px-8 pb-6 md:pb-10 space-y-6 md:space-y-8 relative overflow-y-auto">
+      {/* Header - renders instantly */}
+      <div className="text-center md:text-left space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          {userRole === 'administrator' 
+            ? (isImpersonating ? 'Dashboard - Viewing Employee Data' : 'Administrator Dashboard')
+            : t('welcomeBack')}
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          {userRole === 'administrator' 
+            ? (isImpersonating 
+                ? "Managing selected employee's information and requests" 
+                : 'System-wide management and settings')
+            : t('dashboardSubtitle')}
+        </p>
       </div>
 
-      {/* Quick Actions */}
-      <QuickActions />
-
+      {/* Navigation cards - static, no data queries */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         {dashboardCards.map((card) => {
           const Icon = card.icon;
-          const pendingCount = getPendingCountForCard(card.href);
-          const isTaskCard = card.href === '/tasks';
-          const taskBadge = isTaskCard ? getTaskBadge() : null;
-          
           return (
             <Link key={card.title} to={card.href}>
               <div className="card-glass relative rounded-2xl p-4 md:p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 border-border/50">
-                {/* Regular badge for non-task cards */}
-                {!isTaskCard && pendingCount > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 bg-primary text-primary-foreground h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse z-10"
-                  >
-                    {pendingCount > 99 ? '99+' : pendingCount}
-                  </Badge>
-                )}
-                {/* Color-coded badge for task card */}
-                {isTaskCard && taskBadge && (
-                  <Badge 
-                    className={`absolute -top-2 -right-2 ${taskBadge.bgColor} text-white h-6 min-w-[24px] flex items-center justify-center px-2 shadow-lg animate-pulse z-10`}
-                  >
-                    {taskBadge.count > 99 ? '99+' : taskBadge.count}
-                  </Badge>
-                )}
                 <div className="flex flex-col items-center gap-3 text-center">
                   <div className="p-3 md:p-4 rounded-xl bg-gradient-primary shadow-sm">
                     <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
@@ -272,101 +124,15 @@ const Index = () => {
         })}
       </div>
 
-      {/* Real-time Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <Card className="card-professional animate-slide-up">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-orange-500/10 ring-1 ring-orange-500/20">
-                <Clock className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-foreground">
-                  {stats.loading ? (
-                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
-                  ) : (
-                    stats.pendingRequests
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">{t('pendingRequests')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                <TrendingUp className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-foreground">
-                  {stats.loading ? (
-                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
-                  ) : (
-                    stats.totalRequests
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">{t('totalThisYear')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-professional animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                <Calendar className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-foreground">
-                  {stats.loading ? (
-                    <div className="h-8 w-12 bg-muted animate-pulse rounded" />
-                  ) : (
-                    stats.leaveBalances.reduce((sum, balance) => sum + balance.remainingDays, 0)
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">{t('daysRemaining')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <ProfileRequestsCard 
-          stats={stats.profileChangeRequests} 
-          loading={stats.loading}
-        />
-      </div>
-
-       {/* Payroll Card */}
-       <PayrollCard />
-
-       {/* Role-specific alerts */}
-       {(userRole === 'administrator' || userRole === 'hr_admin') && (
-         <div className="mt-4 space-y-4">
-           <AdminMissingDocumentsCard />
-           <StorageCentreAlert />
-           <AdminPendingDiscussionsCard />
-           <AdminNeedsReplyCard />
-         </div>
-       )}
-       {userRole === 'employee' && (
-         <div className="mt-4 space-y-4">
-           <MissingDocumentsAlert />
-           <DocumentIssuesCard />
-           <EmployeeDiscussionAlertsCard />
-         </div>
-       )}
-      
-      {/* Detailed Leave Breakdown */}
-      <LeaveTypeBreakdown 
-        leaveBalances={stats.leaveBalances} 
-        loading={stats.loading}
-      />
+      {/* Data-heavy sections: only mount after delay to prevent WebView crash */}
+      {dataReady ? (
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <DashboardDataSection />
+        </Suspense>
+      ) : (
+        <LoadingPlaceholder />
+      )}
     </div>
-    </>
   );
 };
 
