@@ -135,12 +135,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => authSubscription.unsubscribe();
   }, []);
 
-  // Check subscription when session changes - delayed to avoid burst of requests on login
+  // Check subscription when session changes - delayed significantly to avoid burst of requests on login
+  // The staged mount in MainAppLayout adds 1.2s delay; this adds another 3s on top
   useEffect(() => {
     if (session) {
+      console.log('[Auth] Session detected, scheduling subscription check in 4s...');
       const timer = setTimeout(() => {
+        console.log('[Auth] Running checkSubscription now');
         checkSubscription();
-      }, 2000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [session, checkSubscription]);
