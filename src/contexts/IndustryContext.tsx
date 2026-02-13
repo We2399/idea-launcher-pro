@@ -30,52 +30,67 @@ export const IndustryProvider: React.FC<IndustryProviderProps> = ({ children }) 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchIndustryType = async () => {
       if (!user) {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
         return;
       }
 
       try {
         // First check if user is an organization owner
-        const { data: ownedOrg } = await supabase
+        const { data: ownedOrg, error: ownedOrgError } = await supabase
           .from('organizations')
           .select('industry_type')
           .eq('owner_id', user.id)
           .maybeSingle();
 
-        if (ownedOrg?.industry_type) {
+        if (ownedOrgError) {
+          console.warn('Failed to fetch owned org:', ownedOrgError);
+        }
+
+        if (!cancelled && ownedOrg?.industry_type) {
           setIndustryType(ownedOrg.industry_type as IndustryType);
           setLoading(false);
           return;
         }
 
         // Check if user is a member of an organization
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('organization_id')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (profile?.organization_id) {
-          const { data: org } = await supabase
+        if (profileError) {
+          console.warn('Failed to fetch profile org:', profileError);
+        }
+
+        if (!cancelled && profile?.organization_id) {
+          const { data: org, error: orgError } = await supabase
             .from('organizations')
             .select('industry_type')
             .eq('id', profile.organization_id)
             .maybeSingle();
 
-          if (org?.industry_type) {
+          if (orgError) {
+            console.warn('Failed to fetch org:', orgError);
+          }
+
+          if (!cancelled && org?.industry_type) {
             setIndustryType(org.industry_type as IndustryType);
           }
         }
       } catch (error) {
-        console.error('Failed to fetch industry type:', error);
+        console.warn('Failed to fetch industry type:', error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchIndustryType();
+    return () => { cancelled = true; };
   }, [user]);
 
   return (
