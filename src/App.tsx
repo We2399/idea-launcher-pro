@@ -15,6 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Requests from './pages/Requests';
@@ -102,32 +103,36 @@ function MainAppLayout() {
 // App component with all providers
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ImpersonationProvider>
-          <LanguageProvider>
-            <TooltipProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/*" element={
-                    <ProtectedRoute>
-                      <IndustryProvider>
-                        <MainAppLayout />
-                      </IndustryProvider>
-                    </ProtectedRoute>
-                  } />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </LanguageProvider>
-        </ImpersonationProvider>
-      </AuthProvider>
-      <Toaster />
-      <Sonner />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ImpersonationProvider>
+            <LanguageProvider>
+              <TooltipProvider>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/*" element={
+                      <ProtectedRoute>
+                        <IndustryProvider>
+                          <ErrorBoundary>
+                            <MainAppLayout />
+                          </ErrorBoundary>
+                        </IndustryProvider>
+                      </ProtectedRoute>
+                    } />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </LanguageProvider>
+          </ImpersonationProvider>
+        </AuthProvider>
+        <Toaster />
+        <Sonner />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

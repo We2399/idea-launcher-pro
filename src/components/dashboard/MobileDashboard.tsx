@@ -35,7 +35,7 @@ interface Employee {
 }
 
 export function MobileDashboard() {
-  const { user, userRole } = useAuth();
+  const { user, userRole, loading: authLoading } = useAuth();
   const { t } = useLanguage();
   const counts = useDashboardCounts();
   const taskCounts = useTaskStatusCounts();

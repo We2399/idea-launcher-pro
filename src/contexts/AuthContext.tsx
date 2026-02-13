@@ -135,10 +135,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => authSubscription.unsubscribe();
   }, []);
 
-  // Check subscription when session changes
+  // Check subscription when session changes - delayed to avoid burst of requests on login
   useEffect(() => {
     if (session) {
-      checkSubscription();
+      const timer = setTimeout(() => {
+        checkSubscription();
+      }, 2000);
+      return () => clearTimeout(timer);
     }
   }, [session, checkSubscription]);
 
