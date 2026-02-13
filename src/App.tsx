@@ -48,10 +48,39 @@ const PageLoader = () => (
 
 const queryClient = new QueryClient();
 
+// Staged mounting: delays heavy children to prevent Android WebView crash
+// from 20+ simultaneous Supabase queries + native plugin calls at login
+function useStagedMount(delayMs = 1500) {
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setReady(true), delayMs);
+    return () => clearTimeout(timer);
+  }, [delayMs]);
+  return ready;
+}
+
 // Separate component to use impersonation hook inside the provider
 function MainAppLayout() {
   const { isImpersonating } = useImpersonation();
+  const ready = useStagedMount(1200);
   
+  // Only initialize native plugins and realtime subscriptions after staged delay
+  // This prevents 20+ concurrent requests from crashing Android WebView
+  if (!ready) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#5BBFBA', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <p style={{ color: '#888', fontSize: '0.875rem' }}>Loading your dashboard...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+  
+  return <MainAppContent isImpersonating={isImpersonating} />;
+}
+
+// Actual app content - only mounts after staged delay
+function MainAppContent({ isImpersonating }: { isImpersonating: boolean }) {
   // Initialize push notifications for native mobile platforms
   usePushNotifications();
   

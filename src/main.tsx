@@ -9,15 +9,16 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 // Global safety net: catch ANY unhandled promise rejection so the Android WebView
 // doesn't crash and close the app. This is critical for Capacitor mobile apps.
 window.addEventListener('unhandledrejection', (event) => {
-  console.warn('Unhandled promise rejection caught (app kept alive):', event.reason);
-  event.preventDefault(); // Prevent the WebView from crashing
-});
-
-// Also catch uncaught errors globally
-window.addEventListener('error', (event) => {
-  console.warn('Uncaught error caught (app kept alive):', event.error);
+  console.warn('[GLOBAL] Unhandled promise rejection caught (app kept alive):', event.reason);
   event.preventDefault();
 });
+
+window.addEventListener('error', (event) => {
+  console.warn('[GLOBAL] Uncaught error caught (app kept alive):', event.error);
+  event.preventDefault();
+});
+
+console.log('[BOOT] App starting, platform:', Capacitor.getPlatform());
 
 ;(async () => {
   if (typeof window !== 'undefined' && Capacitor.getPlatform() === 'ios') {
