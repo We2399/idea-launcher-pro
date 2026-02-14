@@ -14,7 +14,6 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Lazy-load ALL pages to reduce initial bundle parse time on Android WebView
@@ -51,17 +50,18 @@ const queryClient = new QueryClient({
     queries: {
       // Stagger retries to avoid burst of requests on Android WebView
       retry: 1,
-      retryDelay: 3000,
+      retryDelay: 5000,
       // Don't refetch on window focus on mobile (saves resources)
       refetchOnWindowFocus: false,
-      staleTime: 30000, // 30s stale time reduces duplicate queries
+      staleTime: 60000, // 60s stale time reduces duplicate queries on Android
+      gcTime: 300000, // Keep cache for 5 minutes
     },
   },
 });
 
 // Staged mounting: delays heavy children to prevent Android WebView crash
 // from 20+ simultaneous Supabase queries + native plugin calls at login
-function useStagedMount(delayMs = 1500) {
+function useStagedMount(delayMs = 2000) {
   const [ready, setReady] = React.useState(false);
   React.useEffect(() => {
     const timer = setTimeout(() => setReady(true), delayMs);
@@ -73,7 +73,7 @@ function useStagedMount(delayMs = 1500) {
 // Separate component to use impersonation hook inside the provider
 function MainAppLayout() {
   const { isImpersonating } = useImpersonation();
-  const ready = useStagedMount(1500);
+  const ready = useStagedMount(2000);
   
   // Only initialize native plugins and realtime subscriptions after staged delay
   // This prevents 20+ concurrent requests from crashing Android WebView
@@ -95,8 +95,9 @@ function MainAppContent({ isImpersonating }: { isImpersonating: boolean }) {
   // Initialize push notifications for native mobile platforms
   usePushNotifications();
   
-  // Initialize global chat notification sound listener (plays on all pages)
-  useUnreadMessagesCount();
+  // NOTE: useUnreadMessagesCount is initialized inside MobileDashboard (mobile)
+  // and individual pages (desktop) to avoid duplicate realtime subscriptions
+  // that overwhelm Android WebView's connection limit
   
   return (
     <SidebarProvider defaultOpen={false}>
