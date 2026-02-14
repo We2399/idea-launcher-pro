@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useDashboardCounts } from '@/hooks/useDashboardCounts';
-import { useTaskStatusCounts } from '@/hooks/useTaskStatusCounts';
-import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import { CheckSquare, Calendar, DollarSign, MessageCircle, FileText, Wallet, User, Search, Sparkles, Star } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { Badge } from '@/components/ui/badge';
@@ -22,8 +19,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import jiejieLadyIcon from '@/assets/jiejie-lady-icon.png';
-import { MissingDocumentsAlert } from '@/components/profile/MissingDocumentsAlert';
-import { AdminMissingDocumentsCard } from '@/components/dashboard/AdminMissingDocumentsCard';
 
 interface Employee {
   user_id: string;
@@ -34,12 +29,20 @@ interface Employee {
   position: string;
 }
 
+/**
+ * MobileDashboardData: lazy-loaded component that contains ALL data hooks.
+ * This is mounted 2s after the shell renders, so the WebView is stable
+ * before any Supabase queries or realtime subscriptions start.
+ */
+const MobileDashboardData = lazy(() => import('./MobileDashboardData'));
+
+/**
+ * MobileDashboard: renders a lightweight shell immediately (no Supabase queries).
+ * Data-heavy hooks are deferred to MobileDashboardData which mounts after a delay.
+ */
 export function MobileDashboard() {
   const { user, userRole, loading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const counts = useDashboardCounts();
-  const taskCounts = useTaskStatusCounts();
-  const { unreadCount: unreadMessages } = useUnreadMessagesCount();
   const { isImpersonating, impersonatedUserId, startImpersonation } = useImpersonation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
@@ -48,10 +51,17 @@ export function MobileDashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
   
   const isAdmin = userRole === 'administrator' || userRole === 'hr_admin';
+
+  // Delay mounting data-heavy component to avoid query storm
+  useEffect(() => {
+    const timer = setTimeout(() => setDataReady(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
   
-  // Fetch user's first name and avatar
+  // Fetch user's first name and avatar (only 2 lightweight queries)
   useEffect(() => {
     const fetchUserProfile = async () => {
       const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
@@ -71,12 +81,12 @@ export function MobileDashboard() {
         console.warn('Failed to fetch user profile:', err);
       }
       
-      // Check for avatar in profile_documents (separate try/catch so profile name still works)
+      // Check for avatar (separate try/catch)
       try {
         const { data: avatarDoc } = await supabase
           .from('profile_documents')
           .select('file_path')
-          .eq('user_id', isImpersonating ? impersonatedUserId! : user!.id)
+          .eq('user_id', targetUserId)
           .eq('document_type', 'avatar')
           .order('created_at', { ascending: false })
           .limit(1)
@@ -165,41 +175,6 @@ export function MobileDashboard() {
     return isAdmin ? t('employer') : t('helper');
   };
 
-  // Get color-coded task badge info
-  const getTaskBadgeInfo = () => {
-    const { counts } = taskCounts;
-    const total = counts.pending + counts.inProgress + counts.completedUnacknowledged;
-    
-    if (total === 0) return null;
-    
-    // Priority: red (new) > amber (in progress) > green (completed but not acknowledged)
-    let bgColor = 'bg-emerald-500';
-    let borderColor = 'border-emerald-200/50 dark:border-emerald-800/30';
-    let lightBg = 'bg-emerald-50 dark:bg-emerald-950/30';
-    let iconBg = 'bg-emerald-100 dark:bg-emerald-900/50';
-    let iconColor = 'text-emerald-600 dark:text-emerald-400';
-    
-    if (counts.pending > 0) {
-      bgColor = 'bg-red-500';
-      borderColor = 'border-red-200/50 dark:border-red-800/30';
-      lightBg = 'bg-red-50 dark:bg-red-950/30';
-      iconBg = 'bg-red-100 dark:bg-red-900/50';
-      iconColor = 'text-red-600 dark:text-red-400';
-    } else if (counts.inProgress > 0) {
-      bgColor = 'bg-amber-500';
-      borderColor = 'border-amber-200/50 dark:border-amber-800/30';
-      lightBg = 'bg-amber-50 dark:bg-amber-950/30';
-      iconBg = 'bg-amber-100 dark:bg-amber-900/50';
-      iconColor = 'text-amber-600 dark:text-amber-400';
-    }
-    
-    return { count: total, bgColor, borderColor, lightBg, iconBg, iconColor };
-  };
-
-  const taskBadgeInfo = getTaskBadgeInfo();
-  const taskDisplayCount = taskBadgeInfo?.count || (userRole === 'employee' ? counts.pendingTasks : counts.allPendingTasks);
-  const leaveRequests = userRole === 'employee' ? counts.pendingLeaveRequests : counts.pendingLeaveApprovals;
-
   return (
     <div className="md:hidden min-h-screen bg-gradient-to-b from-background via-background to-muted/30 pb-20 relative overflow-hidden">
       {/* Decorative background elements */}
@@ -237,7 +212,7 @@ export function MobileDashboard() {
           <LanguageSwitcher variant="pills" />
         </div>
         
-        {/* Second row: User avatar + Employer View button (separated) */}
+        {/* Second row: User avatar + Employer View button */}
         <div className="flex items-center justify-end gap-2 relative z-10">
           {/* User Profile Avatar */}
           <Link to="/profile">
@@ -319,11 +294,9 @@ export function MobileDashboard() {
 
       {/* Content */}
       <div className="px-4 mt-4 space-y-4 relative z-10">
-        {/* Greeting Card with glass effect and illustration */}
+        {/* Greeting Card - static, no data queries */}
         <div className="card-glass rounded-2xl p-5 shadow-lg border border-white/20 relative overflow-hidden">
-          {/* Decorative gradient blob */}
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-2xl" />
-          
           <div className="flex items-start justify-between relative z-10">
             <div className="flex-1">
               <h2 className="text-xl font-bold text-foreground">
@@ -331,7 +304,6 @@ export function MobileDashboard() {
               </h2>
               <p className="text-muted-foreground text-sm mt-1">{t('hereTodaySummary')}</p>
             </div>
-            {/* Illustration placeholder */}
             <div className="hidden xs:block relative">
               <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center">
                 <Sparkles className="h-8 w-8 text-primary/60 animate-pulse-soft" />
@@ -340,69 +312,16 @@ export function MobileDashboard() {
           </div>
         </div>
 
-        {/* Missing Documents Alerts */}
-        {isAdmin ? <AdminMissingDocumentsCard /> : <MissingDocumentsAlert />}
+        {/* Data-heavy section: lazy loaded after delay */}
+        {dataReady ? (
+          <Suspense fallback={<MobileDashboardSkeleton t={t} />}>
+            <MobileDashboardData />
+          </Suspense>
+        ) : (
+          <MobileDashboardSkeleton t={t} />
+        )}
 
-        {/* Stats Cards with glassmorphism */}
-        <div className="grid grid-cols-3 gap-3">
-          <Link to="/tasks" className="group">
-            <div className="card-glass rounded-2xl p-3 relative shadow-md border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-active:scale-95">
-              {taskBadgeInfo && (
-                <Badge 
-                  className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground h-5 min-w-[20px] flex items-center justify-center px-1.5 text-[10px] shadow-lg animate-bounce-soft"
-                >
-                  {taskBadgeInfo.count > 99 ? '99+' : taskBadgeInfo.count}
-                </Badge>
-              )}
-              <div className="flex flex-col items-center gap-2">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 ring-1 ring-primary/20 shadow-inner">
-                  <CheckSquare className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{taskDisplayCount}</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">{t('tasksPending')}</p>
-                </div>
-              </div>
-            </div>
-          </Link>
-          
-          <Link to="/requests" className="group">
-            <div className="card-glass rounded-2xl p-3 shadow-md border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-active:scale-95">
-              <div className="flex flex-col items-center gap-2">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 ring-1 ring-blue-500/20 shadow-inner">
-                  <FileText className="h-5 w-5 text-blue-500" />
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{leaveRequests}</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">{t('leaveRequests')}</p>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          <Link to="/chat" className="group">
-            <div className="card-glass rounded-2xl p-3 relative shadow-md border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-active:scale-95">
-              {unreadMessages > 0 && (
-                <Badge 
-                  className="absolute -top-1.5 -right-1.5 bg-destructive text-white h-5 min-w-[20px] flex items-center justify-center px-1.5 text-[10px] shadow-lg animate-bounce-soft"
-                >
-                  {unreadMessages > 99 ? '99+' : unreadMessages}
-                </Badge>
-              )}
-              <div className="flex flex-col items-center gap-2">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 ring-1 ring-emerald-500/20 shadow-inner">
-                  <MessageCircle className="h-5 w-5 text-emerald-500" />
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{unreadMessages}</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">{t('messages')}</p>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-
-        {/* Quick Access Grid with feature cards */}
+        {/* Quick Access Grid - static, no data queries */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h3 className="text-lg font-semibold text-foreground">{t('quickActions')}</h3>
@@ -444,13 +363,11 @@ export function MobileDashboard() {
           </div>
         </div>
 
-        {/* Chat Quick Action with enhanced styling */}
+        {/* Chat Quick Action */}
         <div>
           <Link to="/chat" className="group block">
             <div className="card-glass rounded-2xl p-4 flex items-center gap-4 shadow-md border border-white/10 transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl group-active:scale-[0.98] relative overflow-hidden">
-              {/* Background glow */}
               <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
               <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 ring-1 ring-primary/20 relative z-10">
                 <MessageCircle className="h-6 w-6 text-primary" />
               </div>
@@ -462,6 +379,28 @@ export function MobileDashboard() {
             </div>
           </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Skeleton placeholder while data loads */
+function MobileDashboardSkeleton({ t }: { t: (key: string) => string }) {
+  return (
+    <div className="space-y-4">
+      {/* Stats skeleton */}
+      <div className="grid grid-cols-3 gap-3">
+        {[0, 1, 2].map(i => (
+          <div key={i} className="card-glass rounded-2xl p-3 shadow-md border border-white/10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="p-2.5 rounded-xl bg-muted/30 w-10 h-10" />
+              <div className="text-center space-y-1">
+                <div className="h-7 w-8 bg-muted/40 rounded mx-auto animate-pulse" />
+                <div className="h-3 w-12 bg-muted/30 rounded mx-auto" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
