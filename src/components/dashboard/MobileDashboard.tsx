@@ -57,34 +57,43 @@ export function MobileDashboard() {
       const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
       if (!targetUserId) return;
       
-      const { data } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('user_id', targetUserId)
-        .single();
-      
-      if (data?.first_name) {
-        setUserName(data.first_name);
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', targetUserId)
+          .maybeSingle();
+        
+        if (data?.first_name) {
+          setUserName(data.first_name);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch user profile:', err);
       }
       
-      // Check for avatar in profile_documents
-      const { data: avatarDoc } = await supabase
-        .from('profile_documents')
-        .select('file_path')
-        .eq('user_id', targetUserId)
-        .eq('document_type', 'avatar')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (avatarDoc?.file_path) {
-        const { data: signedUrl } = await supabase.storage
-          .from('profile-documents')
-          .createSignedUrl(avatarDoc.file_path, 3600);
-        if (signedUrl?.signedUrl) {
-          setAvatarUrl(signedUrl.signedUrl);
+      // Check for avatar in profile_documents (separate try/catch so profile name still works)
+      try {
+        const { data: avatarDoc } = await supabase
+          .from('profile_documents')
+          .select('file_path')
+          .eq('user_id', isImpersonating ? impersonatedUserId! : user!.id)
+          .eq('document_type', 'avatar')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (avatarDoc?.file_path) {
+          const { data: signedUrl } = await supabase.storage
+            .from('profile-documents')
+            .createSignedUrl(avatarDoc.file_path, 3600);
+          if (signedUrl?.signedUrl) {
+            setAvatarUrl(signedUrl.signedUrl);
+          }
+        } else {
+          setAvatarUrl(null);
         }
-      } else {
+      } catch (err) {
+        console.warn('Failed to fetch avatar:', err);
         setAvatarUrl(null);
       }
     };

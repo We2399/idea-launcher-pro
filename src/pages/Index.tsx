@@ -36,7 +36,7 @@ const Index = () => {
   const isMobile = useIsMobile();
 
   // Delay mounting data-heavy sections to let the shell render first
-  const dataReady = useStagedLoad(600);
+  const dataReady = useStagedLoad(1200);
   
   const isImpersonating = userRole === 'administrator' && impersonatedUserId;
 
