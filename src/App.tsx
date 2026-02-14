@@ -13,7 +13,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+// Push notifications disabled - requires Firebase google-services.json
+// import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Lazy-load ALL pages to reduce initial bundle parse time on Android WebView
@@ -92,8 +93,10 @@ function MainAppLayout() {
 
 // Actual app content - only mounts after staged delay
 function MainAppContent({ isImpersonating }: { isImpersonating: boolean }) {
-  // Initialize push notifications for native mobile platforms
-  usePushNotifications();
+  // Push notifications disabled - requires Firebase (google-services.json)
+  // which isn't configured. Native calls without Firebase cause hard crashes
+  // that JavaScript try/catch cannot prevent.
+  // usePushNotifications();
   
   // NOTE: useUnreadMessagesCount is initialized inside MobileDashboard (mobile)
   // and individual pages (desktop) to avoid duplicate realtime subscriptions
