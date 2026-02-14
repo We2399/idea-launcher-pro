@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Upload } from 'lucide-react';
 import { useMissingDocuments } from '@/hooks/useMissingDocuments';
+import { Link } from 'react-router-dom';
 
 interface MissingDocumentsAlertProps {
   onScrollToDocuments?: () => void;
@@ -26,17 +27,25 @@ export function MissingDocumentsAlert({ onScrollToDocuments }: MissingDocumentsA
               <li key={d.documentType}>{d.label}</li>
             ))}
           </ul>
-          {onScrollToDocuments && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={onScrollToDocuments}
-            >
-              <Upload className="h-3 w-3 mr-1" />
-              Go to Documents
-            </Button>
-          )}
+          <div className="flex gap-2 mt-2">
+            {onScrollToDocuments ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onScrollToDocuments}
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Go to Documents
+              </Button>
+            ) : (
+              <Link to="/profile">
+                <Button variant="outline" size="sm">
+                  <Upload className="h-3 w-3 mr-1" />
+                  Upload Documents
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </AlertDescription>
     </Alert>

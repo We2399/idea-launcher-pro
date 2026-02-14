@@ -15,6 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 // Push notifications disabled - requires Firebase google-services.json
 // import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Lazy-load ALL pages to reduce initial bundle parse time on Android WebView
@@ -94,13 +95,11 @@ function MainAppLayout() {
 // Actual app content - only mounts after staged delay
 function MainAppContent({ isImpersonating }: { isImpersonating: boolean }) {
   // Push notifications disabled - requires Firebase (google-services.json)
-  // which isn't configured. Native calls without Firebase cause hard crashes
-  // that JavaScript try/catch cannot prevent.
   // usePushNotifications();
   
-  // NOTE: useUnreadMessagesCount is initialized inside MobileDashboard (mobile)
-  // and individual pages (desktop) to avoid duplicate realtime subscriptions
-  // that overwhelm Android WebView's connection limit
+  // Global chat notification listener - provides sound + toast alerts
+  // on ALL pages (not just dashboard). This is the single source of truth.
+  useUnreadMessagesCount();
   
   return (
     <SidebarProvider defaultOpen={false}>
