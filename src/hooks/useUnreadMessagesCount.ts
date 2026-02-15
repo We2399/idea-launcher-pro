@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ interface UserPreferences {
 }
 
 export const useUnreadMessagesCount = () => {
+  const hookId = useId();
   const { user } = useAuth();
   const { isImpersonating, impersonatedUserId } = useImpersonation();
   const location = useLocation();
@@ -23,8 +24,11 @@ export const useUnreadMessagesCount = () => {
 
   const targetUserId = isImpersonating ? impersonatedUserId : user?.id;
 
-  // Check if user is currently on the chat page
+  // Use a ref for isOnChatPage so the realtime subscription doesn't
+  // get destroyed/recreated on every route change
   const isOnChatPage = location.pathname === '/chat';
+  const isOnChatPageRef = useRef(isOnChatPage);
+  isOnChatPageRef.current = isOnChatPage;
 
   // Fetch user preferences
   const fetchPreferences = useCallback(async () => {
@@ -108,8 +112,9 @@ export const useUnreadMessagesCount = () => {
   useEffect(() => {
     if (!targetUserId) return;
 
+    const channelName = `unread-messages-${hookId.replace(/:/g, '')}`;
     const channel = supabase
-      .channel('unread-messages-count')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -128,7 +133,7 @@ export const useUnreadMessagesCount = () => {
           // Only trigger for messages sent TO this user (not from self)
           if (newMessage.receiver_id === targetUserId && !newMessage.read_at) {
             // Skip notifications if user is on the chat page (Chat.tsx handles it)
-            if (!isOnChatPage) {
+            if (!isOnChatPageRef.current) {
               // Play sound if enabled
               if (preferencesRef.current.chat_sound_enabled) {
                 playNotificationSound();
@@ -168,7 +173,7 @@ export const useUnreadMessagesCount = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [targetUserId, playNotificationSound, isOnChatPage]);
+  }, [targetUserId, playNotificationSound, hookId]);
 
   return { unreadCount, isLoading, refetch: fetchUnreadCount };
 };
