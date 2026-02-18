@@ -23,11 +23,11 @@ const config: CapacitorConfig = {
     scheme: 'https'
   },
   
-  // 🔧 DEVELOPMENT ONLY: Uncomment below for live-reload from Lovable preview
-  // server: {
-  //   url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true',
-  //   cleartext: true
-  // },
+  // 🔧 LIVE-RELOAD MODE: Loading directly from Lovable preview
+  server: {
+    url: 'https://bea471aa-2444-40ca-9c0c-5142cd0a98fc.lovableproject.com?forceHideBadge=true',
+    cleartext: true
+  },
   
   plugins: {
     SplashScreen: {
