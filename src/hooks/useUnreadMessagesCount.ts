@@ -130,12 +130,24 @@ export const useUnreadMessagesCount = () => {
             content: string;
           };
           
+          console.log('[UnreadMessages] Realtime INSERT received:', {
+            sender: newMessage.sender_id?.substring(0, 8),
+            receiver: newMessage.receiver_id?.substring(0, 8),
+            targetUser: targetUserId?.substring(0, 8),
+            isForMe: newMessage.receiver_id === targetUserId,
+            isOnChatPage: isOnChatPageRef.current,
+            soundEnabled: preferencesRef.current.chat_sound_enabled,
+            toastEnabled: preferencesRef.current.chat_toast_enabled,
+          });
+          
           // Only trigger for messages sent TO this user (not from self)
           if (newMessage.receiver_id === targetUserId && !newMessage.read_at) {
             // Skip notifications if user is on the chat page (Chat.tsx handles it)
             if (!isOnChatPageRef.current) {
+              console.log('[UnreadMessages] Triggering notification (not on chat page)');
               // Play sound if enabled
               if (preferencesRef.current.chat_sound_enabled) {
+                console.log('[UnreadMessages] Playing sound...');
                 playNotificationSound();
               }
               
@@ -146,11 +158,14 @@ export const useUnreadMessagesCount = () => {
                   ? newMessage.content.substring(0, 60) + '...' 
                   : newMessage.content;
                 
+                console.log('[UnreadMessages] Showing toast from:', senderName);
                 toast({
                   title: `💬 ${senderName}`,
                   description: messagePreview,
                 });
               }
+            } else {
+              console.log('[UnreadMessages] On chat page, skipping notification (Chat.tsx handles it)');
             }
           }
           
@@ -168,9 +183,18 @@ export const useUnreadMessagesCount = () => {
           fetchUnreadCount();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[UnreadMessages] Realtime subscription status:', status, err || '');
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[UnreadMessages] Channel error, will retry in 5s');
+          setTimeout(() => {
+            supabase.removeChannel(channel);
+          }, 5000);
+        }
+      });
 
     return () => {
+      console.log('[UnreadMessages] Cleaning up channel:', channelName);
       supabase.removeChannel(channel);
     };
   }, [targetUserId, playNotificationSound, hookId]);
