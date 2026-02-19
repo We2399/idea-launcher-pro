@@ -44,14 +44,38 @@ serve(async (req) => {
 
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      logStep("No authorization header - returning unsubscribed");
+      return new Response(JSON.stringify({ 
+        subscribed: false, product_id: null, subscription_end: null, status: 'no_auth' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("Auth error - returning unsubscribed", { message: userError.message });
+      return new Response(JSON.stringify({ 
+        subscribed: false, product_id: null, subscription_end: null, status: 'auth_error' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email) {
+      logStep("No user email - returning unsubscribed");
+      return new Response(JSON.stringify({ 
+        subscribed: false, product_id: null, subscription_end: null, status: 'no_email' 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Initialize Stripe
