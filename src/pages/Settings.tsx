@@ -77,6 +77,10 @@ export default function Settings() {
         <TabsContent value="subscriptions">
           <AdminTierManager />
         </TabsContent>
+
+        <TabsContent value="users">
+          <RegisteredUsersPanel />
+        </TabsContent>
         
         <TabsContent value="delegation">
           <DelegationSettings />
