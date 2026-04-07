@@ -7,8 +7,9 @@ import { WorkScheduleManager } from '@/components/admin/WorkScheduleManager';
 import { PublicHolidaysManager } from '@/components/admin/PublicHolidaysManager';
 import { OrganizationManager } from '@/components/admin/OrganizationManager';
 import { AdminTierManager } from '@/components/admin/AdminTierManager';
+import { RegisteredUsersPanel } from '@/components/admin/RegisteredUsersPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database, Building2, Crown } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database, Building2, Crown, UserSearch } from 'lucide-react';
 import StorageCentre from '@/pages/StorageCentre';
 
 export default function Settings() {
@@ -34,7 +35,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="organization" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="organization" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">{t('organization')}</span>
@@ -42,6 +43,10 @@ export default function Settings() {
           <TabsTrigger value="subscriptions" className="flex items-center gap-2">
             <Crown className="h-4 w-4" />
             <span className="hidden sm:inline">{t('subscriptions')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <UserSearch className="h-4 w-4" />
+            <span className="hidden sm:inline">Users</span>
           </TabsTrigger>
           <TabsTrigger value="delegation" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -71,6 +76,10 @@ export default function Settings() {
 
         <TabsContent value="subscriptions">
           <AdminTierManager />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <RegisteredUsersPanel />
         </TabsContent>
         
         <TabsContent value="delegation">
