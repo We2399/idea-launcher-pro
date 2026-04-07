@@ -35,7 +35,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="organization" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="organization" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">{t('organization')}</span>
@@ -43,6 +43,10 @@ export default function Settings() {
           <TabsTrigger value="subscriptions" className="flex items-center gap-2">
             <Crown className="h-4 w-4" />
             <span className="hidden sm:inline">{t('subscriptions')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <UserSearch className="h-4 w-4" />
+            <span className="hidden sm:inline">Users</span>
           </TabsTrigger>
           <TabsTrigger value="delegation" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
