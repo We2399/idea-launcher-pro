@@ -40,7 +40,14 @@ const ResetPassword: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const redirectTo = `${window.location.origin}/reset-password`;
+      // Avoid https://localhost (Capacitor WebView) which gives ERR_CONNECTION_REFUSED on phone
+      const isNativeOrLocalhost =
+        window.location.hostname === 'localhost' ||
+        window.location.protocol === 'capacitor:';
+      const baseUrl = isNativeOrLocalhost
+        ? 'https://idea-launcher-pro.lovable.app'
+        : window.location.origin;
+      const redirectTo = `${baseUrl}/reset-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw error;
       toast({ title: 'Email sent', description: 'Check your inbox for the reset link.' });
