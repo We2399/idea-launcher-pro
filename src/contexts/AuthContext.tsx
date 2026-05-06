@@ -161,7 +161,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      // In Capacitor/native app, window.location.origin is "https://localhost"
+      // which doesn't resolve on the user's phone browser when they click the
+      // confirmation link in their email (ERR_CONNECTION_REFUSED).
+      // Always redirect to the public web URL so the link works on any device.
+      const isNativeOrLocalhost =
+        window.location.hostname === 'localhost' ||
+        window.location.protocol === 'capacitor:';
+      const redirectUrl = isNativeOrLocalhost
+        ? 'https://idea-launcher-pro.lovable.app/'
+        : `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
