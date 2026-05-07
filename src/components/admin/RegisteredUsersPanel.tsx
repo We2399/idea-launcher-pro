@@ -172,7 +172,9 @@ export function RegisteredUsersPanel() {
                       {format(new Date(user.created_at), 'dd MMM yyyy')}
                     </TableCell>
                     <TableCell>
-                      {user.profile_completed ? (
+                      {(user.role === 'administrator' || user.role === 'hr_admin' || user.is_employer) ? (
+                        <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">N/A</Badge>
+                      ) : user.profile_completed ? (
                         <Badge variant="outline" className="text-xs text-green-600 border-green-300">Complete</Badge>
                       ) : (
                         <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Incomplete</Badge>
