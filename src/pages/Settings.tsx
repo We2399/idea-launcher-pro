@@ -103,6 +103,10 @@ export default function Settings() {
           <StorageCentre />
         </TabsContent>
       </Tabs>
+
+      <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border/50">
+        Jie Jie 姐姐 HR Hub · {APP_VERSION_LABEL}
+      </div>
     </div>
   );
 }
