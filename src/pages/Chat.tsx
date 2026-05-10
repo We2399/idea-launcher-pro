@@ -361,8 +361,133 @@ const Chat = () => {
     setSending(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const handleSendVoice = async (blob: Blob, durationSeconds: number, mimeType: string) => {
+    if (!user?.id || !selectedContact?.user_id) return;
+    setSending(true);
+
+    try {
+      const ext = mimeType.includes('mp4') ? 'm4a'
+        : mimeType.includes('ogg') ? 'ogg'
+        : 'webm';
+      const filePath = `${user.id}/${selectedContact.user_id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('voice-messages')
+        .upload(filePath, blob, { contentType: mimeType, upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      // Optimistic add
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        sender_id: user.id,
+        receiver_id: selectedContact.user_id,
+        content: null,
+        message_type: 'voice',
+        audio_url: filePath,
+        duration_seconds: durationSeconds,
+        read_at: null,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat-messages', user.id, selectedContact.user_id],
+        (old = []) => [...old, optimisticMessage]
+      );
+
+      const { error: insertError } = await supabase
+        .from('chat_messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: selectedContact.user_id,
+          content: '',
+          message_type: 'voice',
+          audio_url: filePath,
+          duration_seconds: durationSeconds,
+        });
+
+      if (insertError) throw insertError;
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', user.id, selectedContact.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
+
+      // Push notification (non-critical)
+      try {
+        const { data: senderProfile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', user.id)
+          .single();
+        const senderName = senderProfile
+          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || 'Someone'
+          : 'Someone';
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: selectedContact.user_id,
+            title: `${t('newMessage')} from ${senderName}`,
+            body: `🎤 ${t('voiceMessage')}`,
+            data: { type: 'chat_voice_message', senderId: user.id },
+          },
+        });
+      } catch { /* non-critical */ }
+    } catch (e) {
+      console.error('[Voice] send failed', e);
+      toast({
+        title: t('error'),
+        description: t('voiceUploadFailed'),
+        variant: 'destructive',
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Hold-to-record handlers
+  const handleRecordStart = async (e: React.PointerEvent) => {
+    if (sending) return;
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    recordStartXRef.current = e.clientX;
+    setSlideToCancel(false);
+    const ok = await startRecording();
+    if (!ok) {
+      toast({
+        title: t('error'),
+        description: t('micPermissionDenied'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRecordMove = (e: React.PointerEvent) => {
+    if (!isRecording) return;
+    const dx = recordStartXRef.current - e.clientX;
+    setSlideToCancel(dx > 80);
+  };
+
+  const handleRecordEnd = async (e: React.PointerEvent) => {
+    if (!isRecording) return;
+    e.preventDefault();
+    const shouldCancel = slideToCancel;
+    setSlideToCancel(false);
+
+    if (shouldCancel) {
+      cancelRecording();
+      return;
+    }
+
+    const result = await stopRecording();
+    if (!result) return;
+
+    if (result.durationSeconds < MIN_RECORDING_SECONDS) {
+      toast({
+        title: t('voiceTooShort'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await handleSendVoice(result.blob, result.durationSeconds, result.mimeType);
+  };
       e.preventDefault();
       handleSend();
     }
