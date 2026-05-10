@@ -109,25 +109,34 @@ export type Database = {
       }
       chat_messages: {
         Row: {
-          content: string
+          audio_url: string | null
+          content: string | null
           created_at: string
+          duration_seconds: number | null
           id: string
+          message_type: string
           read_at: string | null
           receiver_id: string
           sender_id: string
         }
         Insert: {
-          content: string
+          audio_url?: string | null
+          content?: string | null
           created_at?: string
+          duration_seconds?: number | null
           id?: string
+          message_type?: string
           read_at?: string | null
           receiver_id: string
           sender_id: string
         }
         Update: {
-          content?: string
+          audio_url?: string | null
+          content?: string | null
           created_at?: string
+          duration_seconds?: number | null
           id?: string
+          message_type?: string
           read_at?: string | null
           receiver_id?: string
           sender_id?: string

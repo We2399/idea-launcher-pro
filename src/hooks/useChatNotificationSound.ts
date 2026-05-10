@@ -92,5 +92,39 @@ export const useChatNotificationSound = () => {
     }
   }, []);
 
-  return { playNotificationSound };
+  // Distinct sound for incoming voice messages: 3 lower descending tones
+  const playVoiceNotificationSound = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const now = ctx.currentTime;
+      const tones = [
+        { freq: 660, start: 0 },
+        { freq: 550, start: 0.12 },
+        { freq: 440, start: 0.24 },
+      ];
+      tones.forEach(({ freq, start }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(freq, now + start);
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0, now + start);
+        gain.gain.linearRampToValueAtTime(0.25, now + start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + start + 0.18);
+        osc.start(now + start);
+        osc.stop(now + start + 0.2);
+      });
+      console.log('[ChatSound] Voice notification sound played');
+    } catch (error) {
+      console.log('[ChatSound] Could not play voice sound:', error);
+    }
+  }, []);
+
+  return { playNotificationSound, playVoiceNotificationSound };
 };

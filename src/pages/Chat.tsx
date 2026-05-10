@@ -4,21 +4,26 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ArrowLeft, Users, MessageCircle } from 'lucide-react';
+import { Send, ArrowLeft, Users, MessageCircle, Mic, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatNotificationSound } from '@/hooks/useChatNotificationSound';
+import { useVoiceRecorder, MAX_RECORDING_SECONDS, MIN_RECORDING_SECONDS } from '@/hooks/useVoiceRecorder';
+import { VoiceMessagePlayer } from '@/components/chat/VoiceMessagePlayer';
 
 interface ChatMessage {
   id: string;
   sender_id: string;
   receiver_id: string;
-  content: string;
+  content: string | null;
   read_at: string | null;
   created_at: string;
+  message_type?: string | null;
+  audio_url?: string | null;
+  duration_seconds?: number | null;
 }
 
 interface Contact {
@@ -40,10 +45,13 @@ const Chat = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { playNotificationSound } = useChatNotificationSound();
+  const { playNotificationSound, playVoiceNotificationSound } = useChatNotificationSound();
+  const { isRecording, elapsedSeconds, startRecording, stopRecording, cancelRecording } = useVoiceRecorder();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [slideToCancel, setSlideToCancel] = useState(false);
+  const recordStartXRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const preferencesRef = useRef<UserPreferences>({ chat_sound_enabled: true, chat_toast_enabled: true });
 
@@ -131,10 +139,15 @@ const Chat = () => {
           // Get last message
           const { data: lastMsg } = await supabase
             .from('chat_messages')
-            .select('content, created_at')
+            .select('content, created_at, message_type')
             .or(`and(sender_id.eq.${profile.user_id},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${profile.user_id})`)
             .order('created_at', { ascending: false })
             .limit(1);
+
+          const last = lastMsg?.[0];
+          const lastPreview = last
+            ? (last.message_type === 'voice' ? `🎤 ${t('voiceMessage')}` : last.content)
+            : undefined;
 
           return {
             user_id: profile.user_id,
@@ -142,8 +155,8 @@ const Chat = () => {
             last_name: profile.last_name,
             role: roleInfo?.role || 'employee',
             unread_count: unreadCount || 0,
-            last_message: lastMsg?.[0]?.content,
-            last_message_time: lastMsg?.[0]?.created_at,
+            last_message: lastPreview,
+            last_message_time: last?.created_at,
           };
         })
       );
@@ -212,17 +225,25 @@ const Chat = () => {
           // For incoming messages, play sound and optionally show toast
           if (newMessage.sender_id !== user.id) {
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
-            
+            const isVoice = newMessage.message_type === 'voice';
+
             // Always play sound for incoming messages (even from current contact)
             if (preferencesRef.current.chat_sound_enabled) {
-              playNotificationSound();
+              if (isVoice) {
+                playVoiceNotificationSound();
+              } else {
+                playNotificationSound();
+              }
             }
-            
+
             // Only show toast if the message is from a DIFFERENT contact
             if (!isFromSelectedContact && preferencesRef.current.chat_toast_enabled) {
+              const previewText = isVoice
+                ? `🎤 ${t('voiceMessage')}`
+                : (newMessage.content || '').substring(0, 50) + ((newMessage.content || '').length > 50 ? '...' : '');
               toast({
                 title: t('newMessage'),
-                description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
+                description: previewText,
               });
             }
           }
@@ -235,7 +256,7 @@ const Chat = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, t, selectedContact?.user_id, playNotificationSound]);
+  }, [user?.id, queryClient, t, selectedContact?.user_id, playNotificationSound, playVoiceNotificationSound]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -338,6 +359,134 @@ const Chat = () => {
     }
     
     setSending(false);
+  };
+
+  const handleSendVoice = async (blob: Blob, durationSeconds: number, mimeType: string) => {
+    if (!user?.id || !selectedContact?.user_id) return;
+    setSending(true);
+
+    try {
+      const ext = mimeType.includes('mp4') ? 'm4a'
+        : mimeType.includes('ogg') ? 'ogg'
+        : 'webm';
+      const filePath = `${user.id}/${selectedContact.user_id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('voice-messages')
+        .upload(filePath, blob, { contentType: mimeType, upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      // Optimistic add
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        sender_id: user.id,
+        receiver_id: selectedContact.user_id,
+        content: null,
+        message_type: 'voice',
+        audio_url: filePath,
+        duration_seconds: durationSeconds,
+        read_at: null,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat-messages', user.id, selectedContact.user_id],
+        (old = []) => [...old, optimisticMessage]
+      );
+
+      const { error: insertError } = await supabase
+        .from('chat_messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: selectedContact.user_id,
+          content: '',
+          message_type: 'voice',
+          audio_url: filePath,
+          duration_seconds: durationSeconds,
+        });
+
+      if (insertError) throw insertError;
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', user.id, selectedContact.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['chat-contacts'] });
+
+      // Push notification (non-critical)
+      try {
+        const { data: senderProfile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', user.id)
+          .single();
+        const senderName = senderProfile
+          ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() || 'Someone'
+          : 'Someone';
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: selectedContact.user_id,
+            title: `${t('newMessage')} from ${senderName}`,
+            body: `🎤 ${t('voiceMessage')}`,
+            data: { type: 'chat_voice_message', senderId: user.id },
+          },
+        });
+      } catch { /* non-critical */ }
+    } catch (e) {
+      console.error('[Voice] send failed', e);
+      toast({
+        title: t('error'),
+        description: t('voiceUploadFailed'),
+        variant: 'destructive',
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Hold-to-record handlers
+  const handleRecordStart = async (e: React.PointerEvent) => {
+    if (sending) return;
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    recordStartXRef.current = e.clientX;
+    setSlideToCancel(false);
+    const ok = await startRecording();
+    if (!ok) {
+      toast({
+        title: t('error'),
+        description: t('micPermissionDenied'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRecordMove = (e: React.PointerEvent) => {
+    if (!isRecording) return;
+    const dx = recordStartXRef.current - e.clientX;
+    setSlideToCancel(dx > 80);
+  };
+
+  const handleRecordEnd = async (e: React.PointerEvent) => {
+    if (!isRecording) return;
+    e.preventDefault();
+    const shouldCancel = slideToCancel;
+    setSlideToCancel(false);
+
+    if (shouldCancel) {
+      cancelRecording();
+      return;
+    }
+
+    const result = await stopRecording();
+    if (!result) return;
+
+    if (result.durationSeconds < MIN_RECORDING_SECONDS) {
+      toast({
+        title: t('voiceTooShort'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await handleSendVoice(result.blob, result.durationSeconds, result.mimeType);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -496,7 +645,15 @@ const Chat = () => {
                         : 'bg-background text-foreground border border-border rounded-bl-md'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.message_type === 'voice' && message.audio_url ? (
+                      <VoiceMessagePlayer
+                        audioPath={message.audio_url}
+                        durationSeconds={message.duration_seconds}
+                        isOwnMessage={isOwnMessage}
+                      />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    )}
                     <p className={`text-xs mt-1 ${
                       isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
                     }`}>
@@ -519,24 +676,69 @@ const Chat = () => {
 
       {/* Input */}
       <div className="p-4 border-t border-border bg-background rounded-b-lg">
-        <div className="flex items-center gap-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={t('chatPlaceholder')}
-            className="flex-1 rounded-full"
-            disabled={sending}
-          />
-          <Button 
-            onClick={handleSend} 
-            size="icon" 
-            className="rounded-full h-10 w-10"
-            disabled={!newMessage.trim() || sending}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+        {isRecording ? (
+          <div className="flex items-center gap-3">
+            <div className={`flex-1 flex items-center gap-3 px-4 py-2 rounded-full ${slideToCancel ? 'bg-destructive/10' : 'bg-muted'}`}>
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+              </span>
+              <span className="text-sm font-medium tabular-nums">
+                {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / {Math.floor(MAX_RECORDING_SECONDS / 60)}:00
+              </span>
+              <span className={`text-xs ml-auto ${slideToCancel ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                {slideToCancel ? <Trash2 className="h-4 w-4 inline" /> : `← ${t('releaseToSend')}`}
+              </span>
+            </div>
+            <Button
+              size="icon"
+              variant={slideToCancel ? 'destructive' : 'default'}
+              className="rounded-full h-12 w-12 flex-shrink-0 scale-110 transition-transform"
+              onPointerDown={(e) => e.preventDefault()}
+              onPointerMove={handleRecordMove}
+              onPointerUp={handleRecordEnd}
+              onPointerCancel={handleRecordEnd}
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={t('chatPlaceholder')}
+              className="flex-1 rounded-full"
+              disabled={sending}
+            />
+            {newMessage.trim() ? (
+              <Button
+                onClick={handleSend}
+                size="icon"
+                className="rounded-full h-10 w-10"
+                disabled={sending}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="default"
+                className="rounded-full h-10 w-10 select-none touch-none"
+                disabled={sending}
+                title={t('holdToRecord')}
+                onPointerDown={handleRecordStart}
+                onPointerMove={handleRecordMove}
+                onPointerUp={handleRecordEnd}
+                onPointerCancel={handleRecordEnd}
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <Mic className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
