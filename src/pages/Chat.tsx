@@ -256,7 +256,7 @@ const Chat = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, t, selectedContact?.user_id, playNotificationSound]);
+  }, [user?.id, queryClient, t, selectedContact?.user_id, playNotificationSound, playVoiceNotificationSound]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
