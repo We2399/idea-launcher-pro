@@ -45,10 +45,13 @@ const Chat = () => {
   const { user, userRole } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { playNotificationSound } = useChatNotificationSound();
+  const { playNotificationSound, playVoiceNotificationSound } = useChatNotificationSound();
+  const { isRecording, elapsedSeconds, startRecording, stopRecording, cancelRecording } = useVoiceRecorder();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [slideToCancel, setSlideToCancel] = useState(false);
+  const recordStartXRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const preferencesRef = useRef<UserPreferences>({ chat_sound_enabled: true, chat_toast_enabled: true });
 
