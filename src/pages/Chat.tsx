@@ -645,7 +645,15 @@ const Chat = () => {
                         : 'bg-background text-foreground border border-border rounded-bl-md'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.message_type === 'voice' && message.audio_url ? (
+                      <VoiceMessagePlayer
+                        audioPath={message.audio_url}
+                        durationSeconds={message.duration_seconds}
+                        isOwnMessage={isOwnMessage}
+                      />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    )}
                     <p className={`text-xs mt-1 ${
                       isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
                     }`}>
@@ -668,25 +676,73 @@ const Chat = () => {
 
       {/* Input */}
       <div className="p-4 border-t border-border bg-background rounded-b-lg">
-        <div className="flex items-center gap-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={t('chatPlaceholder')}
-            className="flex-1 rounded-full"
-            disabled={sending}
-          />
-          <Button 
-            onClick={handleSend} 
-            size="icon" 
-            className="rounded-full h-10 w-10"
-            disabled={!newMessage.trim() || sending}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+        {isRecording ? (
+          <div className="flex items-center gap-3">
+            <div className={`flex-1 flex items-center gap-3 px-4 py-2 rounded-full ${slideToCancel ? 'bg-destructive/10' : 'bg-muted'}`}>
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+              </span>
+              <span className="text-sm font-medium tabular-nums">
+                {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / {Math.floor(MAX_RECORDING_SECONDS / 60)}:00
+              </span>
+              <span className={`text-xs ml-auto ${slideToCancel ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                {slideToCancel ? <Trash2 className="h-4 w-4 inline" /> : `← ${t('releaseToSend')}`}
+              </span>
+            </div>
+            <Button
+              size="icon"
+              variant={slideToCancel ? 'destructive' : 'default'}
+              className="rounded-full h-12 w-12 flex-shrink-0 scale-110 transition-transform"
+              onPointerDown={(e) => e.preventDefault()}
+              onPointerMove={handleRecordMove}
+              onPointerUp={handleRecordEnd}
+              onPointerCancel={handleRecordEnd}
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={t('chatPlaceholder')}
+              className="flex-1 rounded-full"
+              disabled={sending}
+            />
+            {newMessage.trim() ? (
+              <Button
+                onClick={handleSend}
+                size="icon"
+                className="rounded-full h-10 w-10"
+                disabled={sending}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="default"
+                className="rounded-full h-10 w-10 select-none touch-none"
+                disabled={sending}
+                title={t('holdToRecord')}
+                onPointerDown={handleRecordStart}
+                onPointerMove={handleRecordMove}
+                onPointerUp={handleRecordEnd}
+                onPointerCancel={handleRecordEnd}
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <Mic className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
+    </div>
+  );
+};
     </div>
   );
 };
