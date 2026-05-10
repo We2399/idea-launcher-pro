@@ -4,21 +4,26 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, ArrowLeft, Users, MessageCircle } from 'lucide-react';
+import { Send, ArrowLeft, Users, MessageCircle, Mic, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatNotificationSound } from '@/hooks/useChatNotificationSound';
+import { useVoiceRecorder, MAX_RECORDING_SECONDS, MIN_RECORDING_SECONDS } from '@/hooks/useVoiceRecorder';
+import { VoiceMessagePlayer } from '@/components/chat/VoiceMessagePlayer';
 
 interface ChatMessage {
   id: string;
   sender_id: string;
   receiver_id: string;
-  content: string;
+  content: string | null;
   read_at: string | null;
   created_at: string;
+  message_type?: string | null;
+  audio_url?: string | null;
+  duration_seconds?: number | null;
 }
 
 interface Contact {
