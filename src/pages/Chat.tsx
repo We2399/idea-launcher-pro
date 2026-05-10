@@ -225,17 +225,25 @@ const Chat = () => {
           // For incoming messages, play sound and optionally show toast
           if (newMessage.sender_id !== user.id) {
             const isFromSelectedContact = selectedContact?.user_id === newMessage.sender_id;
-            
+            const isVoice = newMessage.message_type === 'voice';
+
             // Always play sound for incoming messages (even from current contact)
             if (preferencesRef.current.chat_sound_enabled) {
-              playNotificationSound();
+              if (isVoice) {
+                playVoiceNotificationSound();
+              } else {
+                playNotificationSound();
+              }
             }
-            
+
             // Only show toast if the message is from a DIFFERENT contact
             if (!isFromSelectedContact && preferencesRef.current.chat_toast_enabled) {
+              const previewText = isVoice
+                ? `🎤 ${t('voiceMessage')}`
+                : (newMessage.content || '').substring(0, 50) + ((newMessage.content || '').length > 50 ? '...' : '');
               toast({
                 title: t('newMessage'),
-                description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? '...' : ''),
+                description: previewText,
               });
             }
           }
