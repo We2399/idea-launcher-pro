@@ -139,10 +139,15 @@ const Chat = () => {
           // Get last message
           const { data: lastMsg } = await supabase
             .from('chat_messages')
-            .select('content, created_at')
+            .select('content, created_at, message_type')
             .or(`and(sender_id.eq.${profile.user_id},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${profile.user_id})`)
             .order('created_at', { ascending: false })
             .limit(1);
+
+          const last = lastMsg?.[0];
+          const lastPreview = last
+            ? (last.message_type === 'voice' ? `🎤 ${t('voiceMessage')}` : last.content)
+            : undefined;
 
           return {
             user_id: profile.user_id,
@@ -150,8 +155,8 @@ const Chat = () => {
             last_name: profile.last_name,
             role: roleInfo?.role || 'employee',
             unread_count: unreadCount || 0,
-            last_message: lastMsg?.[0]?.content,
-            last_message_time: lastMsg?.[0]?.created_at,
+            last_message: lastPreview,
+            last_message_time: last?.created_at,
           };
         })
       );
