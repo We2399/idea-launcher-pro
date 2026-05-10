@@ -488,6 +488,9 @@ const Chat = () => {
 
     await handleSendVoice(result.blob, result.durationSeconds, result.mimeType);
   };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
