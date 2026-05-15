@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Search, Users, RefreshCw, Copy, Download } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Search, Users, RefreshCw, Copy, Download, Trash2, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -24,9 +29,12 @@ interface RegisteredUser {
 
 export function RegisteredUsersPanel() {
   const { t } = useLanguage();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [toDelete, setToDelete] = useState<RegisteredUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -38,7 +46,6 @@ export function RegisteredUsersPanel() {
 
       if (error) throw error;
 
-      // Fetch roles for all users
       const userIds = (profiles || []).map(p => p.user_id);
       const { data: roles } = await supabase
         .from('user_roles')
@@ -94,6 +101,27 @@ export function RegisteredUsersPanel() {
     URL.revokeObjectURL(url);
   };
 
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-registered-user', {
+        body: { user_id: toDelete.user_id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({ title: 'User deleted', description: toDelete.email || toDelete.user_id });
+      setUsers(prev => prev.filter(u => u.user_id !== toDelete.user_id));
+      setToDelete(null);
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      toast({ title: 'Delete failed', description: err.message || 'Could not delete user', variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'administrator': return 'default';
@@ -147,7 +175,7 @@ export function RegisteredUsersPanel() {
                 <TableHead>Role</TableHead>
                 <TableHead>Registered</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,42 +186,84 @@ export function RegisteredUsersPanel() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((user, idx) => (
-                  <TableRow key={user.user_id}>
-                    <TableCell className="text-muted-foreground text-xs">{idx + 1}</TableCell>
-                    <TableCell className="font-mono text-sm">{user.email || '—'}</TableCell>
-                    <TableCell>{(user.first_name || '') + ' ' + (user.last_name || '')}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role || 'employee')} className="text-xs">
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(user.created_at), 'dd MMM yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      {user.role === 'administrator' ? (
-                        <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">N/A</Badge>
-                      ) : user.profile_completed ? (
-                        <Badge variant="outline" className="text-xs text-green-600 border-green-300">Complete</Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Incomplete</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.email && (
-                        <Button variant="ghost" size="sm" onClick={() => copyEmail(user.email!)}>
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                filtered.map((user, idx) => {
+                  const isSelf = currentUser?.id === user.user_id;
+                  return (
+                    <TableRow key={user.user_id}>
+                      <TableCell className="text-muted-foreground text-xs">{idx + 1}</TableCell>
+                      <TableCell className="font-mono text-sm">{user.email || '—'}</TableCell>
+                      <TableCell>{(user.first_name || '') + ' ' + (user.last_name || '')}</TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(user.role || 'employee')} className="text-xs">
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {format(new Date(user.created_at), 'dd MMM yyyy')}
+                      </TableCell>
+                      <TableCell>
+                        {user.role === 'administrator' ? (
+                          <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">N/A</Badge>
+                        ) : user.profile_completed ? (
+                          <Badge variant="outline" className="text-xs text-green-600 border-green-300">Complete</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Incomplete</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {user.email && (
+                            <Button variant="ghost" size="sm" onClick={() => copyEmail(user.email!)} title="Copy email">
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setToDelete(user)}
+                            disabled={isSelf}
+                            title={isSelf ? "You can't delete yourself" : 'Delete user'}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
         </div>
       </CardContent>
+
+      <AlertDialog open={!!toDelete} onOpenChange={(open) => !open && !deleting && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this registered user?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  This permanently removes <strong>{toDelete?.email || 'this user'}</strong> from
+                  authentication and cascades to their profile, role, and related records.
+                </p>
+                <p className="text-destructive font-medium">This action cannot be undone.</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (<><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Deleting...</>) : 'Delete user'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
