@@ -32,8 +32,10 @@ export const BackupStatusPanel: React.FC = () => {
   const [draftUrl, setDraftUrl] = useState(repoUrl);
   const [exporting, setExporting] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
+  const [fullBackup, setFullBackup] = useState(false);
   const [lastExportAt, setLastExportAt] = useState<string | null>(() => localStorage.getItem('backup_last_export_at'));
   const [lastSnapshotAt, setLastSnapshotAt] = useState<string | null>(() => localStorage.getItem('backup_last_snapshot_at'));
+  const [lastFullBackupAt, setLastFullBackupAt] = useState<string | null>(() => localStorage.getItem('backup_last_full_at'));
 
   const markGithubConnected = () => {
     localStorage.setItem(GITHUB_CONNECTED_KEY, 'true');
