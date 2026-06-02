@@ -317,6 +317,33 @@ export const BackupStatusPanel: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Full Database Snapshot */}
+      <Card className="card-glass border-l-4 border-l-primary">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" /> Full Database Snapshot
+          </CardTitle>
+          <CardDescription>
+            Download every table (profiles, payroll, leave, tasks, chat, transactions…) as JSON inside a single ZIP. Admin/HR only — contains PII and salary data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Last snapshot:{' '}
+            <span className="font-medium text-foreground">
+              {lastSnapshotAt ? format(new Date(lastSnapshotAt), 'PPpp') : 'Never'}
+            </span>
+          </p>
+          <div className="text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+            <p><strong className="text-foreground">⚠️ Sensitive data:</strong> Store the ZIP on an encrypted drive. Use alongside the document export above for a complete offline backup.</p>
+          </div>
+          <Button onClick={handleDatabaseSnapshot} disabled={snapshotting} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            {snapshotting ? 'Building snapshot…' : 'Download database snapshot'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
