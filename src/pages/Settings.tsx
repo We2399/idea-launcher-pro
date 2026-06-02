@@ -37,7 +37,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="organization" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="organization" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">{t('organization')}</span>
@@ -69,6 +69,10 @@ export default function Settings() {
           <TabsTrigger value="storage" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">{t('storageCentre')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="backup" className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Backup</span>
           </TabsTrigger>
         </TabsList>
         
