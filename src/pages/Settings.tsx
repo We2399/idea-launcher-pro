@@ -107,6 +107,10 @@ export default function Settings() {
         <TabsContent value="storage">
           <StorageCentre />
         </TabsContent>
+
+        <TabsContent value="backup">
+          <BackupStatusPanel />
+        </TabsContent>
       </Tabs>
 
       <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border/50">
