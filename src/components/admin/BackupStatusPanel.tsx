@@ -98,6 +98,62 @@ export const BackupStatusPanel: React.FC = () => {
     }
   };
 
+  const handleDatabaseSnapshot = async () => {
+    setSnapshotting(true);
+    const toastId = toast.loading('Preparing full database snapshot…');
+    try {
+      const zip = new JSZip();
+      const summary: Record<string, number | string> = {};
+      let totalRows = 0;
+
+      for (const table of DB_SNAPSHOT_TABLES) {
+        try {
+          const { data, error } = await supabase.from(table as any).select('*');
+          if (error) {
+            summary[table] = `error: ${error.message}`;
+            zip.file(`${table}.error.txt`, error.message);
+            continue;
+          }
+          const rows = data || [];
+          summary[table] = rows.length;
+          totalRows += rows.length;
+          zip.file(`${table}.json`, JSON.stringify(rows, null, 2));
+        } catch (e: any) {
+          summary[table] = `error: ${e?.message || 'unknown'}`;
+        }
+      }
+
+      const meta = {
+        exported_at: new Date().toISOString(),
+        supabase_project_ref: SUPABASE_PROJECT_REF,
+        total_rows: totalRows,
+        tables: summary,
+        note: 'Snapshot reflects only rows visible to the current admin under RLS. Storage files are NOT included — use "Download backup now" for files.',
+      };
+      zip.file('_meta.json', JSON.stringify(meta, null, 2));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `database_snapshot_${timestamp}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const now = new Date().toISOString();
+      localStorage.setItem('backup_last_snapshot_at', now);
+      setLastSnapshotAt(now);
+      toast.success(`Snapshot ready — ${totalRows} rows across ${DB_SNAPSHOT_TABLES.length} tables`, { id: toastId });
+    } catch (err: any) {
+      toast.error(err?.message || 'Snapshot failed', { id: toastId });
+    } finally {
+      setSnapshotting(false);
+    }
+  };
+
   const supabaseBackupsUrl = `https://supabase.com/dashboard/project/${SUPABASE_PROJECT_REF}/database/backups/scheduled`;
 
   const overallHealthy = githubConnected;
