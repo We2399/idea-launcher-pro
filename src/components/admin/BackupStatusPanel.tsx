@@ -9,6 +9,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { exportDocumentsWithFiles } from '@/lib/exportStorageCentre';
+import JSZip from 'jszip';
+
+const DB_SNAPSHOT_TABLES = [
+  'profiles', 'user_roles', 'organizations', 'organization_members',
+  'employee_invitations', 'leave_types', 'leave_allocations', 'leave_balances',
+  'leave_requests', 'employee_work_schedules', 'employee_recurring_allowances',
+  'public_holidays', 'cash_transactions', 'payroll_records', 'payroll_line_items',
+  'payroll_notifications', 'tasks', 'chat_messages', 'document_storage',
+  'document_comments', 'profile_documents', 'profile_change_requests',
+  'system_settings', 'subscription_pricing', 'audit_logs', 'device_tokens',
+] as const;
 
 const GITHUB_REPO_KEY = 'backup_github_repo_url';
 const GITHUB_CONNECTED_KEY = 'backup_github_connected';
