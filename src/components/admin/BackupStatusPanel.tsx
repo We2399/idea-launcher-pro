@@ -331,6 +331,33 @@ Questions: contact your administrator.
         <p className="text-muted-foreground">Track your 3-way backup: GitHub code, Supabase database, and local exports.</p>
       </div>
 
+      {/* Complete Backup — single download */}
+      <Card className="card-glass border-l-4 border-l-emerald-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-emerald-600" /> Complete Backup (Everything in One ZIP)
+          </CardTitle>
+          <CardDescription>
+            One click → one ZIP with the full database (all tables as JSON), all uploaded documents, and a README that explains how to read and restore it on any Mac, Windows or Linux machine. No Supabase / GitHub / Lovable required to open it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Last complete backup:{' '}
+            <span className="font-medium text-foreground">
+              {lastFullBackupAt ? format(new Date(lastFullBackupAt), 'PPpp') : 'Never'}
+            </span>
+          </p>
+          <div className="text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+            <strong className="text-foreground">⚠️ Sensitive:</strong> Contains PII and salary data. Save to an encrypted drive.
+          </div>
+          <Button onClick={handleFullBackup} disabled={fullBackup} size="lg" className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Download className="h-4 w-4" />
+            {fullBackup ? 'Building complete backup… (may take a few minutes)' : 'Download complete backup'}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Overall Status Summary */}
       <Card className="card-glass border-l-4 border-l-primary">
         <CardContent className="pt-6">
