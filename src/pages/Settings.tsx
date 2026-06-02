@@ -9,8 +9,9 @@ import { OrganizationManager } from '@/components/admin/OrganizationManager';
 import { AdminTierManager } from '@/components/admin/AdminTierManager';
 import { RegisteredUsersPanel } from '@/components/admin/RegisteredUsersPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database, Building2, Crown, UserSearch } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, Clock, Globe, Database, Building2, Crown, UserSearch, ShieldCheck } from 'lucide-react';
 import StorageCentre from '@/pages/StorageCentre';
+import { BackupStatusPanel } from '@/components/admin/BackupStatusPanel';
 import { APP_VERSION_LABEL } from '@/lib/appVersion';
 
 export default function Settings() {
@@ -36,7 +37,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="organization" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="organization" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">{t('organization')}</span>
@@ -68,6 +69,10 @@ export default function Settings() {
           <TabsTrigger value="storage" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">{t('storageCentre')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="backup" className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Backup</span>
           </TabsTrigger>
         </TabsList>
         
@@ -101,6 +106,10 @@ export default function Settings() {
         
         <TabsContent value="storage">
           <StorageCentre />
+        </TabsContent>
+
+        <TabsContent value="backup">
+          <BackupStatusPanel />
         </TabsContent>
       </Tabs>
 
