@@ -32,8 +32,10 @@ export const BackupStatusPanel: React.FC = () => {
   const [draftUrl, setDraftUrl] = useState(repoUrl);
   const [exporting, setExporting] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
+  const [fullBackup, setFullBackup] = useState(false);
   const [lastExportAt, setLastExportAt] = useState<string | null>(() => localStorage.getItem('backup_last_export_at'));
   const [lastSnapshotAt, setLastSnapshotAt] = useState<string | null>(() => localStorage.getItem('backup_last_snapshot_at'));
+  const [lastFullBackupAt, setLastFullBackupAt] = useState<string | null>(() => localStorage.getItem('backup_last_full_at'));
 
   const markGithubConnected = () => {
     localStorage.setItem(GITHUB_CONNECTED_KEY, 'true');
@@ -154,6 +156,167 @@ export const BackupStatusPanel: React.FC = () => {
     }
   };
 
+  const buildReadme = (stats: { totalRows: number; tableCount: number; docCount: number | string }) => `JIE JIE 姐姐 HR HUB — COMPLETE BACKUP
+=====================================
+Generated: ${new Date().toISOString()}
+Supabase project ref: ${SUPABASE_PROJECT_REF}
+
+CONTENTS
+--------
+/database/        One JSON file per table (${stats.tableCount} tables, ${stats.totalRows} rows total)
+/database/_meta.json   Snapshot manifest with row counts and export time
+/documents/       All employee documents (PDFs, images) + index.csv
+README.txt        This file
+
+ABOUT THIS BACKUP
+-----------------
+This is a self-contained offline copy of your HR data and uploaded files.
+You can open every JSON file in any text editor, Excel, or a database tool.
+You can open every document file directly on Mac / Windows / Linux.
+
+You do NOT need Supabase, GitHub or Lovable to READ this data.
+You DO need them (or any equivalent backend + hosting) to RUN the app again.
+
+WHAT IS / IS NOT INCLUDED
+-------------------------
+Included:
+  - All rows from your database that your admin account can see (RLS-filtered)
+  - All active documents in Storage (profile docs, receipts, etc.)
+  - CSV index of every document
+Not included:
+  - Auth users (managed by Supabase Auth — restore via Supabase backups)
+  - App source code (kept in your GitHub repository)
+  - Stripe subscription state (kept in Stripe dashboard)
+  - Edge function code & secrets (kept in Supabase dashboard)
+
+HOW TO RESTORE INTO A FRESH SETUP
+---------------------------------
+1. Re-deploy the app code from your GitHub repository to Lovable or any host.
+2. Create a new Supabase project (or restore a Supabase scheduled backup).
+3. Re-run the database migrations from /supabase/migrations in the repo.
+4. Use a script (Node / Python) to read /database/*.json and INSERT each row
+   into the matching table via Supabase service-role key. Insert in this order:
+     organizations → profiles → user_roles → organization_members
+     → leave_types → leave_allocations → leave_balances → leave_requests
+     → payroll_records → payroll_line_items → everything else
+5. Re-upload /documents/ files into the matching Supabase Storage buckets
+   (profile-documents, receipts, voice-messages) preserving file paths from
+   index.csv.
+6. Recreate auth users in Supabase Auth (or import via the Supabase CLI).
+
+SECURITY
+--------
+This archive contains sensitive PII and salary data. Store it on an
+encrypted drive. Do not email or upload to public cloud storage.
+
+DOCUMENTS
+---------
+${stats.docCount === 0 ? 'No documents were present at backup time.' : `${stats.docCount} document(s) included under /documents/.`}
+
+Questions: contact your administrator.
+`;
+
+  const handleFullBackup = async () => {
+    setFullBackup(true);
+    const toastId = toast.loading('Building complete backup (database + documents)…');
+    try {
+      const zip = new JSZip();
+      const dbFolder = zip.folder('database')!;
+      const docsFolder = zip.folder('documents')!;
+
+      // 1. Database snapshot
+      const summary: Record<string, number | string> = {};
+      let totalRows = 0;
+      for (const table of DB_SNAPSHOT_TABLES) {
+        const { data, error } = await supabase.from(table as any).select('*');
+        if (error) {
+          summary[table] = `error: ${error.message}`;
+          dbFolder.file(`${table}.error.txt`, error.message);
+        } else {
+          const rows = data || [];
+          summary[table] = rows.length;
+          totalRows += rows.length;
+          dbFolder.file(`${table}.json`, JSON.stringify(rows, null, 2));
+        }
+      }
+      dbFolder.file('_meta.json', JSON.stringify({
+        exported_at: new Date().toISOString(),
+        supabase_project_ref: SUPABASE_PROJECT_REF,
+        total_rows: totalRows,
+        tables: summary,
+      }, null, 2));
+
+      // 2. Documents
+      let docCount: number | string = 0;
+      try {
+        const { data: documents } = await supabase
+          .from('document_storage')
+          .select('*')
+          .is('deleted_at', null);
+        docCount = documents?.length || 0;
+
+        if (documents && documents.length > 0) {
+          const userIds = [...new Set(documents.map((d: any) => d.user_id))];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name, employee_id')
+            .in('user_id', userIds);
+          const pMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+          // CSV index
+          const headers = ['file_path','employee_name','employee_id','document_type','document_name','version','status','source','file_size','created_at'];
+          const rows = documents.map((d: any) => {
+            const p = pMap.get(d.user_id);
+            return [
+              d.file_path,
+              p ? `${p.first_name} ${p.last_name}` : '',
+              p?.employee_id || '',
+              d.document_type, d.document_name, d.version, d.replacement_status,
+              d.source, d.file_size, d.created_at,
+            ].map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
+          });
+          docsFolder.file('index.csv', [headers.join(','), ...rows].join('\n'));
+
+          // Download each file from Storage and add to ZIP
+          for (const doc of documents as any[]) {
+            const bucket = doc.source === 'cash_control' ? 'receipts' : 'profile-documents';
+            try {
+              const { data: fileBlob, error } = await supabase.storage.from(bucket).download(doc.file_path);
+              if (!error && fileBlob) {
+                docsFolder.file(doc.file_path, fileBlob);
+              }
+            } catch { /* skip individual file errors */ }
+          }
+        }
+      } catch (e: any) {
+        docsFolder.file('_error.txt', e?.message || 'Failed to enumerate documents');
+      }
+
+      // 3. README
+      zip.file('README.txt', buildReadme({ totalRows, tableCount: DB_SNAPSHOT_TABLES.length, docCount }));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `jiejie_full_backup_${ts}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const now = new Date().toISOString();
+      localStorage.setItem('backup_last_full_at', now);
+      setLastFullBackupAt(now);
+      toast.success(`Complete backup ready — ${totalRows} rows + ${docCount} document(s)`, { id: toastId });
+    } catch (err: any) {
+      toast.error(err?.message || 'Full backup failed', { id: toastId });
+    } finally {
+      setFullBackup(false);
+    }
+  };
+
   const supabaseBackupsUrl = `https://supabase.com/dashboard/project/${SUPABASE_PROJECT_REF}/database/backups/scheduled`;
 
   const overallHealthy = githubConnected;
@@ -167,6 +330,33 @@ export const BackupStatusPanel: React.FC = () => {
         </h2>
         <p className="text-muted-foreground">Track your 3-way backup: GitHub code, Supabase database, and local exports.</p>
       </div>
+
+      {/* Complete Backup — single download */}
+      <Card className="card-glass border-l-4 border-l-emerald-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-emerald-600" /> Complete Backup (Everything in One ZIP)
+          </CardTitle>
+          <CardDescription>
+            One click → one ZIP with the full database (all tables as JSON), all uploaded documents, and a README that explains how to read and restore it on any Mac, Windows or Linux machine. No Supabase / GitHub / Lovable required to open it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Last complete backup:{' '}
+            <span className="font-medium text-foreground">
+              {lastFullBackupAt ? format(new Date(lastFullBackupAt), 'PPpp') : 'Never'}
+            </span>
+          </p>
+          <div className="text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+            <strong className="text-foreground">⚠️ Sensitive:</strong> Contains PII and salary data. Save to an encrypted drive.
+          </div>
+          <Button onClick={handleFullBackup} disabled={fullBackup} size="lg" className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Download className="h-4 w-4" />
+            {fullBackup ? 'Building complete backup… (may take a few minutes)' : 'Download complete backup'}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Overall Status Summary */}
       <Card className="card-glass border-l-4 border-l-primary">
