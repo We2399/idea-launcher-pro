@@ -8,6 +8,7 @@ import { Github, Database, Download, ExternalLink, HardDrive, ShieldCheck, Check
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { exportDocumentsWithFiles } from '@/lib/exportStorageCentre';
 
 const GITHUB_REPO_KEY = 'backup_github_repo_url';
 const GITHUB_CONNECTED_KEY = 'backup_github_connected';
