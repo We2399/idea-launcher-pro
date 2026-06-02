@@ -47,23 +47,37 @@ export const BackupStatusPanel: React.FC = () => {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('export-storage-centre');
-      if (error) throw error;
+      // Fetch all active documents
+      const { data: documents, error } = await supabase
+        .from('document_storage')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
 
-      const blob = data instanceof Blob ? data : new Blob([typeof data === 'string' ? data : JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `jiejie-backup-${format(new Date(), 'yyyy-MM-dd-HHmm')}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      if (error) throw error;
+      if (!documents || documents.length === 0) {
+        toast.info('No documents to export yet.');
+        return;
+      }
+
+      // Enrich with profile info (employee name + id)
+      const userIds = [...new Set(documents.map((d: any) => d.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, employee_id')
+        .in('user_id', userIds);
+      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+      const enriched = documents.map((doc: any) => ({
+        ...doc,
+        user: profileMap.get(doc.user_id),
+      }));
+
+      await exportDocumentsWithFiles(enriched as any);
 
       const now = new Date().toISOString();
       localStorage.setItem('backup_last_export_at', now);
       setLastExportAt(now);
-      toast.success('Backup export downloaded');
     } catch (err: any) {
       toast.error(err?.message || 'Export failed');
     } finally {
