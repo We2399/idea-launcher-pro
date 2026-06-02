@@ -9,6 +9,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { exportDocumentsWithFiles } from '@/lib/exportStorageCentre';
+import JSZip from 'jszip';
+
+const DB_SNAPSHOT_TABLES = [
+  'profiles', 'user_roles', 'organizations', 'organization_members',
+  'employee_invitations', 'leave_types', 'leave_allocations', 'leave_balances',
+  'leave_requests', 'employee_work_schedules', 'employee_recurring_allowances',
+  'public_holidays', 'cash_transactions', 'payroll_records', 'payroll_line_items',
+  'payroll_notifications', 'tasks', 'chat_messages', 'document_storage',
+  'document_comments', 'profile_documents', 'profile_change_requests',
+  'system_settings', 'subscription_pricing', 'audit_logs', 'device_tokens',
+] as const;
 
 const GITHUB_REPO_KEY = 'backup_github_repo_url';
 const GITHUB_CONNECTED_KEY = 'backup_github_connected';
@@ -20,7 +31,9 @@ export const BackupStatusPanel: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const [draftUrl, setDraftUrl] = useState(repoUrl);
   const [exporting, setExporting] = useState(false);
+  const [snapshotting, setSnapshotting] = useState(false);
   const [lastExportAt, setLastExportAt] = useState<string | null>(() => localStorage.getItem('backup_last_export_at'));
+  const [lastSnapshotAt, setLastSnapshotAt] = useState<string | null>(() => localStorage.getItem('backup_last_snapshot_at'));
 
   const markGithubConnected = () => {
     localStorage.setItem(GITHUB_CONNECTED_KEY, 'true');
@@ -82,6 +95,62 @@ export const BackupStatusPanel: React.FC = () => {
       toast.error(err?.message || 'Export failed');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleDatabaseSnapshot = async () => {
+    setSnapshotting(true);
+    const toastId = toast.loading('Preparing full database snapshot…');
+    try {
+      const zip = new JSZip();
+      const summary: Record<string, number | string> = {};
+      let totalRows = 0;
+
+      for (const table of DB_SNAPSHOT_TABLES) {
+        try {
+          const { data, error } = await supabase.from(table as any).select('*');
+          if (error) {
+            summary[table] = `error: ${error.message}`;
+            zip.file(`${table}.error.txt`, error.message);
+            continue;
+          }
+          const rows = data || [];
+          summary[table] = rows.length;
+          totalRows += rows.length;
+          zip.file(`${table}.json`, JSON.stringify(rows, null, 2));
+        } catch (e: any) {
+          summary[table] = `error: ${e?.message || 'unknown'}`;
+        }
+      }
+
+      const meta = {
+        exported_at: new Date().toISOString(),
+        supabase_project_ref: SUPABASE_PROJECT_REF,
+        total_rows: totalRows,
+        tables: summary,
+        note: 'Snapshot reflects only rows visible to the current admin under RLS. Storage files are NOT included — use "Download backup now" for files.',
+      };
+      zip.file('_meta.json', JSON.stringify(meta, null, 2));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `database_snapshot_${timestamp}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const now = new Date().toISOString();
+      localStorage.setItem('backup_last_snapshot_at', now);
+      setLastSnapshotAt(now);
+      toast.success(`Snapshot ready — ${totalRows} rows across ${DB_SNAPSHOT_TABLES.length} tables`, { id: toastId });
+    } catch (err: any) {
+      toast.error(err?.message || 'Snapshot failed', { id: toastId });
+    } finally {
+      setSnapshotting(false);
     }
   };
 
@@ -245,6 +314,33 @@ export const BackupStatusPanel: React.FC = () => {
           <Button onClick={handleExport} disabled={exporting} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             {exporting ? 'Exporting…' : 'Download backup now'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Full Database Snapshot */}
+      <Card className="card-glass border-l-4 border-l-primary">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" /> Full Database Snapshot
+          </CardTitle>
+          <CardDescription>
+            Download every table (profiles, payroll, leave, tasks, chat, transactions…) as JSON inside a single ZIP. Admin/HR only — contains PII and salary data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Last snapshot:{' '}
+            <span className="font-medium text-foreground">
+              {lastSnapshotAt ? format(new Date(lastSnapshotAt), 'PPpp') : 'Never'}
+            </span>
+          </p>
+          <div className="text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+            <p><strong className="text-foreground">⚠️ Sensitive data:</strong> Store the ZIP on an encrypted drive. Use alongside the document export above for a complete offline backup.</p>
+          </div>
+          <Button onClick={handleDatabaseSnapshot} disabled={snapshotting} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            {snapshotting ? 'Building snapshot…' : 'Download database snapshot'}
           </Button>
         </CardContent>
       </Card>
