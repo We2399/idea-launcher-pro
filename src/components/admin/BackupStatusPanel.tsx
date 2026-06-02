@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Github, Database, Download, ExternalLink, HardDrive, ShieldCheck, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Github, Database, Download, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { exportDocumentsWithFiles } from '@/lib/exportStorageCentre';
 import JSZip from 'jszip';
 
 const DB_SNAPSHOT_TABLES = [
@@ -30,11 +29,7 @@ export const BackupStatusPanel: React.FC = () => {
   const [githubConnected, setGithubConnected] = useState<boolean>(() => localStorage.getItem(GITHUB_CONNECTED_KEY) === 'true');
   const [editing, setEditing] = useState(false);
   const [draftUrl, setDraftUrl] = useState(repoUrl);
-  const [exporting, setExporting] = useState(false);
-  const [snapshotting, setSnapshotting] = useState(false);
   const [fullBackup, setFullBackup] = useState(false);
-  const [lastExportAt, setLastExportAt] = useState<string | null>(() => localStorage.getItem('backup_last_export_at'));
-  const [lastSnapshotAt, setLastSnapshotAt] = useState<string | null>(() => localStorage.getItem('backup_last_snapshot_at'));
   const [lastFullBackupAt, setLastFullBackupAt] = useState<string | null>(() => localStorage.getItem('backup_last_full_at'));
 
   const markGithubConnected = () => {
@@ -57,103 +52,6 @@ export const BackupStatusPanel: React.FC = () => {
       setGithubConnected(true);
     }
     toast.success('GitHub repository link saved');
-  };
-
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      // Fetch all active documents
-      const { data: documents, error } = await supabase
-        .from('document_storage')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      if (!documents || documents.length === 0) {
-        toast.info('No documents to export yet.');
-        return;
-      }
-
-      // Enrich with profile info (employee name + id)
-      const userIds = [...new Set(documents.map((d: any) => d.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, employee_id')
-        .in('user_id', userIds);
-      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
-
-      const enriched = documents.map((doc: any) => ({
-        ...doc,
-        user: profileMap.get(doc.user_id),
-      }));
-
-      await exportDocumentsWithFiles(enriched as any);
-
-      const now = new Date().toISOString();
-      localStorage.setItem('backup_last_export_at', now);
-      setLastExportAt(now);
-    } catch (err: any) {
-      toast.error(err?.message || 'Export failed');
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleDatabaseSnapshot = async () => {
-    setSnapshotting(true);
-    const toastId = toast.loading('Preparing full database snapshot…');
-    try {
-      const zip = new JSZip();
-      const summary: Record<string, number | string> = {};
-      let totalRows = 0;
-
-      for (const table of DB_SNAPSHOT_TABLES) {
-        try {
-          const { data, error } = await supabase.from(table as any).select('*');
-          if (error) {
-            summary[table] = `error: ${error.message}`;
-            zip.file(`${table}.error.txt`, error.message);
-            continue;
-          }
-          const rows = data || [];
-          summary[table] = rows.length;
-          totalRows += rows.length;
-          zip.file(`${table}.json`, JSON.stringify(rows, null, 2));
-        } catch (e: any) {
-          summary[table] = `error: ${e?.message || 'unknown'}`;
-        }
-      }
-
-      const meta = {
-        exported_at: new Date().toISOString(),
-        supabase_project_ref: SUPABASE_PROJECT_REF,
-        total_rows: totalRows,
-        tables: summary,
-        note: 'Snapshot reflects only rows visible to the current admin under RLS. Storage files are NOT included — use "Download backup now" for files.',
-      };
-      zip.file('_meta.json', JSON.stringify(meta, null, 2));
-
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      link.href = url;
-      link.download = `database_snapshot_${timestamp}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      const now = new Date().toISOString();
-      localStorage.setItem('backup_last_snapshot_at', now);
-      setLastSnapshotAt(now);
-      toast.success(`Snapshot ready — ${totalRows} rows across ${DB_SNAPSHOT_TABLES.length} tables`, { id: toastId });
-    } catch (err: any) {
-      toast.error(err?.message || 'Snapshot failed', { id: toastId });
-    } finally {
-      setSnapshotting(false);
-    }
   };
 
   const buildReadme = (stats: { totalRows: number; tableCount: number; docCount: number | string }) => `JIE JIE 姐姐 HR HUB — COMPLETE BACKUP
@@ -319,8 +217,6 @@ Questions: contact your administrator.
 
   const supabaseBackupsUrl = `https://supabase.com/dashboard/project/${SUPABASE_PROJECT_REF}/database/backups/scheduled`;
 
-  const overallHealthy = githubConnected;
-
   return (
     <div className="space-y-6">
       <div>
@@ -328,7 +224,7 @@ Questions: contact your administrator.
           <ShieldCheck className="h-6 w-6 text-primary" />
           Backup Status
         </h2>
-        <p className="text-muted-foreground">Track your 3-way backup: GitHub code, Supabase database, and local exports.</p>
+        <p className="text-muted-foreground">Download a complete offline copy of your data, and manage your cloud backups.</p>
       </div>
 
       {/* Complete Backup — single download */}
@@ -355,36 +251,6 @@ Questions: contact your administrator.
             <Download className="h-4 w-4" />
             {fullBackup ? 'Building complete backup… (may take a few minutes)' : 'Download complete backup'}
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Overall Status Summary */}
-      <Card className="card-glass border-l-4 border-l-primary">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${overallHealthy ? 'bg-emerald-500/15' : 'bg-amber-500/15'}`}>
-                {overallHealthy ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-amber-500" />
-                )}
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">
-                  {overallHealthy ? 'GitHub Connected' : 'Backup Setup Incomplete'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {overallHealthy
-                    ? 'Code backup is active. Complete the remaining steps below.'
-                    : 'Finish connecting your backups for full protection.'}
-                </p>
-              </div>
-            </div>
-            <Badge variant={overallHealthy ? 'default' : 'secondary'} className={overallHealthy ? 'bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20' : ''}>
-              {overallHealthy ? '1 of 3 active' : '0 of 3 active'}
-            </Badge>
-          </div>
         </CardContent>
       </Card>
 
@@ -460,7 +326,7 @@ Questions: contact your administrator.
               <Database className="h-5 w-5" /> Supabase (Database Backup)
             </CardTitle>
             <Badge variant="outline" className="text-muted-foreground">
-              <Clock className="h-3 w-3 mr-1" /> Auto
+              Auto
             </Badge>
           </div>
           <CardDescription>
@@ -477,60 +343,6 @@ Questions: contact your administrator.
               <Database className="h-4 w-4" />
               Open Supabase Backups <ExternalLink className="h-4 w-4" />
             </a>
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Local export */}
-      <Card className="card-glass">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HardDrive className="h-5 w-5" /> Local Export
-          </CardTitle>
-          <CardDescription>
-            Download a snapshot of your data for offline backup (Mac, external drive, etc.).
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Last local export:{' '}
-            <span className="font-medium text-foreground">
-              {lastExportAt ? format(new Date(lastExportAt), 'PPpp') : 'Never'}
-            </span>
-          </p>
-          <div className="text-sm text-muted-foreground">
-            <p><strong className="text-foreground">Recommended:</strong> Export once a week and save to your Mac or an external drive.</p>
-          </div>
-          <Button onClick={handleExport} disabled={exporting} className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            {exporting ? 'Exporting…' : 'Download backup now'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Full Database Snapshot */}
-      <Card className="card-glass border-l-4 border-l-primary">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" /> Full Database Snapshot
-          </CardTitle>
-          <CardDescription>
-            Download every table (profiles, payroll, leave, tasks, chat, transactions…) as JSON inside a single ZIP. Admin/HR only — contains PII and salary data.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Last snapshot:{' '}
-            <span className="font-medium text-foreground">
-              {lastSnapshotAt ? format(new Date(lastSnapshotAt), 'PPpp') : 'Never'}
-            </span>
-          </p>
-          <div className="text-sm text-muted-foreground bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-            <p><strong className="text-foreground">⚠️ Sensitive data:</strong> Store the ZIP on an encrypted drive. Use alongside the document export above for a complete offline backup.</p>
-          </div>
-          <Button onClick={handleDatabaseSnapshot} disabled={snapshotting} variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            {snapshotting ? 'Building snapshot…' : 'Download database snapshot'}
           </Button>
         </CardContent>
       </Card>
